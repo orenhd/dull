@@ -26,6 +26,14 @@ const envSchema = z.object({
   // `openssl rand -hex 32` ולשים ב-.env בלבד (אף פעם לא ב-.env.example
   // ואף פעם לא בקוד) - ראו את ה-README לגבי ההבחנה בין שני הקבצים.
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters - generate with `openssl rand -hex 32`"),
+
+  // מפתח API של Resend (resend.com/api-keys) - סוד אמיתי, לא ב-.env.example.
+  RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
+
+  // כתובת "מאת" למיילים. תלוי-סביבה במובהק: לפני אימות דומיין משלנו מול
+  // Resend, חייבים להשתמש בכתובת ה-sandbox שלהם (onboarding@resend.dev) -
+  // ברגע שיש דומיין אמיתי, זה משתנה בלי לגעת בקוד בכלל.
+  EMAIL_FROM: z.string().email(),
 });
 
 export const env = envSchema.parse(process.env);

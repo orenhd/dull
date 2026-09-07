@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { sendThankYouEmail } from "../lib/email.js";
 
 export const ordersRouter = Router();
 
@@ -89,6 +90,20 @@ ordersRouter.post("/", async (req, res, next) => {
     });
 
     res.status(201).json({ order });
+
+    // אחרי ששלחנו תשובה ללקוח: מייל התודה הוא effect צדדי, לא חלק מהעסקה.
+    // try/catch נפרד ומקומי בכוונה - אם נזרוק לכאן ל-catch החיצוני, next(err)
+    // ינסה לשלוח תגובת שגיאה על response שכבר נשלח (ERR_HTTP_HEADERS_SENT).
+    // כשל כאן (מפתח Resend שגוי, timeout וכו') לעולם לא אמור להשפיע על
+    // ההזמנה שכבר נשמרה בהצלחה - רק נרשם ל-log לבדיקה ידנית מאוחר יותר.
+    try {
+      const user = await prisma.user.findUnique({ where: { id: userId } });
+      if (user) {
+        await sendThankYouEmail({ toEmail: user.email, recipientName: user.name ?? user.email, orderId: order.id });
+      }
+    } catch (err) {
+      console.error(`Failed to send thank-you email for order ${order.id}:`, err);
+    }
   } catch (err) {
     next(err);
   }
