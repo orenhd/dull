@@ -1,0 +1,52 @@
+/* ==========================================================================
+   Dull — Design Tokens
+   --------------------------------------------------------------------------
+   The single source of truth for the visual language.
+
+   Rule (per the brief): no colour, spacing or font value may appear
+   anywhere in the project except as a token defined in this file.
+   ========================================================================== */
+
+:root {
+  /* ---- Color ---- */
+  --color-brand-primary: #1b1c77;
+  --color-brand-primary-light: #9293ea;
+  --color-accent-lemon: #e3ff2b;
+  --color-accent-sun: #ffe100;
+  --color-text-base: #2e2e2e;
+  --color-text-muted: #6e6e6e;
+  --color-border-base: #d5d5d5;
+  --color-border-strong: #535353;
+  --color-surface-base: #ffffff;
+  --color-surface-sunken: #f4f4f4;
+  --color-feedback-error: #b3261e;
+
+  /* ---- Typography ---- */
+  --typography-family-headline: 'Archivo Black', 'Arial Black', sans-serif;
+  --typography-family-body: 'Inter', Arial, sans-serif;
+  --typography-weight-regular: 400;
+  --typography-weight-bold: 700;
+  --typography-size-h1: 48px;
+  --typography-size-h2: 32px;
+  --typography-size-h3: 20px;
+  --typography-size-body-strong: 18px;
+  --typography-size-body: 16px;
+  --typography-size-caption: 13px;
+
+  /* ---- Spacing ---- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* ---- Radius ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* ---- Motion ---- */
+  --motion-duration-fast: 120ms;
+  --motion-duration-base: 240ms;
+  --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+}

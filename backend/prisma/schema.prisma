@@ -1,0 +1,173 @@
+// Dull — DB schema
+//
+// עיקרון מרכזי: שום דבר לא "נעול" למספר קבוע של אפשרויות - וריאנטים, גוונים,
+// מידות ושפות כולם מודלים כנתונים (rows), לא כקוד/enum קשיח.
+//
+// i18n: כל שדה טקסט המוצג ללקוח מאוחסן כ-JSON עם מפתח לכל locale, לדוגמה:
+// { "en": "Darkthrone Tee", "he": "חולצת דארקת'רון" }. מספיק לשני locales
+// קבועים (en/he) בסדר גודל הזה של קטלוג - בלי להקים טבלת תרגומים נפרדת.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductCategory {
+  SHIRT
+  FOOTWEAR
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  category       ProductCategory
+  name           Json            // { en, he }
+  description    Json?           // { en, he } - פסקת "חומרים וייצור"
+  bandCreditName String?
+  bandCreditUrl  String?
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  axes     VariantAxis[]
+  variants ProductVariant[]
+  media    Media[]
+}
+
+// ציר וריאנט - "Fit", "Colorway", "Size" וכו'. שייך למוצר ספציפי כי לא כל
+// מוצר צריך את אותם צירים (לסנדלים למשל אין "Size" בשלב זה, רק Fit).
+model VariantAxis {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  key       String   // "fit" | "colorway" | "size" - מזהה טכני יציב
+  label     Json     // { en: "Size", he: "מידה" }
+  sortOrder Int      @default(0)
+
+  values VariantAxisValue[]
+
+  @@unique([productId, key])
+}
+
+// ערך אפשרי בציר. dependsOnValueId פותר את "לנשים Petite/S/M/L/XL ולגברים
+// S/M/L/XL/XXL": כל ערך Size תלוי בערך Fit הרלוונטי, לא כל הגדלים מוצגים
+// לכל הגזרות.
+model VariantAxisValue {
+  id               String             @id @default(cuid())
+  axisId           String
+  axis             VariantAxis        @relation(fields: [axisId], references: [id], onDelete: Cascade)
+  key              String             // "mens" | "faded-batik" | "petite" ...
+  label            Json               // { en, he }
+  sortOrder        Int                @default(0)
+  dependsOnValueId String?
+  dependsOnValue   VariantAxisValue?  @relation("SizeDependsOnFit", fields: [dependsOnValueId], references: [id])
+  dependents       VariantAxisValue[] @relation("SizeDependsOnFit")
+
+  selections VariantAxisSelection[]
+  mediaLinks MediaAxisValue[]
+
+  @@unique([axisId, key])
+}
+
+// הצירוף הקונקרטי הניתן לרכישה (= SKU). מלאי ומחיר חיים כאן, לא על המוצר.
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku         String   @unique
+  priceAgorot Int      // מחיר באגורות - נמנעים מ-float לכסף
+  stockQty    Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  axisSelections VariantAxisSelection[]
+  orderItems     OrderItem[]
+}
+
+// אילו ערכי-ציר מרכיבים את הוריאנט הזה (Fit=Mens + Colorway=DeepNature + Size=L)
+model VariantAxisSelection {
+  variantId   String
+  variant     ProductVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  axisValueId String
+  axisValue   VariantAxisValue @relation(fields: [axisValueId], references: [id])
+
+  @@id([variantId, axisValueId])
+}
+
+enum MediaRole {
+  FLAT       // תמונת מוצר על רקע אפור
+  CAMPAIGN   // תמונת דוגמנות ממכתש רמון
+  SIZE_GUIDE
+}
+
+// תמונה משויכת למוצר ולסט ערכי-ציר שהיא תקפה עבורו (Fit=Mens+Colorway=Dark) -
+// לא לוריאנט ספציפי, כי אותה תמונה משרתת את כל המידות של אותו Fit+Colorway.
+model Media {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  role      MediaRole
+  url       String
+  altText   Json?     // { en, he }
+  sortOrder Int       @default(0)
+
+  axisValues MediaAxisValue[]
+}
+
+model MediaAxisValue {
+  mediaId     String
+  media       Media            @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  axisValueId String
+  axisValue   VariantAxisValue @relation(fields: [axisValueId], references: [id])
+
+  @@id([mediaId, axisValueId])
+}
+
+// ---------------------------------------------------------------------------
+// משתמשים והזמנות - Google login חובה רק ב-checkout, אין הזמנת guest.
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String   @id @default(cuid())
+  googleSub String   @unique // ה-id היציב מגוגל, לא המייל (מייל יכול תיאורטית להתחלף)
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  orders Order[]
+}
+
+enum OrderStatus {
+  PLACED
+  FULFILLED
+  CANCELLED
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  userId             String
+  user               User        @relation(fields: [userId], references: [id])
+  status             OrderStatus @default(PLACED)
+  totalAgorot        Int
+  isSimulatedPayment Boolean     @default(true) // v1: תמיד true, אין סליקה אמיתית
+  shippingAddress    Json
+  createdAt          DateTime    @default(now())
+
+  items OrderItem[]
+}
+
+// שומרים snapshot של שם המוצר והמחיר בזמן הרכישה - שינוי/מחיקה עתידיים של
+// המוצר לא ישנו הזמנה היסטורית בדיעבד.
+model OrderItem {
+  id                  String         @id @default(cuid())
+  orderId             String
+  order               Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariantId    String
+  productVariant      ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity            Int
+  unitPriceAgorot     Int
+  productNameSnapshot Json           // { en, he } בזמן הרכישה
+}
