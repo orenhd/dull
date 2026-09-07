@@ -17,10 +17,29 @@
 ## הרצה ראשונית
 1. תיצור פרויקט חינמי ב-[neon.tech](https://neon.tech), תעתיק את ה-connection string.
 2. `cd backend && npm install`
-3. `cp .env.example .env` ותדביק את ה-DATABASE_URL האמיתי.
+3. `cp .env.example .env` ותמלא: `DATABASE_URL` (מ-Neon), `GOOGLE_CLIENT_ID`
+   (Google Cloud Console -> Google Auth Platform -> Clients), `JWT_SECRET`
+   (לייצר עם `openssl rand -hex 32` - סוד אמיתי, לעולם לא ב-.env.example).
 4. `npm run prisma:migrate` — יוצר את הטבלאות בענן לפי `prisma/schema.prisma`.
-5. `npm run dev` — מריץ את השרת עם hot-reload על `http://localhost:4000`.
+5. `npm run seed` — ממלא מוצרים אמיתיים (ראו `prisma/seed.ts`).
+6. `npm run images:generate` — ממיר את `../hi-res` לתמונות web (`public/images`, לא ב-git - build artifact).
+7. `npm run dev` — מריץ את השרת עם hot-reload על `http://localhost:4000`.
+
+## ניהול מוצרים (CMS)
+אין כרגע UI מותאם לניהול קטלוג - `npm run prisma:studio` (עורך טבלאות
+בדפדפן, חינמי, מגיע עם Prisma) משמש בתור זה. החלטה מכוונת: לא לבנות CMS
+מותאם עד שיתברר שבאמת צריך יותר מזה (למשל הרבה מוצרים בקצב גבוה) - ראו
+דיון בצ'אט. Prisma Studio לא מגן מפני טעויות לוגיות (כמו `key` שלא תואם
+בין axis values), אז שינויים מורכבים (מוצר חדש עם כל הוריאנטים) עדיין
+עוברים דרך `prisma/seed.ts`.
+
+## בדיקות ידניות
+- `requests.http` — בקשות GET לקטלוג (עם REST Client extension ל-VS Code).
+- `dev-tools/google-signin-test.html` — בדיקת login מלאה (Google Sign-In
+  אמיתי -> session cookie -> POST /orders) - ראו `dev-tools/README.md`.
 
 ## סטטוס
-שלד ראשוני: סכימת DB, נקודת קצה יחידה `/health`, ומוסכמת env/constants.
-אין עדיין: routes למוצרים/עגלה/הזמנות, Google OAuth, seed data.
+קיים: סכימת DB מלאה, seed עם מוצרים אמיתיים, `/products` (קטלוג + פריט),
+`/auth/google` (login + session cookie), `/orders` (יצירה/רשימה/פריט),
+צינור תמונות web, ניהול מוצרים דרך Prisma Studio.
+אין עדיין: מייל תודה + מתנת PDF, frontend (לא באחריות Backend).
