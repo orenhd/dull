@@ -233,7 +233,7 @@ async function main() {
       he: "כותנה 100% מסורקת, 180 גרם, כביסה מוקדמת. הדפסה בדיו מבוססת מים.",
     },
     bandCreditName: "Darkthrone",
-    bandCreditUrl: "https://www.metal-archives.com/bands/darkthrone/146",
+    bandCreditUrl: "https://peaceville.com/bands/darkthrone/", // הלייבל הוותיק שלהם, לא Metal Archives
     priceAgorot: 14900, // ₪149 - כמו בדמו
     isActive: true,
     media: [
@@ -257,7 +257,7 @@ async function main() {
       he: "כותנה 100% מסורקת, 180 גרם, כביסה מוקדמת. הדפסה בדיו מבוססת מים.",
     },
     bandCreditName: "Immortal",
-    bandCreditUrl: "https://en.wikipedia.org/wiki/Immortal_(band)",
+    bandCreditUrl: "https://www.immortalofficial.com/", // האתר הרשמי
     priceAgorot: 14900, // placeholder - לעדכן במחיר סופי
     isActive: true,
     media: [
@@ -276,6 +276,7 @@ async function main() {
       category: ProductCategory.SHIRT,
       name: { en: "45 Grave Tee", he: "חולצת 45 גרייב" },
       bandCreditName: "45 Grave",
+      bandCreditUrl: "https://en.wikipedia.org/wiki/45_Grave", // אין לייבל יציב/דיסקוגרפיה מרכזית - ויקיפדיה כמקור הכי יציב
       isActive: false, // אין עדיין שום חומר חזותי - לא מוצג באתר עד שיהיה
     },
   });
