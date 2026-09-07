@@ -200,7 +200,7 @@ async function createSandalsProduct() {
       data: {
         productId: product.id,
         sku: `SANDALS-${f.key}`.toUpperCase(),
-        priceAgorot: 17900, // ₪179 - placeholder, אין מחיר סופי עדיין
+        priceAgorot: 17900, // ₪179 - מחיר סופי
         stockQty: 10,
       },
     });
@@ -234,7 +234,7 @@ async function main() {
     },
     bandCreditName: "Darkthrone",
     bandCreditUrl: "https://peaceville.com/bands/darkthrone/", // הלייבל הוותיק שלהם, לא Metal Archives
-    priceAgorot: 14900, // ₪149 - כמו בדמו
+    priceAgorot: 8900, // ₪89 - מחיר סופי
     isActive: true,
     media: [
       { fit: "mens", colorway: "faded-batik", role: "FLAT", file: "darkthrone-shirt-mens-light" },
@@ -258,7 +258,7 @@ async function main() {
     },
     bandCreditName: "Immortal",
     bandCreditUrl: "https://www.immortalofficial.com/", // האתר הרשמי
-    priceAgorot: 14900, // placeholder - לעדכן במחיר סופי
+    priceAgorot: 8900, // ₪89 - מחיר סופי
     isActive: true,
     media: [
       { fit: "mens", colorway: "faded-batik", role: "FLAT", file: "immortal-shirt-mens-light" },
