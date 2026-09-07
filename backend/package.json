@@ -10,6 +10,10 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "images:generate": "tsx scripts/generate-web-images.ts",
+    "seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
@@ -24,6 +28,7 @@
     "@types/cors": "^2.8.17",
     "@types/node": "^22.5.0",
     "prisma": "^5.20.0",
+    "sharp": "^0.33.5",
     "tsx": "^4.19.0",
     "typescript": "^5.6.2"
   }
