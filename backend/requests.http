@@ -1,0 +1,24 @@
+### Dull backend - manual API smoke tests
+### נפתח עם ה-VS Code extension "REST Client" (humao.rest-client) - קליק על
+### "Send Request" מעל כל בקשה שולח אותה ומציג את התגובה בפאנל צמוד.
+### קובץ הזה מתועד ב-git בכוונה: זו דוגמה חיה לחוזה ה-API, לא רק תיעוד סטטי.
+
+@baseUrl = http://localhost:4000
+
+### בריאות השרת
+GET {{baseUrl}}/health
+
+### קטלוג - אנגלית (ברירת מחדל)
+GET {{baseUrl}}/products
+
+### קטלוג - עברית
+GET {{baseUrl}}/products?locale=he
+
+### פריט בודד - אנגלית
+GET {{baseUrl}}/products/darkthrone-tee
+
+### פריט בודד - עברית
+GET {{baseUrl}}/products/darkthrone-tee?locale=he
+
+### slug שלא קיים - אמור להחזיר 404
+GET {{baseUrl}}/products/does-not-exist
