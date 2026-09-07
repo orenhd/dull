@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Dull - בדיקת Google Sign-In</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+  h1 { font-size: 20px; }
+  .box { border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin: 16px 0; }
+  input { width: 100%; padding: 8px; box-sizing: border-box; margin-bottom: 8px; }
+  button { padding: 8px 16px; cursor: pointer; }
+  pre { background: #f5f5f5; padding: 12px; border-radius: 6px; overflow-x: auto; white-space: pre-wrap; }
+  .ok { color: green; } .err { color: crimson; }
+</style>
+</head>
+<body>
+<h1>כלי בדיקה זמני - Google Sign-In מול backend/auth/google</h1>
+<p>לא ה-frontend האמיתי - רק לוודא שה-flow המלא (Google -> אימות אצלנו -> session cookie) עובד, לפני שיש frontend אמיתי.</p>
+
+<div class="box">
+  <label>Backend URL</label>
+  <input id="backendUrl" value="http://localhost:4000">
+  <label>Google Client ID (מה-.env שלך, GOOGLE_CLIENT_ID)</label>
+  <input id="clientId" placeholder="xxxxx.apps.googleusercontent.com">
+  <button id="initBtn">אתחל כפתור Google</button>
+  <div id="googleButtonContainer" style="margin-top:12px;"></div>
+</div>
+
+<div class="box">
+  <button id="checkOrdersBtn">בדיקה: GET /orders (אמור לעבוד רק אחרי login מוצלח)</button>
+  <button id="logoutBtn">POST /auth/logout</button>
+</div>
+
+<h3>תוצאה אחרונה:</h3>
+<pre id="result">-</pre>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+  function show(label, data, isError) {
+    const el = document.getElementById("result");
+    el.className = isError ? "err" : "ok";
+    el.textContent = label + ":\n" + JSON.stringify(data, null, 2);
+  }
+
+  async function handleCredentialResponse(response) {
+    const backendUrl = document.getElementById("backendUrl").value.replace(/\/$/, "");
+    try {
+      const res = await fetch(backendUrl + "/auth/google", {
+        method: "POST",
+        credentials: "include", // חשוב - כדי שה-session cookie שהשרת מנפיק יישמר בדפדפן
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json();
+      show("POST /auth/google (status " + res.status + ")", data, !res.ok);
+    } catch (err) {
+      show("שגיאת רשת", String(err), true);
+    }
+  }
+
+  document.getElementById("initBtn").addEventListener("click", () => {
+    const clientId = document.getElementById("clientId").value.trim();
+    if (!clientId) { alert("תדביק קודם את ה-Client ID"); return; }
+    google.accounts.id.initialize({ client_id: clientId, callback: handleCredentialResponse });
+    google.accounts.id.renderButton(document.getElementById("googleButtonContainer"), { theme: "outline", size: "large" });
+  });
+
+  document.getElementById("checkOrdersBtn").addEventListener("click", async () => {
+    const backendUrl = document.getElementById("backendUrl").value.replace(/\/$/, "");
+    try {
+      const res = await fetch(backendUrl + "/orders", { credentials: "include" });
+      const data = await res.json();
+      show("GET /orders (status " + res.status + ")", data, !res.ok);
+    } catch (err) {
+      show("שגיאת רשת", String(err), true);
+    }
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    const backendUrl = document.getElementById("backendUrl").value.replace(/\/$/, "");
+    try {
+      const res = await fetch(backendUrl + "/auth/logout", { method: "POST", credentials: "include" });
+      const data = await res.json();
+      show("POST /auth/logout (status " + res.status + ")", data, !res.ok);
+    } catch (err) {
+      show("שגיאת רשת", String(err), true);
+    }
+  });
+</script>
+</body>
+</html>
