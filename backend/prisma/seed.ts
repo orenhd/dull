@@ -15,7 +15,7 @@ const WOMENS_SIZES = ["Petite", "S", "M", "L", "XL"];
 
 type ShirtMediaFile = {
   fit: "mens" | "womens";
-  colorway: "faded-batik" | "deep-nature";
+  colorway: "light" | "dark";
   role: keyof typeof MediaRole;
   file: string; // שם קובץ בלי סיומת, תואם ל-backend/public/images/<file>.webp
 };
@@ -59,24 +59,24 @@ async function createShirtProduct(opts: {
     data: { axisId: fitAxis.id, key: "womens", label: { en: "Women's", he: "נשים" }, sortOrder: 1 },
   });
 
-  const fadedBatik = await prisma.variantAxisValue.create({
+  const lightColorway = await prisma.variantAxisValue.create({
     data: {
       axisId: colorwayAxis.id,
-      key: "faded-batik",
-      label: { en: "Faded Batik", he: "בטיק דהוי" },
+      key: "light",
+      label: { en: "Light", he: "בהיר" },
       sortOrder: 0,
     },
   });
-  const deepNature = await prisma.variantAxisValue.create({
+  const darkColorway = await prisma.variantAxisValue.create({
     data: {
       axisId: colorwayAxis.id,
-      key: "deep-nature",
-      label: { en: "Deep Nature", he: "טבע עמוק" },
+      key: "dark",
+      label: { en: "Dark", he: "כהה" },
       sortOrder: 1,
     },
   });
 
-  const colorwayByKey = { "faded-batik": fadedBatik, "deep-nature": deepNature };
+  const colorwayByKey = { light: lightColorway, dark: darkColorway };
   const fitByKey = { mens: mensFit, womens: womensFit };
 
   // מידות - key ייחודי per-axis, לכן מקדימים בגזרה (mens-s / womens-s וכו')
@@ -237,14 +237,14 @@ async function main() {
     priceAgorot: 8900, // ₪89 - מחיר סופי
     isActive: true,
     media: [
-      { fit: "mens", colorway: "faded-batik", role: "FLAT", file: "darkthrone-shirt-mens-light" },
-      { fit: "mens", colorway: "deep-nature", role: "FLAT", file: "darkthrone-shirt-mens-dark" },
-      { fit: "womens", colorway: "faded-batik", role: "FLAT", file: "darkthrone-shirt-womens-light" },
-      { fit: "womens", colorway: "deep-nature", role: "FLAT", file: "darkthrone-shirt-womens-dark" },
-      { fit: "mens", colorway: "faded-batik", role: "CAMPAIGN", file: "yonatan-darkthrone-shirt-mens-light" },
-      { fit: "mens", colorway: "deep-nature", role: "CAMPAIGN", file: "yonatan-darkthrone-shirt-mens-dark" },
-      { fit: "womens", colorway: "faded-batik", role: "CAMPAIGN", file: "sarah-darkthrone-shirt-womens-light" },
-      { fit: "womens", colorway: "deep-nature", role: "CAMPAIGN", file: "sarah-darkthrone-shirt-womens-dark" },
+      { fit: "mens", colorway: "light", role: "FLAT", file: "darkthrone-shirt-mens-light" },
+      { fit: "mens", colorway: "dark", role: "FLAT", file: "darkthrone-shirt-mens-dark" },
+      { fit: "womens", colorway: "light", role: "FLAT", file: "darkthrone-shirt-womens-light" },
+      { fit: "womens", colorway: "dark", role: "FLAT", file: "darkthrone-shirt-womens-dark" },
+      { fit: "mens", colorway: "light", role: "CAMPAIGN", file: "yonatan-darkthrone-shirt-mens-light" },
+      { fit: "mens", colorway: "dark", role: "CAMPAIGN", file: "yonatan-darkthrone-shirt-mens-dark" },
+      { fit: "womens", colorway: "light", role: "CAMPAIGN", file: "sarah-darkthrone-shirt-womens-light" },
+      { fit: "womens", colorway: "dark", role: "CAMPAIGN", file: "sarah-darkthrone-shirt-womens-dark" },
     ],
   });
 
@@ -261,10 +261,10 @@ async function main() {
     priceAgorot: 8900, // ₪89 - מחיר סופי
     isActive: true,
     media: [
-      { fit: "mens", colorway: "faded-batik", role: "FLAT", file: "immortal-shirt-mens-light" },
-      { fit: "mens", colorway: "deep-nature", role: "FLAT", file: "immortal-shirt-mens-dark" },
-      { fit: "womens", colorway: "faded-batik", role: "FLAT", file: "immortal-shirt-womens-light" },
-      { fit: "womens", colorway: "deep-nature", role: "FLAT", file: "immortal-shirt-womens-dark" },
+      { fit: "mens", colorway: "light", role: "FLAT", file: "immortal-shirt-mens-light" },
+      { fit: "mens", colorway: "dark", role: "FLAT", file: "immortal-shirt-mens-dark" },
+      { fit: "womens", colorway: "light", role: "FLAT", file: "immortal-shirt-womens-light" },
+      { fit: "womens", colorway: "dark", role: "FLAT", file: "immortal-shirt-womens-dark" },
       // אין עדיין CAMPAIGN - הפרונטאנד יצטרך fallback לעמוד פריט של המוצר הזה
     ],
   });
