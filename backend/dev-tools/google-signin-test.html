@@ -27,7 +27,8 @@
 </div>
 
 <div class="box">
-  <button id="checkOrdersBtn">בדיקה: GET /orders (אמור לעבוד רק אחרי login מוצלח)</button>
+  <button id="checkOrdersBtn">GET /orders</button>
+  <button id="createOrderBtn">צור הזמנת בדיקה (Darkthrone Tee, כמות 1)</button>
   <button id="logoutBtn">POST /auth/logout</button>
 </div>
 
@@ -71,6 +72,31 @@
       const res = await fetch(backendUrl + "/orders", { credentials: "include" });
       const data = await res.json();
       show("GET /orders (status " + res.status + ")", data, !res.ok);
+    } catch (err) {
+      show("שגיאת רשת", String(err), true);
+    }
+  });
+
+  document.getElementById("createOrderBtn").addEventListener("click", async () => {
+    const backendUrl = document.getElementById("backendUrl").value.replace(/\/$/, "");
+    try {
+      // שולפים מוצר אמיתי מהקטלוג כדי לקבל productVariantId אמיתי - לא מקלידים ידנית
+      const productRes = await fetch(backendUrl + "/products/darkthrone-tee");
+      const productData = await productRes.json();
+      const variant = productData.product?.variants?.[0];
+      if (!variant) { show("שגיאה", "לא נמצא וריאנט ב-darkthrone-tee - הרצת seed?", true); return; }
+
+      const res = await fetch(backendUrl + "/orders", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: [{ productVariantId: variant.id, quantity: 1 }],
+          shippingAddress: { fullName: "בדיקה", city: "תל אביב", street: "הרצל 1" },
+        }),
+      });
+      const data = await res.json();
+      show("POST /orders (status " + res.status + ") - וריאנט: " + variant.sku, data, !res.ok);
     } catch (err) {
       show("שגיאת רשת", String(err), true);
     }
