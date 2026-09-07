@@ -12,3 +12,9 @@ export const DEFAULT_LOCALE: Locale = "en";
 export const CURRENCY_CODE = "ILS";
 
 export const DEFAULT_PAGE_SIZE = 24;
+
+// כמה זמן ה-session cookie (ולכן ה-JWT שבתוכו) תקף - זהה בכל סביבה, לא
+// תלוי-deploy ולא ניתן לעריכה ע"י בעל האתר, ולכן קבוע כאן ולא ב-env/DB.
+export const SESSION_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 יום
+
+export const SESSION_COOKIE_NAME = "dull_session";

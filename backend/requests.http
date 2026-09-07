@@ -22,3 +22,27 @@ GET {{baseUrl}}/products/darkthrone-tee?locale=he
 
 ### slug שלא קיים - אמור להחזיר 404
 GET {{baseUrl}}/products/does-not-exist
+
+### Google login - "credential" הוא ה-ID token שמתקבל מ-Google Identity
+### Services בצד ה-frontend (google.accounts.id.initialize + callback). אי
+### אפשר לייצר אחד ידנית כאן - זו רק תזכורת לצורת הבקשה, לא בקשה שרצה כמו-שהיא.
+# POST {{baseUrl}}/auth/google
+# Content-Type: application/json
+#
+# { "credential": "<ID token from Google Identity Services>" }
+
+### logout - מוחק את ה-session cookie
+POST {{baseUrl}}/auth/logout
+
+### הזמנה חדשה - דורש session cookie תקף (להתחבר קודם דרך /auth/google).
+### מחליפים productVariantId בערך אמיתי מתוך GET /products/darkthrone-tee.
+# POST {{baseUrl}}/orders
+# Content-Type: application/json
+#
+# {
+#   "items": [{ "productVariantId": "REPLACE_ME", "quantity": 1 }],
+#   "shippingAddress": { "fullName": "בדיקה", "city": "תל אביב", "street": "הרצל 1" }
+# }
+
+### היסטוריית הזמנות של המשתמש המחובר
+GET {{baseUrl}}/orders

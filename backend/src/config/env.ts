@@ -10,6 +10,22 @@ import { z } from "zod";
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   PORT: z.coerce.number().int().positive().default(4000),
+
+  // שולט למשל בהאם session cookie מסומן secure (דורש https - לא זמין ב-
+  // localhost בפיתוח). ברירת מחדל development כדי ש-`npm run dev` יעבוד
+  // מיד בלי לדרוש להגדיר את זה - production מוגדר מפורשות ב-deploy.
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+
+  // Client ID של Google OAuth (Google Cloud Console -> APIs & Services ->
+  // Credentials -> OAuth client ID -> Web application). זה לא סוד - הוא
+  // גלוי גם בקוד ה-frontend - אבל עדיין חי כאן ולא ב-constants, כי הוא
+  // תלוי-סביבה (ערך שונה לכל פרויקט ב-Google Cloud, למשל dev מול prod).
+  GOOGLE_CLIENT_ID: z.string().min(1, "GOOGLE_CLIENT_ID is required"),
+
+  // סוד לחתימת ה-JWT של session cookie - זה כן סוד אמיתי. ליצור עם
+  // `openssl rand -hex 32` ולשים ב-.env בלבד (אף פעם לא ב-.env.example
+  // ואף פעם לא בקוד) - ראו את ה-README לגבי ההבחנה בין שני הקבצים.
+  JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters - generate with `openssl rand -hex 32`"),
 });
 
 export const env = envSchema.parse(process.env);

@@ -130,14 +130,37 @@ model MediaAxisValue {
 // משתמשים והזמנות - Google login חובה רק ב-checkout, אין הזמנת guest.
 // ---------------------------------------------------------------------------
 
+// AuthProvider כרשימת שורות-מהות במקום enum קשיח היה עדיף עקרונית (כמו
+// VariantAxisValue), אבל כאן מדובר בכמות סגורה וממש לא-דינמית של ספקי זהות
+// שאנחנו בעצמנו מוסיפים בקוד (צריך תמיד קוד תומך חדש לכל ספק) - אז enum
+// מספיק, והוספת ספק היא migration תוסף בלבד, לא שינוי שובר.
+enum AuthProvider {
+  GOOGLE
+}
+
+// User הוא האדם עצמו (הזמנות, מייל, שם) - לא קשור לאיך הוא התחבר. UserIdentity
+// היא ה"אמצעי כניסה" הספציפי (יכול להיות כמה לאותו User: גם גוגל וגם פייסבוק
+// למשל). כך הוספת ספק login עתידי היא שורה חדשה בטבלה, לא שינוי מבנה ב-User
+// ולא תלות בפלטפורמת auth חיצונית (Auth0/Okta/Firebase) - ראו דיון בצ'אט.
 model User {
   id        String   @id @default(cuid())
-  googleSub String   @unique // ה-id היציב מגוגל, לא המייל (מייל יכול תיאורטית להתחלף)
-  email     String   @unique
+  email     String   @unique // מניחים שהמייל מאומת ע"י ספק הזהות; שני ספקים עם אותו מייל מתמזגים לאותו User
   name      String?
   createdAt DateTime @default(now())
 
-  orders Order[]
+  identities UserIdentity[]
+  orders     Order[]
+}
+
+model UserIdentity {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       AuthProvider
+  providerUserId String       // ה-sub/id היציב אצל הספק - לא המייל, כי מייל יכול תיאורטית להתחלף אצל הספק
+  createdAt      DateTime     @default(now())
+
+  @@unique([provider, providerUserId])
 }
 
 enum OrderStatus {
