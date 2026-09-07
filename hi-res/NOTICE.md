@@ -17,3 +17,12 @@ featuring named models, produced for this project.
 
 This project ("Dull") is a personal, educational exercise, not a
 commercial operation.
+
+## AI-Generated Imagery
+
+The campaign/lifestyle photography in this folder (files prefixed
+`sarah-` and `yonatan-`, including the character sheets) depicts
+AI-generated personas, not real people — created with Nano Banana
+(Google), as also disclosed on the site's "Concept" page alongside the
+Claude collaboration. No model likeness or consent issue applies, since
+no real individual is depicted.
