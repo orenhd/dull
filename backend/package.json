@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "images:generate": "tsx scripts/generate-web-images.ts",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "oauth-logo:generate": "tsx scripts/generate-oauth-logo.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
