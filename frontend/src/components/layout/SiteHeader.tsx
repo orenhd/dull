@@ -16,9 +16,9 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { key: "home", to: "/" },
-  { key: "shirts" },
-  { key: "about" },
-  { key: "footwear" },
+  { key: "shirts", to: "/shirts" },
+  { key: "about", to: "/about" },
+  { key: "footwear", to: "/footwear" },
 ];
 
 function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {

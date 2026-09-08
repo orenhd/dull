@@ -19,3 +19,19 @@ export function ContentSkeleton() {
     </div>
   );
 }
+
+// שלד טעינה לרשת קטלוג (HomePage/CollectionPage) - אותה רשת 2/4 עמודות
+// כמו ProductGrid.tsx עצמו, כדי שלא תהיה קפיצת layout כשהתוכן האמיתי נטען.
+export function CatalogGridSkeleton() {
+  return (
+    <ul className="m-0 grid list-none grid-cols-2 gap-md p-0 desktop:grid-cols-4" aria-hidden="true">
+      {Array.from({ length: 8 }, (_, i) => (
+        <li key={i} className="flex flex-col gap-xs">
+          <div className="aspect-square animate-pulse-soft rounded-sm bg-surface-sunken" />
+          <span className="block h-md w-[80%] animate-pulse-soft rounded-sm bg-surface-sunken" />
+          <span className="block h-sm w-[40%] animate-pulse-soft rounded-sm bg-surface-sunken" />
+        </li>
+      ))}
+    </ul>
+  );
+}

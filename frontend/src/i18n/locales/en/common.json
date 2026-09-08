@@ -65,9 +65,19 @@
   },
   "home": {
     "title": "Dull",
-    "subtitle": "Plain, clean streetwear with an official band print. Measured, verifiable, no hype.",
-    "buildNote": "The rest of the site is being rebuilt page by page - the item page is first (see TECH_SPEC.md).",
-    "viewItemCta": "View the item page"
+    "campaignBannerPlaceholder": "Campaign banner — placeholder for a full-width photo of all six models"
+  },
+  "catalog": {
+    "loading": "Loading products…",
+    "errorTitle": "We can't load the catalog right now",
+    "errorBody": "Something went wrong loading the products. Please try again.",
+    "retry": "Try again",
+    "empty": "No items in this category yet."
+  },
+  "about": {
+    "title": "About",
+    "imagePlaceholder": "Image placeholder",
+    "contentPlaceholder": "Copy coming soon."
   },
   "notFound": {
     "title": "Page not found",

@@ -11,6 +11,7 @@ import { getProduct } from "@/lib/api/products";
 import { ApiError } from "@/lib/api/client";
 import { getStartingPriceAgorot } from "@/lib/variant";
 import { useVariantSelection } from "@/hooks/useVariantSelection";
+import { useApiLocale } from "@/hooks/useApiLocale";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { AddToBagForm } from "@/components/product/AddToBagForm";
@@ -18,14 +19,8 @@ import { BandCredit } from "@/components/product/BandCredit";
 import { SoldOutNotice } from "@/components/product/SoldOutNotice";
 import { GallerySkeleton, ContentSkeleton } from "@/components/feedback/Skeletons";
 import { formatAgorot } from "@/lib/money";
-import { PRODUCT_CATEGORY, type Locale } from "@/constants";
+import { PRODUCT_CATEGORY } from "@/constants";
 import type { Product } from "@/types/product";
-
-function useApiLocale(): Locale {
-  const { i18n } = useTranslation();
-  const resolved = i18n.resolvedLanguage ?? i18n.language;
-  return resolved === "he" ? "he" : "en";
-}
 
 function categoryLabel(category: Product["category"], t: (key: string) => string): string {
   return category === PRODUCT_CATEGORY.footwear ? t("nav.footwear") : t("nav.shirts");

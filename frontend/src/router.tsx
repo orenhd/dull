@@ -7,7 +7,10 @@ import { createRootRoute, createRoute, createRouter, Outlet } from "@tanstack/re
 import { RootLayout } from "@/components/layout/RootLayout";
 import { HomePage } from "@/pages/HomePage";
 import { ProductPage } from "@/pages/ProductPage";
+import { CollectionPage } from "@/pages/CollectionPage";
+import { AboutPage } from "@/pages/AboutPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { PRODUCT_CATEGORY } from "@/constants";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -31,7 +34,29 @@ export const productRoute = createRoute({
   component: ProductPage,
 });
 
-const routeTree = rootRoute.addChildren([homeRoute, productRoute]);
+// שני עמודי קולקציה (docs/SCREENS_INVENTORY.md מסכים 3-4) - אותה
+// CollectionPage.tsx, פרמטרית לפי category. ראו הערה בראש אותו קובץ.
+const shirtsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/shirts",
+  component: () => <CollectionPage category={PRODUCT_CATEGORY.shirt} titleKey="nav.shirts" />,
+});
+
+const footwearRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/footwear",
+  component: () => <CollectionPage category={PRODUCT_CATEGORY.footwear} titleKey="nav.footwear" />,
+});
+
+// /about - עימוד הכנה בלבד (docs/SCREENS_INVENTORY.md מסך 6), ראו הערה
+// ב-AboutPage.tsx.
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/about",
+  component: AboutPage,
+});
+
+const routeTree = rootRoute.addChildren([homeRoute, productRoute, shirtsRoute, footwearRoute, aboutRoute]);
 
 export const router = createRouter({
   routeTree,
