@@ -33,7 +33,12 @@ const envSchema = z.object({
   // כתובת "מאת" למיילים. תלוי-סביבה במובהק: לפני אימות דומיין משלנו מול
   // Resend, חייבים להשתמש בכתובת ה-sandbox שלהם (onboarding@resend.dev) -
   // ברגע שיש דומיין אמיתי, זה משתנה בלי לגעת בקוד בכלל.
-  EMAIL_FROM: z.string().email(),
+  //
+  // פורמט: כתובת בלבד ("a@b.com"), או עם שם תצוגה ("Dull <a@b.com>") - שם
+  // התצוגה הוא מה שהנמען רואה בתיבת הדואר שלו, נפרד לגמרי מהכתובת הטכנית
+  // (שיכולה להישאר onboarding@resend.dev גם ככה). לא z.string().email()
+  // בכוונה - זה היה פוסל את פורמט "שם <כתובת>".
+  EMAIL_FROM: z.string().min(3, "EMAIL_FROM is required"),
 });
 
 export const env = envSchema.parse(process.env);
