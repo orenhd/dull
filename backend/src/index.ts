@@ -1,5 +1,3 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -7,8 +5,7 @@ import { env } from "./config/env.js";
 import { productsRouter } from "./routes/products.js";
 import { authRouter } from "./routes/auth.js";
 import { ordersRouter } from "./routes/orders.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import { PUBLIC_IMAGES_DIR } from "./lib/paths.js";
 
 const app = express();
 // credentials: true נדרש כדי שהדפדפן ישלח/יקבל את ה-session cookie מבקשות
@@ -21,7 +18,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // תמונות מוצר מוגשות סטטית מ-public/images (ראו scripts/generate-web-images.ts)
-app.use("/images", express.static(path.join(__dirname, "../public/images")));
+app.use("/images", express.static(PUBLIC_IMAGES_DIR));
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });

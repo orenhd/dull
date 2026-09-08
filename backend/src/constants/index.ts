@@ -18,3 +18,7 @@ export const DEFAULT_PAGE_SIZE = 24;
 export const SESSION_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 יום
 
 export const SESSION_COOKIE_NAME = "dull_session";
+
+// סימן המטבע להצגה (לא לבלבל עם CURRENCY_CODE - קוד ISO לשימוש טכני/API,
+// זה הסימן שמוצג לבן אדם, למשל בטבלת הפריטים במייל אישור הזמנה).
+export const CURRENCY_SYMBOL = "₪";

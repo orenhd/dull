@@ -7,6 +7,9 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { sendThankYouEmail } from "../lib/email.js";
+import { findFlatMediaUrl } from "../lib/media.js";
+import { localize } from "../lib/i18n.js";
+import { DEFAULT_LOCALE } from "../constants/index.js";
 
 export const ordersRouter = Router();
 
@@ -35,7 +38,10 @@ ordersRouter.post("/", async (req, res, next) => {
     const variantIds = body.items.map((item) => item.productVariantId);
     const variants = await prisma.productVariant.findMany({
       where: { id: { in: variantIds }, isActive: true },
-      include: { product: true },
+      include: {
+        product: { include: { media: { include: { axisValues: true } } } },
+        axisSelections: true,
+      },
     });
     const variantById = new Map(variants.map((v) => [v.id, v]));
 
@@ -99,7 +105,22 @@ ordersRouter.post("/", async (req, res, next) => {
     try {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (user) {
-        await sendThankYouEmail({ toEmail: user.email, recipientName: user.name ?? user.email, orderId: order.id });
+        const emailItems = body.items.map((item) => {
+          const variant = variantById.get(item.productVariantId)!;
+          return {
+            name: localize(variant.product.name as Record<string, string>, DEFAULT_LOCALE) ?? variant.product.slug,
+            quantity: item.quantity,
+            unitPriceAgorot: variant.priceAgorot,
+            imageUrl: findFlatMediaUrl(variant.product.media, variant.axisSelections),
+          };
+        });
+        await sendThankYouEmail({
+          toEmail: user.email,
+          recipientName: user.name ?? user.email,
+          orderId: order.id,
+          totalAgorot,
+          items: emailItems,
+        });
       }
     } catch (err) {
       console.error(`Failed to send thank-you email for order ${order.id}:`, err);
