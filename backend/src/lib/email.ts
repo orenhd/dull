@@ -7,8 +7,14 @@
 // של הנמען לא יכולים לטעון תמונה מ-localhost. Resend תומך בהטמעת תמונה
 // כצירוף עם contentId, ומפנים אליה מה-HTML עם cid:<contentId> - זה עובד
 // גם בלי URL ציבורי בכלל, כי בייטים התמונה נשלחים בתוך המייל עצמו.
+//
+// חשוב: contentId לבד לא מספיק ל-Gmail בפועל - בלי contentType מפורש
+// (image/webp וכו') הוא לא מזהה את הצירוף כתמונה-להטמעה ומציג אותו כקובץ
+// מצורף רגיל, עם ה-<img> בגוף המייל שבור. זה תועד ב-Resend עצמם כ"מומלץ
+// לרינדור תקין" - לא ניחוש.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { extensionToMimeType } from "./mime.js";
 import { Resend } from "resend";
 import { env } from "../config/env.js";
 import { generateGiftPdf } from "./giftPdf.js";
@@ -104,7 +110,13 @@ export async function sendThankYouEmail(params: {
       if (!item.imageUrl) return null;
       const content = await tryReadImageFile(item.imageUrl);
       if (!content) return null;
-      return { filename: path.basename(item.imageUrl), content, contentId: contentIdByIndex(index) };
+      const filename = path.basename(item.imageUrl);
+      return {
+        filename,
+        content,
+        contentId: contentIdByIndex(index),
+        contentType: extensionToMimeType(filename),
+      };
     }),
   );
 
