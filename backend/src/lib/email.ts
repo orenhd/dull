@@ -5,13 +5,15 @@
 // למה thumbnail הוא צירוף inline (CID) ולא <img src="https://...">: אין
 // עדיין deploy ציבורי של ה-backend (רץ רק על localhost שלך) - שרתי המייל
 // של הנמען לא יכולים לטעון תמונה מ-localhost. Resend תומך בהטמעת תמונה
-// כצירוף עם contentId, ומפנים אליה מה-HTML עם cid:<contentId> - זה עובד
+// כצירוף עם inlineContentId, ומפנים אליה מה-HTML עם cid:<id> - זה עובד
 // גם בלי URL ציבורי בכלל, כי בייטים התמונה נשלחים בתוך המייל עצמו.
 //
-// חשוב: contentId לבד לא מספיק ל-Gmail בפועל - בלי contentType מפורש
-// (image/webp וכו') הוא לא מזהה את הצירוף כתמונה-להטמעה ומציג אותו כקובץ
-// מצורף רגיל, עם ה-<img> בגוף המייל שבור. זה תועד ב-Resend עצמם כ"מומלץ
-// לרינדור תקין" - לא ניחוש.
+// שים לב: השדה הנכון ב-SDK הוא inlineContentId, לא contentId (שם שדה
+// שגוי שראיתי בתיעוד/דוגמאות אונליין) - עם contentId Resend פשוט מתעלם
+// מהשדה בשקט (לא שגיאה!) ושולח כצירוף רגיל בלי Content-ID header בכלל,
+// בדיוק התסמין שראינו: התמונה מגיעה, אבל ה-<img cid:...> בגוף המייל שבור.
+// ודאתי את שם השדה הנכון ישירות מול node_modules/resend/dist/index.d.ts,
+// לא מול תיעוד חיצוני - שם המקור האמיתי היחיד כשיש אי-התאמה.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { extensionToMimeType } from "./mime.js";
@@ -114,7 +116,7 @@ export async function sendThankYouEmail(params: {
       return {
         filename,
         content,
-        contentId: contentIdByIndex(index),
+        inlineContentId: contentIdByIndex(index),
         contentType: extensionToMimeType(filename),
       };
     }),
