@@ -40,27 +40,58 @@
 
 ## פריסה (Render)
 - **Root Directory**: `backend` (המונורפו כולל גם docs/hi-res/db - Render צריך לדעת שהאפליקציה חיה בתת-תיקייה).
+- **Language**: Node (לא Docker - אין Dockerfile בפרויקט, במכוון).
 - **Region**: Frankfurt - קרוב ביותר ל-Neon (גם הוא Frankfurt) ולקהל היעד בישראל.
-- **Build Command**: `npm ci && npm run images:generate && npm run build`
-  (חובה לכלול `images:generate` - תיקיית `public/images` היא build artifact
-  ולא נשמרת ב-git, אז בלי זה השרת החי לא יגיש שום תמונה).
+- **Build Command**: `npm install --include=dev && npm run build && npm run images:generate`
+  - `--include=dev` **קריטי ולא קוסמטי**: מכיוון ש-`NODE_ENV=production` מוגדר
+    כמשתנה סביבה (ראו למטה), ו-Render מזריק את משתני הסביבה גם לשלב ה-Build
+    ולא רק ל-runtime - וההתנהגות המתועדת של npm היא לדלג על `devDependencies`
+    כש-`NODE_ENV=production` קיים. בלי הדגל הזה, `typescript`/`@types/*`
+    לא מותקנים ו-`tsc` נכשל עם שגיאות "Cannot find name 'process'" וכו',
+    למרות שהם רשומים כהלכה ב-`package.json`. גילינו את זה בדרך הקשה - ראו
+    "בעיות שנתקלנו בהן" למטה אם זה קורה שוב.
+  - `images:generate` חובה - תיקיית `public/images` היא build artifact
+    ולא נשמרת ב-git, אז בלי זה השרת החי לא יגיש שום תמונה.
 - **Pre-Deploy Command**: `npx prisma migrate deploy` (מריץ מיגרציות ממתינות
   לפני שהגרסה החדשה מקבלת תנועה - לא `migrate dev`, זה אינטראקטיבי ולא מתאים
-  ל-CI/deploy). אם זה לא זמין ב-plan החינמי, לשלב בתוך ה-Build Command במקום.
+  ל-CI/deploy).
 - **Start Command**: `npm run start`
+- **Health Check Path**: `/health`.
+- **Auto-Deploy**: On Commit - כל push ל-main מפעיל דיפלוי אוטומטית.
 - **משתני סביבה** (Environment tab בדשבורד - `.env` עצמו כמובן לא מגיע ל-git):
   `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `RESEND_API_KEY`,
   `EMAIL_FROM`, `NODE_ENV=production`. לא צריך להגדיר `PORT` - Render מזריק
   אותו בעצמו וה-קוד כבר קורא מ-`env.PORT`.
-- **Plan**: Starter ($7/חודש), לא Free - החלטה מכוונת. Free "נרדם" אחרי 15
-  דקות בלי תנועה (~30-60 שניות התעוררות לבקשה הראשונה אחר כך) - לא מתאים
-  לפרויקט שהקישור אליו נשלח החוצה לאנשים אמיתיים, שרואים "אתר תקוע" בלי
-  הקשר. השיקול היה: workaround חינמי (פינג חיצוני שמונע הירדמות) עובד, אבל
-  צורך כמעט את כל 750 שעות ה-free tier של כל ה-workspace לבד, ומתבסס על
-  התנהגות שהפלטפורמה לא מתחייבת לא לשנות. $7/חודש קונה תמיד-ער בלי סיכון.
+- **גרסת Node**: מוגדרת מפורשות ב-`package.json` (`"engines": {"node": "22.x"}`)
+  כדי לתאום לגרסה המקומית (22.x) ולמנוע ברירת מחדל שונה של Render.
+- **Workspace Plan מול Instance Type - שני מקומות שונים לגמרי בדשבורד**:
+  - *Workspace Plan* (Account/Billing → Hobby $0 / Pro $25) - נשארנו על
+    **Hobby (חינם)**. זו רק הגדרה חשבונאית-ארגונית, לא קובעת ביצועים/זמינות.
+  - *Instance Type* (בתוך השירות עצמו → Settings → Instance Type) - זה
+    שקובע את משאבי המחשוב בפועל. בחרנו **Starter ($7/חודש)**, לא Free -
+    Free "נרדם" אחרי 15 דקות בלי תנועה (~30-60 שניות התעוררות לבקשה
+    הראשונה) - לא מתאים לפרויקט שנשלח לאנשים אמיתיים. $7/חודש קונה
+    תמיד-ער בלי סיכון, ובלי תלות בהתנהגות לא-מובטחת של פלטפורמות אחרות
+    (שקלנו גם Railway - יש לו אי-ודאות דומה סביב הירדמות ב-Hobby plan).
+
+### בעיות שנתקלנו בהן בדיפלוי הראשון (לתיעוד, למקרה שיחזרו)
+1. **Build נכשל על commit ישן** - Render בנה מ-`origin/main` שהיה 15 קומיטים
+   מאחורי המקומי (git push לא בוצע בזמן). פתרון: לוודא `git push` לפני כל
+   דיפלוי; `git status`/`git log origin/main..HEAD` בודקים את זה מראש.
+2. **גרסת Node לא תואמת** - Render ברירת מחדל ל-Node 24, בעוד הפרויקט פותח
+   על 22. פתרון: `engines` ב-`package.json` (ראו למעלה).
+3. **`@types/*` לא מותקנים למרות שרשומים ב-package.json** - הסיבה האמיתית
+   (אחרי שנפסלו: commit ישן, Node version, build cache) הייתה `NODE_ENV=
+   production` גורם ל-npm לדלג על devDependencies. פתרון: `--include=dev`
+   ב-Build Command (ראו למעלה). אבחון: `ls node_modules/@types` בתוך ה-
+   Build Command חשף שהתיקייה ריקה לגמרי - זו הייתה ההוכחה המכרעת.
 
 ## סטטוס
 קיים: סכימת DB מלאה, seed עם מוצרים אמיתיים, `/products` (קטלוג + פריט),
 `/auth/google` (login + session cookie), `/orders` (יצירה/רשימה/פריט),
-צינור תמונות web, ניהול מוצרים דרך Prisma Studio.
-אין עדיין: מייל תודה + מתנת PDF, frontend (לא באחריות Backend).
+מייל תודה + מתנת PDF (Resend + pdf-lib, תוכן placeholder בכוונה - העיצוב/
+הקופי הסופיים עוד לא נקבעו), צינור תמונות web, ניהול מוצרים דרך Prisma
+Studio. **השרת פרוס ורץ בפועל** ב-Render: https://dull.onrender.com
+(`/health`, `/products` נבדקו ועובדים).
+אין עדיין: frontend (לא באחריות Backend - באחריות Oren), תוכן סופי למייל/
+PDF המתנה, נכסי מוצר נוספים (Immortal, שאר Grave) לפי הזמינות.
