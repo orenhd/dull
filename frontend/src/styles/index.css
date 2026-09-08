@@ -1,0 +1,216 @@
+@import "tailwindcss";
+
+/* tokens.css הוא מקור האמת היחיד לעיצוב (חי בשורש frontend/, לא ב-src/) -
+   לא משוכפל כאן, רק מיובא ומוזן ל-Tailwind למטה. ראו TECH_SPEC.md סעיף 1. */
+@import "../../tokens.css";
+
+/* גופנים - self-hosted דרך @fontsource (TECH_SPEC.md: "Self-hosting עדיף
+   בד"כ בפרודקשן" - ההחלטה שהמסמך השאיר פתוחה עד הקמת ה-build בפועל).
+   כל קובץ מכיל כמה @font-face עם unicode-range שונה (latin/hebrew/וכו') -
+   הדפדפן מוריד רק את מה שבאמת בשימוש, אין צורך לבחור subset ידנית. */
+@import "@fontsource/archivo-black"; /* משקל יחיד - הפונט עצמו הוא "Black" */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/rubik/900.css";
+@import "@fontsource/assistant/400.css";
+@import "@fontsource/assistant/700.css";
+
+/* ==========================================================================
+   מגשר בין tokens.css (שמות טוקן משלנו: --color-*, --typography-*, --space-*
+   וכו') לבין ה-namespaces שטיילווינד מצפה להם כדי לייצר יוטיליטיז (--color-*,
+   --font-*, --text-*, --spacing-*, --radius-*, --ease-*, --breakpoint-*).
+
+   `@theme inline` (ולא @theme רגיל) הוא קריטי כאן: הוא שומר את היוטיליטיז
+   כ-var(--original-token) בפועל, במקום "לקפוא" על הערך הנוכחי בזמן build.
+   בלי inline, ה-override של :root[lang="he"] בתוקן.ס.ס לא היה "מתעורר"
+   בזמן ריצה - בדיוק אותו תנאי הכרחי כמו סנכרון <html lang>, ראו
+   src/hooks/useLocaleSync.ts.
+   ========================================================================== */
+@theme inline {
+  /* Color - השמות כבר תואמים ל-namespace של Tailwind (--color-*) 1:1 */
+  --color-brand-primary: var(--color-brand-primary);
+  --color-brand-primary-light: var(--color-brand-primary-light);
+  --color-accent-lemon: var(--color-accent-lemon);
+  --color-accent-sun: var(--color-accent-sun);
+  --color-text-base: var(--color-text-base);
+  --color-text-muted: var(--color-text-muted);
+  --color-border-base: var(--color-border-base);
+  --color-border-strong: var(--color-border-strong);
+  --color-surface-base: var(--color-surface-base);
+  --color-surface-sunken: var(--color-surface-sunken);
+  --color-feedback-error: var(--color-feedback-error);
+
+  /* Typography - font families -> font-headline / font-body */
+  --font-headline: var(--typography-family-headline);
+  --font-body: var(--typography-family-body);
+
+  /* Typography - weights -> font-regular / font-bold / font-black
+     (בלי התנגשות עם font-headline/font-body: מרחבי שמות שונים בטיילווינד
+     - --font-* למשפחה מול --font-weight-* למשקל - שניהם מייצרים יוטיליטי
+     בשם font-<key>, אבל ה-key-ים כאן לא מתנגשים) */
+  --font-weight-regular: var(--typography-weight-regular);
+  --font-weight-bold: var(--typography-weight-bold);
+  --font-weight-black: var(--typography-weight-black);
+
+  /* Typography - sizes -> text-h1 / text-body וכו', כל אחד עם line-height
+     תואם (התפקיד שלו - heading/body/caption - ולא בהכרח יחס אחיד, ראו
+     ההערה המקורית ב-tokens.css על עברית) */
+  --text-h1: var(--typography-size-h1);
+  --text-h1--line-height: var(--typography-line-height-heading);
+  --text-h2: var(--typography-size-h2);
+  --text-h2--line-height: var(--typography-line-height-heading);
+  --text-h3: var(--typography-size-h3);
+  --text-h3--line-height: var(--typography-line-height-heading);
+  --text-body-strong: var(--typography-size-body-strong);
+  --text-body-strong--line-height: var(--typography-line-height-body);
+  --text-body: var(--typography-size-body);
+  --text-body--line-height: var(--typography-line-height-body);
+  --text-caption: var(--typography-size-caption);
+  --text-caption--line-height: var(--typography-line-height-caption);
+
+  /* Wordmark - קפוא במכוון, ראו ההערה ליד tokens.css --typography-*-wordmark-* */
+  --font-wordmark: var(--typography-family-wordmark);
+  --text-wordmark-h1: var(--typography-size-wordmark-h1);
+  --text-wordmark-h1--line-height: var(--typography-line-height-heading);
+  --text-wordmark-h3: var(--typography-size-wordmark-h3);
+  --text-wordmark-h3--line-height: var(--typography-line-height-heading);
+
+  /* Spacing - tokens.css משתמש ב-namespace --space-* משלו, טיילווינד
+     מצפה ל---spacing-* - כאן זה כן alias בין שני שמות שונים (לא זהים
+     כמו הצבעים), ולא רק "עצמי" */
+  --spacing-xs: var(--space-xs);
+  --spacing-sm: var(--space-sm);
+  --spacing-md: var(--space-md);
+  --spacing-lg: var(--space-lg);
+  --spacing-xl: var(--space-xl);
+
+  /* Radius - שמות כבר תואמים ל-namespace של Tailwind, דורסים את ברירת
+     המחדל שלו (0.125rem/0.25rem/0.5rem) בערכי הטוקן שלנו */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+
+  /* Motion */
+  --ease-standard: var(--motion-easing-standard);
+
+  /* Breakpoint - יחיד (ראו tokens.css "---- Breakpoints ----").
+     *לא* אפשר var(--breakpoint-desktop) כאן כמו כל שאר הטוקנים למעלה -
+     תנאי @media חייב ערך סטטי בזמן build (דפדפנים לא תומכים ב-custom
+     property בתוך תנאי מדיה עצמו), אז זו כפילות מכוונת ויחידה מול הערך
+     ב-tokens.css - אם 900px משתנה שם, לעדכן גם כאן. */
+  --breakpoint-desktop: 900px;
+}
+
+/* ==========================================================================
+   Base - מקביל למה שהדמו (dull-demo/style.css) עשה ב-reset הגלובלי, מותאם
+   ל-Tailwind (ה-`* { box-sizing: border-box }` וה-reset הבסיסי כבר מגיעים
+   מ-@import "tailwindcss" עצמו - Preflight - אז רק מה שנשאר אמיתי מתווסף כאן).
+   ========================================================================== */
+@layer base {
+  /* height: 100% על html/body + overflow: hidden - אמצעי הגנה משלים ל-
+     app-shell של RootLayout.tsx (h-[100dvh] + overflow-hidden על ה-root
+     div שם). בלי זה, בדפדפנים/מצבים מסוימים (למשל תוכן שגולש למרות
+     min-h-0 ב-<main>) ה-body עצמו עלול לקבל scrollbar כפול ולשבור את
+     ה"הצמדה" של ה-header/footer לקצוות החלון. */
+  html {
+    color-scheme: light;
+    height: 100%;
+  }
+
+  body {
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--color-surface-base);
+    color: var(--color-text-base);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--typography-line-height-body);
+    font-weight: var(--font-weight-regular);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* :focus-visible (לא :focus) - כבר מציג outline רק בפוקוס-מקלדת עבור
+     button/a/label (Chip) - זה נכון ועובד היום. ה"בעיה" שאורן מזהה (outline
+     מופיע גם בקליק עכבר) היא quirk ידוע וספציפי לשדות טקסט/select: הדפדפן
+     מחשיב אותם כזקוקים לאינדיקציה תמיד, גם בפוקוס-עכבר - לא באג בכלל שלנו,
+     ואי אפשר "לתקן" ב-CSS טהור בלי JS נוסף (פוליפיל למודליות קלט). הסרה
+     מוחלטת הייתה שוברת WCAG 2.1 SC 2.4.7 (Focus Visible, AA) - חייב להיות
+     אינדיקטור פוקוס גלוי כלשהו למשתמש מקלדת, במיוחד ב-<select> של המידה
+     שיושב בדיוק בנקודה הקריטית של תהליך הרכישה. עידון (הבקשה השנייה): לא
+     הוחלף הצבע ל-`--color-brand-primary-light` כמו שאולי היה מתבקש - בדקתי
+     ניגודיות בפועל: 2.77:1 על רקע לבן, מתחת ל-3:1 המינימלי הנדרש ל-focus
+     indicators לפי WCAG 1.4.11 (Non-text Contrast, AA) - זו הייתה רגרסיה
+     אמיתית, לא רק ריכוך. במקום זה: outline-offset צומצם מ-2px ל-1px כדי
+     שהטבעת תיצמד יותר לאלמנט ותיראה פחות "קופסתית", בלי לפגוע בניגודיות
+     או בנראות. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-primary);
+    outline-offset: 1px;
+  }
+}
+
+/* ==========================================================================
+   Components - כמה חתיכות CSS ממש בספוקות שדמו קידוד גם ב-CSS "רגיל" ולא
+   ביוטיליטיז (למשל חץ ה-select המצויר ב-gradient) - נשמרות כאן, עדיין דרך
+   var(--token) ולא ערך מוחלט.
+   ========================================================================== */
+@layer components {
+  .select-caret {
+    appearance: none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
+      linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 20px) center,
+      calc(100% - 15px) center;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  /* RTL: החץ המצויר צריך לשבת בצד ה"סוף" הלוגי (ימין ב-LTR, שמאל ב-RTL),
+     לא צמוד ל-inset הפיזי. Tailwind לא נותן utility לזוגות רקע-gradient
+     כאלה, אז המיקום מתהפך ידנית לפי [dir="rtl"]. */
+  [dir="rtl"] .select-caret {
+    background-position:
+      20px center,
+      15px center;
+  }
+}
+
+@theme {
+  --animate-pulse-soft: pulse-soft 1.4s var(--ease-standard) infinite;
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-soft {
+    animation: none;
+  }
+
+  /* כיסוי גורף לכל טרנזישן/אנימציה באתר (לא רק ה-skeleton pulse למעלה) -
+     מקביל ל-"prefers-reduced-motion honoured" שהדמו הצהיר עליו ב-README,
+     אבל בפועל הדמו רק כיסה טרנזישנים ספציפיים ב-CSS ידני. כאן, במקום
+     לרדוף אחרי כל class עם transition-* בנפרד (crossfade בגלריה, ה-chip
+     בבחירת וריאנט, סיבוב פסי ה-hamburger וכו') ולהסתכן בשכוח אחד, זה
+     כלל-על שמאפס virtually-instant כל transition/animation לכל אלמנט -
+     תבנית סטנדרטית ומומלצת (ראו web.dev/prefers-reduced-motion). 0.01ms
+     ולא 0 כדי לא לשבור אירועי transitionend/animationend שקוד עשוי
+     להסתמך עליהם. */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}

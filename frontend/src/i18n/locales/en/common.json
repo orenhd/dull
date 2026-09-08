@@ -1,0 +1,77 @@
+{
+  "common": {
+    "skipToContent": "Skip to content",
+    "menu": "Menu",
+    "languageSwitch": "עברית"
+  },
+  "nav": {
+    "home": "Home",
+    "shirts": "T-Shirts",
+    "footwear": "Shoes",
+    "about": "About",
+    "comingSoon": "Coming soon"
+  },
+  "breadcrumb": {
+    "home": "Home"
+  },
+  "variant": {
+    "fit": "Fit",
+    "colorway": "Colourway",
+    "size": "Size",
+    "selectSize": "Select size",
+    "sizeRequired": "Please select a size."
+  },
+  "sizeGuide": {
+    "summary": "Size guide",
+    "intro": "Measured flat, in centimetres, for this fit.",
+    "columns": {
+      "size": "Size",
+      "chest": "Chest",
+      "length": "Length",
+      "sleeve": "Sleeve"
+    },
+    "note": "Between two sizes? The cotton is pre-shrunk, so it will not gain length in the wash. Take the larger one.",
+    "unavailable": "A size chart isn't available for this fit yet."
+  },
+  "materials": {
+    "title": "Materials & Care"
+  },
+  "actions": {
+    "addToBag": "Add to Bag",
+    "addedToBagToast": "Added to bag — size {{size}}."
+  },
+  "soldOut": {
+    "title": "Sold out",
+    "body": "This combination is out of stock right now. Other sizes or colourways on this item may still be available.",
+    "backLink": "Back to the collection"
+  },
+  "states": {
+    "loading": "Loading item…",
+    "errorTitle": "We can't load this item",
+    "errorBody": "Something went wrong loading this product. Please try again.",
+    "retry": "Try again",
+    "backLink": "Back to the collection",
+    "notFoundTitle": "We can't find this item",
+    "notFoundBody": "It may have sold out for good, or the link is out of date."
+  },
+  "credit": {
+    "print": "Print: <band>{{band}}</band>.",
+    "officialLink": "Official page ↗",
+    "nonCommercialNote": "Non-commercial homage. Artwork rights belong to the band."
+  },
+  "footer": {
+    "disclaimer": "This is an educational/demo project. No real purchase or payment takes place.",
+    "rightsNote": "Band logos and names belong to their respective owners and are shown as a non-commercial homage."
+  },
+  "home": {
+    "title": "Dull",
+    "subtitle": "Plain, clean streetwear with an official band print. Measured, verifiable, no hype.",
+    "buildNote": "The rest of the site is being rebuilt page by page - the item page is first (see TECH_SPEC.md).",
+    "viewItemCta": "View the item page"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "That page doesn't exist.",
+    "backHome": "Back to home"
+  }
+}

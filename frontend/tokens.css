@@ -44,6 +44,17 @@
   --typography-line-height-body: 1.5;
   --typography-line-height-caption: 1.4;
 
+  /* ---- Wordmark ("Dull"/"DULL" as brand mark, not body copy) ----
+     בכוונה *לא* כפוף ל-:root[lang="he"] למטה - הבקשה המפורשת (2026-09-08):
+     המילה Dull, גם כשהיא יושבת בתוך כותרת עברית, תמיד ב-Archivo Black 900
+     ובגודל הפיקסלים האנגלי - לא עוברת ל-Rubik ולא לקנה המידה העברי. שני
+     גדלים קפואים בלבד (לא כל סולם ה-headline) כי אלו שני ההקשרים היחידים
+     שבהם ה-wordmark מופיע כרגע (SiteHeader / HomePage הירו) - להוסיף עוד
+     אם יתווסף הקשר שלישי. */
+  --typography-family-wordmark: 'Archivo Black', 'Arial Black', sans-serif;
+  --typography-size-wordmark-h1: 48px;
+  --typography-size-wordmark-h3: 20px;
+
   /* ---- Spacing ---- */
   --space-xs: 4px;
   --space-sm: 8px;
@@ -60,6 +71,13 @@
   --motion-duration-fast: 120ms;
   --motion-duration-base: 240ms;
   --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---- Breakpoints ----
+     יחיד, מחולץ בפועל מ-github.com/orenhd/dull-demo (style.css) - כל
+     ה-CSS שם בנוי סביב נקודת מעבר אחת בין מובייל לדסקטופ, לא סקאלה
+     מרובת-שברים. ראו TECH_SPEC.md סעיף 4: "לחלץ את ה-breakpoints
+     וההתנהגות בפועל מה-CSS הקיים... ולקודד אותם כ-tokens מתועדים". */
+  --breakpoint-desktop: 900px;
 }
 
 /* ==========================================================================

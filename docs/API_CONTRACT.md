@@ -36,12 +36,14 @@
     "name": "Darkthrone Tee",
     "bandCreditName": "...", "bandCreditUrl": "...",
     "priceAgorot": 8900,
-    "flatImageUrl": "https://dull.onrender.com/images/...",
-    "campaignImageUrl": "https://dull.onrender.com/images/..." // או null
+    "flatImageUrl": "/images/...",
+    "campaignImageUrl": "/images/..." // או null
   }]
 }
 ```
 `flatImageUrl` = תמונת ברירת מחדל בכרטיס; `campaignImageUrl` (אם קיים) מחליף אותה ב-hover (דסקטופ). `priceAgorot` הוא המחיר הזול מבין הוריאנטים (טווח "מ-").
+
+**חשוב לגבי כתובות תמונה (`flatImageUrl`/`campaignImageUrl`/`media[].url`):** אלו נתיבים **יחסיים** בפועל (`"/images/x.webp"`, ראו `backend/src/routes/products.ts` - `url: media.url` כפי שנשמר ב-DB, וב-`backend/prisma/seed.ts`), לא URL מלא כפי שהדוגמה למעלה הציגה קודם (תוקן 2026-09-08 - הדוגמה הקודמת הייתה שגויה, לא רק מקוצרת). ה-frontend חייב לצרף אותן ל-base URL בעצמו (ראו `frontend/src/lib/api/client.ts`, `resolveMediaUrl()`) - לא להניח שהן כבר כתובת מלאה.
 
 ### `GET /products/:slug?locale=en|he`
 דף פריט מלא. **לא דורש login.** 404 עם `{ "error": "PRODUCT_NOT_FOUND" }` אם לא קיים/לא פעיל.

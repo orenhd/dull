@@ -1,0 +1,88 @@
+<title>Hebrew font candidates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600&family=Rubik:wght@400;500;900&family=Assistant:wght@400;600;800&family=Noto+Sans+Hebrew:wght@400;600;900&family=Heebo:wght@400;600;900&family=Frank+Ruhl+Libre:wght@500;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1a1a; --paper:#faf9f7; --line:#e2e0dc; --muted:#8a8680;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --ink:#eae8e4; --paper:#161514; --line:#332f2a; --muted:#948f87; }
+  }
+  :root[data-theme="dark"]{ --ink:#eae8e4; --paper:#161514; --line:#332f2a; --muted:#948f87; }
+  body{ background:var(--paper); color:var(--ink); font-family:Inter,Arial,sans-serif; max-width:920px; margin:0 auto; padding:40px 24px 80px; }
+  h1{ font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; margin:0 0 6px; }
+  p.lede{ color:var(--muted); font-size:14px; margin:0 0 40px; max-width:60ch; }
+  .pair{ border:1px solid var(--line); border-radius:10px; padding:24px 28px; margin-bottom:20px; }
+  .tag{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:14px; }
+  .row{ display:flex; align-items:baseline; gap:18px; flex-wrap:wrap; margin-bottom:6px; }
+  .latin-headline{ font-family:'Archivo Black',sans-serif; font-size:34px; }
+  .he-headline{ font-size:34px; direction:rtl; }
+  .latin-body{ font-family:Inter,sans-serif; font-size:16px; }
+  .he-body{ font-size:16px; direction:rtl; }
+  .price{ font-family:Inter,sans-serif; font-size:14px; color:var(--muted); }
+  .note{ font-size:12.5px; color:var(--muted); margin-top:14px; line-height:1.5; }
+  hr{ border:none; border-top:1px solid var(--line); margin:36px 0; }
+</style>
+
+<h1>Headline candidates — paired with Archivo Black</h1>
+<p class="lede">שלוש אפשרויות ל-headline עברי, כולן sans גיאומטרי/ניטרלי במשקל כבד — לא display faces מסוגננים.</p>
+
+<div class="pair">
+  <div class="tag">Rubik · Black 900</div>
+  <div class="row">
+    <span class="latin-headline">DULL</span>
+    <span class="he-headline" style="font-family:'Rubik',sans-serif;font-weight:900;">חולצת דארקת'רון</span>
+  </div>
+  <div class="note">הכי נפוץ בממשקי מוצר ישראליים כיום (Wix ואחרים) — בחירה "בטוחה וגנרית" במובן הטוב, גיאומטרי ומדויק, בלי אופי מודגש.</div>
+</div>
+
+<div class="pair">
+  <div class="tag">Heebo · Extra Bold 900</div>
+  <div class="row">
+    <span class="latin-headline">DULL</span>
+    <span class="he-headline" style="font-family:'Heebo',sans-serif;font-weight:900;">חולצת דארקת'רון</span>
+  </div>
+  <div class="note">מתוכנן ע"י Google במפורש לצד sans לטיניים מודרניים — נקי מאוד, פחות "עגול" מ-Rubik.</div>
+</div>
+
+<div class="pair">
+  <div class="tag">Frank Ruhl Libre · Black 900 (וריאציה: serif)</div>
+  <div class="row">
+    <span class="latin-headline">DULL</span>
+    <span class="he-headline" style="font-family:'Frank Ruhl Libre',serif;font-weight:900;">חולצת דארקת'רון</span>
+  </div>
+  <div class="note">אופציה שונה לגמרי — serif עברי קלאסי (העיתונות/הספר העברי). ניגוד מכוון ל-Archivo Black, לא התאמה — רק אם מעניין אתכם קונטרסט מודע.</div>
+</div>
+
+<hr>
+
+<h1>Body candidates — paired with Inter</h1>
+<p class="lede">שלוש אפשרויות ל-body עברי, כולן שקטות ונייטרליות במכוון.</p>
+
+<div class="pair">
+  <div class="tag">Assistant · Regular / SemiBold</div>
+  <div class="row">
+    <span class="he-body" style="font-family:'Assistant',sans-serif;">מארז מתנה כולל כרטיס תודה מודפס</span>
+    <span class="price">₪89.00</span>
+  </div>
+  <div class="note">הכי "שקט" מבין השלושה — כמעט בלי אופי משלו, מדויק וללא מוזרויות.</div>
+</div>
+
+<div class="pair">
+  <div class="tag">Noto Sans Hebrew · Regular / SemiBold</div>
+  <div class="row">
+    <span class="he-body" style="font-family:'Noto Sans Hebrew',sans-serif;">מארז מתנה כולל כרטיס תודה מודפס</span>
+    <span class="price">₪89.00</span>
+  </div>
+  <div class="note">מתוכנן ע"י Google לעקביות מרבית בין שפות/סקריפטים — פונקציונלי לחלוטין, אפס אישיות בכוונה.</div>
+</div>
+
+<div class="pair">
+  <div class="tag">Heebo · Regular / SemiBold</div>
+  <div class="row">
+    <span class="he-body" style="font-family:'Heebo',sans-serif;">מארז מתנה כולל כרטיס תודה מודפס</span>
+    <span class="price">₪89.00</span>
+  </div>
+  <div class="note">מעט יותר "מודרני-דיגיטלי" מהשתיים האחרות, עדיין רגוע ונקי.</div>
+</div>

@@ -1,0 +1,43 @@
+<title>Line-height parity check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&family=Assistant:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#1a1a1a; --paper:#faf9f7; --line:#e2e0dc; --muted:#8a8680; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --ink:#eae8e4; --paper:#161514; --line:#332f2a; --muted:#948f87; }
+  }
+  :root[data-theme="dark"]{ --ink:#eae8e4; --paper:#161514; --line:#332f2a; --muted:#948f87; }
+  body{ background:var(--paper); color:var(--ink); font-family:Inter,Arial,sans-serif; max-width:920px; margin:0 auto; padding:40px 24px 80px; }
+  h1{ font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; margin:0 0 6px; }
+  p.lede{ color:var(--muted); font-size:14px; margin:0 0 32px; max-width:65ch; line-height:1.6; }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .block{ border:1px solid var(--line); border-radius:10px; padding:24px; }
+  .tag{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:14px; }
+  .en{ font-family:Inter,sans-serif; font-size:16px; }
+  .he{ font-family:Assistant,sans-serif; font-size:18px; direction:rtl; }
+  .lh-15{ line-height:1.5; }
+  .lh-16{ line-height:1.6; }
+  .lh-17{ line-height:1.7; }
+  .row{ margin-bottom:18px; padding-bottom:18px; border-bottom:1px dashed var(--line); }
+  .row:last-child{ border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .small{ font-size:11px; color:var(--muted); margin-bottom:6px; }
+</style>
+
+<h1>Line-height parity — Inter vs Assistant, three leading values</h1>
+<p class="lede">אותו טקסט, שלושה פסקאות עם line-height שונה (1.5 / 1.6 / 1.7), אנגלית ועברית זו לצד זו. תבדוק אם באותו line-height המקצב האנכי (המרווח בין שורות) מרגיש דומה בעוצמה בשתי השפות, או שאחת מרגישה "צפופה" יותר מהשנייה.</p>
+
+<div class="cols">
+  <div class="block">
+    <div class="tag">Inter · 16px</div>
+    <div class="row"><div class="small">line-height: 1.5</div><p class="en lh-15">Dull started as a private joke between two people who spent too many years in mosh pits and too many hours reworking old band logos on napkins. What began as merch for friends slowly turned into something people asked to buy.</p></div>
+    <div class="row"><div class="small">line-height: 1.6</div><p class="en lh-16">Dull started as a private joke between two people who spent too many years in mosh pits and too many hours reworking old band logos on napkins. What began as merch for friends slowly turned into something people asked to buy.</p></div>
+    <div class="row"><div class="small">line-height: 1.7</div><p class="en lh-17">Dull started as a private joke between two people who spent too many years in mosh pits and too many hours reworking old band logos on napkins. What began as merch for friends slowly turned into something people asked to buy.</p></div>
+  </div>
+  <div class="block">
+    <div class="tag">Assistant · 18px</div>
+    <div class="row"><div class="small">line-height: 1.5</div><p class="he lh-15">דל התחיל כבדיחה פרטית בין שני אנשים שביליו יותר מדי שנים במושים ויותר מדי שעות בעיצוב מחדש של לוגואים ישנים של להקות על מפיות. מה שהתחיל כמרצ'נדייז לחברים הפך בהדרגה למשהו שאנשים ביקשו לקנות.</p></div>
+    <div class="row"><div class="small">line-height: 1.6</div><p class="he lh-16">דל התחיל כבדיחה פרטית בין שני אנשים שביליו יותר מדי שנים במושים ויותר מדי שעות בעיצוב מחדש של לוגואים ישנים של להקות על מפיות. מה שהתחיל כמרצ'נדייז לחברים הפך בהדרגה למשהו שאנשים ביקשו לקנות.</p></div>
+    <div class="row"><div class="small">line-height: 1.7</div><p class="he lh-17">דל התחיל כבדיחה פרטית בין שני אנשים שביליו יותר מדי שנים במושים ויותר מדי שעות בעיצוב מחדש של לוגואים ישנים של להקות על מפיות. מה שהתחיל כמרצ'נדייז לחברים הפך בהדרגה למשהו שאנשים ביקשו לקנות.</p></div>
+  </div>
+</div>

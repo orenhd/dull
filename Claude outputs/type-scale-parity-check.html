@@ -1,0 +1,65 @@
+<title>Type scale parity check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600&family=Rubik:wght@900&family=Assistant:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --ink:#1a1a1a; --paper:#faf9f7; --line:#e2e0dc; --muted:#8a8680; --grid:#d8443b33; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --ink:#eae8e4; --paper:#161514; --line:#332f2a; --muted:#948f87; --grid:#ff6b5f44; }
+  }
+  :root[data-theme="dark"]{ --ink:#eae8e4; --paper:#161514; --line:#332f2a; --muted:#948f87; --grid:#ff6b5f44; }
+  body{ background:var(--paper); color:var(--ink); font-family:Inter,Arial,sans-serif; max-width:920px; margin:0 auto; padding:40px 24px 80px; }
+  h1{ font-size:15px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; margin:0 0 6px; }
+  p.lede{ color:var(--muted); font-size:14px; margin:0 0 32px; max-width:65ch; line-height:1.6; }
+  .block{ border:1px solid var(--line); border-radius:10px; padding:28px; margin-bottom:24px; }
+  .tag{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:16px; }
+  .stack{ position:relative; }
+  .baseline-grid{
+    position:absolute; inset:0; pointer-events:none;
+    background-image: repeating-linear-gradient(to bottom, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 20px);
+  }
+  .sample{ position:relative; line-height:1; margin-bottom:4px; display:flex; align-items:baseline; gap:16px; }
+  .sample .label{ font-size:11px; color:var(--muted); width:130px; flex-shrink:0; font-family:Inter,sans-serif; }
+  .headline-64{ font-size:64px; }
+  .headline-32{ font-size:32px; }
+  .body-16{ font-size:16px; }
+  .latin{ font-family:'Archivo Black',sans-serif; }
+  .latin.body-font{ font-family:Inter,sans-serif; font-weight:600; }
+  .he{ font-family:'Rubik',sans-serif; font-weight:900; direction:rtl; }
+  .he.body-font{ font-family:'Assistant',sans-serif; font-weight:600; direction:rtl; }
+  .note{ font-size:12.5px; color:var(--muted); margin-top:16px; line-height:1.6; max-width:60ch; }
+  code{ background:var(--line); padding:1px 5px; border-radius:4px; font-size:12px; }
+</style>
+
+<h1>Type scale parity — Archivo Black vs Rubik Black, Inter vs Assistant</h1>
+<p class="lede">אותו <code>font-size</code> בדיוק (בפיקסלים) לשתי השפות, עם קווי עזר אופקיים כל 20px כדי שיהיה קל לשפוט אם הגובה האופטי אכן זהה — בדיוק כמו שהיית בודק על פרופת דפוס עם קו-בסיס. אם משהו מרגיש קטן/גדול מדי ביחס לשני, זה הסימן להוסיף תיקון ב-<code>[lang="he"]</code>.</p>
+
+<div class="block">
+  <div class="tag">Headline · 64px</div>
+  <div class="stack">
+    <div class="baseline-grid"></div>
+    <div class="sample"><span class="label">Archivo Black</span><span class="latin headline-64">DULL</span></div>
+    <div class="sample"><span class="label">Rubik 900</span><span class="he headline-64">חולצה</span></div>
+  </div>
+  <div class="note">שים לב במיוחד לגובה-הגוף (x-height המקביל) ולמסה החזותית הכוללת של המילה, לא רק לגובה השורה.</div>
+</div>
+
+<div class="block">
+  <div class="tag">Headline · 32px</div>
+  <div class="stack">
+    <div class="baseline-grid"></div>
+    <div class="sample"><span class="label">Archivo Black</span><span class="latin headline-32">DULL</span></div>
+    <div class="sample"><span class="label">Rubik 900</span><span class="he headline-32">חולצה</span></div>
+  </div>
+</div>
+
+<div class="block">
+  <div class="tag">Body · 16px</div>
+  <div class="stack">
+    <div class="baseline-grid"></div>
+    <div class="sample"><span class="label">Inter SemiBold</span><span class="latin body-font body-16">Free shipping over ₪250</span></div>
+    <div class="sample"><span class="label">Assistant SemiBold</span><span class="he body-font body-16">משלוח חינם מעל ₪250</span></div>
+  </div>
+</div>
+
+<p class="note">איך להשתמש בזה: אם באחד המקרים הטקסט העברי נראה לך קטן/גדול יחסית לטקסט הלטיני למרות ה-<code>font-size</code> הזהה — זה בדיוק המקום להוסיף override ממוקד בתוך <code>[lang="he"]</code> ב-tokens.css (למשל, להגדיל את גודל ה-headline העברי ב-2-3px, או לשנות line-height לגוף הטקסט). אין צורך "לנחש" מראש מקדם תיקון גורף — עדיף לכוון בעין, בדיוק בול/פיקסל בכל מקום שבאמת מפריע, אותו תהליך שעשית מול לוחות דפוס.</p>
