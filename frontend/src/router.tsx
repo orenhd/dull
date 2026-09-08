@@ -9,6 +9,7 @@ import { HomePage } from "@/pages/HomePage";
 import { ProductPage } from "@/pages/ProductPage";
 import { CollectionPage } from "@/pages/CollectionPage";
 import { AboutPage } from "@/pages/AboutPage";
+import { CartPage } from "@/pages/CartPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PRODUCT_CATEGORY } from "@/constants";
 
@@ -56,7 +57,22 @@ const aboutRoute = createRoute({
   component: AboutPage,
 });
 
-const routeTree = rootRoute.addChildren([homeRoute, productRoute, shirtsRoute, footwearRoute, aboutRoute]);
+// /cart - docs/SCREENS_INVENTORY.md מסך 10. שם קובע: הכל local (Zustand
+// cartStore), אין fetch/params.
+const cartRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/cart",
+  component: CartPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  homeRoute,
+  productRoute,
+  shirtsRoute,
+  footwearRoute,
+  aboutRoute,
+  cartRoute,
+]);
 
 export const router = createRouter({
   routeTree,

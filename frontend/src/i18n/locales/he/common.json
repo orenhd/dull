@@ -79,6 +79,17 @@
     "imagePlaceholder": "פלייסהולדר לתמונה",
     "contentPlaceholder": "תוכן בדרך."
   },
+  "cart": {
+    "navLabel": "סל",
+    "title": "הסל שלך",
+    "emptyTitle": "העגלה שלך ריקה",
+    "backToCatalog": "חזרה לקטלוג",
+    "quantity": "כמות",
+    "remove": "הסרה",
+    "total": "סה\"כ",
+    "checkout": "מעבר לתשלום",
+    "checkoutComingSoon": "תהליך התשלום עדיין לא בנוי — בתור הבא."
+  },
   "notFound": {
     "title": "העמוד לא נמצא",
     "body": "העמוד הזה לא קיים.",

@@ -79,6 +79,17 @@
     "imagePlaceholder": "Image placeholder",
     "contentPlaceholder": "Copy coming soon."
   },
+  "cart": {
+    "navLabel": "Bag",
+    "title": "Your Bag",
+    "emptyTitle": "Your cart is empty",
+    "backToCatalog": "Back to the catalog",
+    "quantity": "Qty",
+    "remove": "Remove",
+    "total": "Total",
+    "checkout": "Checkout",
+    "checkoutComingSoon": "Checkout isn't built yet — coming next."
+  },
   "notFound": {
     "title": "Page not found",
     "body": "That page doesn't exist.",

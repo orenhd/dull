@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { wordmarkClassName } from "@/lib/wordmark";
+import { useCartStore, selectCartItemCount } from "@/stores/cartStore";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface NavItem {
@@ -46,6 +47,27 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void 
     >
       {label}
     </span>
+  );
+}
+
+// לינק לעגלה - לא NavItem "רגיל" (אין לו מפתח סטטי ב-nav.*, יש לו ספרת
+// פריטים חיה מה-store) אז קומפוננטה נפרדת, לא חלק מ-NAV_ITEMS/NavLink.
+// אותה מיקום שהיה שייך פעם ל-Wishlist (הוסר, 2026-09-08) - בקבוצת הסוף
+// לצד ה-LanguageSwitcher בדסקטופ, ובתפריט המובייל.
+function CartLink({ onNavigate }: { onNavigate?: () => void }) {
+  const { t } = useTranslation();
+  const count = useCartStore(selectCartItemCount);
+
+  return (
+    <Link
+      to="/cart"
+      onClick={onNavigate}
+      className="inline-block px-xs py-xs text-caption text-text-muted hover:text-text-base"
+      activeProps={{ className: "text-text-base font-bold" }}
+    >
+      {t("cart.navLabel")}
+      {count > 0 ? ` (${count})` : ""}
+    </Link>
   );
 }
 
@@ -117,6 +139,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-sm">
+          <CartLink />
           <LanguageSwitcher />
         </div>
       </div>
@@ -124,14 +147,14 @@ export function SiteHeader() {
       {!isDesktop && menuOpen && (
         <nav id="mobile-menu" aria-label="Primary" className="mt-sm border-t border-border-base px-md">
           <ul className="mx-auto max-w-[1200px]">
-            {NAV_ITEMS.map((item, i, arr) => (
-              <li
-                key={item.key}
-                className={i < arr.length - 1 ? "border-b border-border-base" : undefined}
-              >
+            {NAV_ITEMS.map((item) => (
+              <li key={item.key} className="border-b border-border-base">
                 <NavLink item={item} onNavigate={() => setMenuOpen(false)} />
               </li>
             ))}
+            <li>
+              <CartLink onNavigate={() => setMenuOpen(false)} />
+            </li>
           </ul>
         </nav>
       )}

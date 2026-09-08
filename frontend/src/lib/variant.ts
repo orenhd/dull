@@ -87,13 +87,38 @@ export function isCombinationSoldOut(variants: ProductVariant[], partialIds: Rea
 }
 
 // תווית קריאה-לבנאדם לצירוף שנבחר, למשל "Women's · Faded Batik · M" -
-// נבנית פעם אחת בזמן "Add to Bag" (יש לנו את כל תוויות הצירים ביד) ונשמרת
-// על ה-CartItem עצמו, ראו src/stores/cartStore.ts.
+// נבנית בזמן "Add to Bag" (יש לנו את כל תוויות הצירים ביד) ונשמרת כ-cache
+// על ה-CartItem עצמו (ראו src/stores/cartStore.ts), אבל זה קפוא בשפה שהייתה
+// פעילה באותו רגע - ראו variantSelectionLabel() למטה לגרסה שמתעדכנת.
 export function buildSelectionLabel(axes: VariantAxis[], selection: AxisSelection): string {
   return axes
     .map((axis) => axis.values.find((v) => v.id === selection[axis.key])?.label)
     .filter((label): label is string => Boolean(label))
     .join(" · ");
+}
+
+// בונה AxisSelection (axis.key -> valueId) מ-variant.axisValueIds הגולמי,
+// לפי איזה axis.values[] כל id שייך אליו. variant.axisValueIds עצמם הם
+// id-ים בלבד - קבועים בין שפות - אז זו הדרך היחידה לשחזר "איזה ציר שייך
+// לאיזה id" בלי לשמור מיפוי נוסף.
+function selectionFromVariant(axes: VariantAxis[], variant: ProductVariant): AxisSelection {
+  const ids = new Set(variant.axisValueIds);
+  const selection: AxisSelection = {};
+  for (const axis of axes) {
+    const value = axis.values.find((v) => ids.has(v.id));
+    if (value) selection[axis.key] = value.id;
+  }
+  return selection;
+}
+
+// כמו buildSelectionLabel, אבל *לא* תלוי בבחירה חיה של המשתמש (AxisSelection)
+// - מחזירה תווית טרייה, בשפה הנוכחית, ישירות מ-variant.axisValueIds. פותר
+// באג אמיתי בעגלה (Oren, 2026-09-08): CartItem.selectionLabel נשמר פעם אחת
+// בזמן ההוספה, בשפה שהייתה פעילה אז - אם המשתמש מחליף שפה אחר כך, התווית
+// השמורה נשארת "תקועה" בשפה הישנה. src/pages/CartPage.tsx קורא ל-getProduct
+// מחדש בשפה הנוכחית ומשתמש בזה במקום ב-cache השמור, כשה-fetch כבר חזר.
+export function variantSelectionLabel(axes: VariantAxis[], variant: ProductVariant): string {
+  return buildSelectionLabel(axes, selectionFromVariant(axes, variant));
 }
 
 // מחיר "החל מ-" - כשעדיין אין variant מלא (למשל לפני שנבחרה מידה). אותה
