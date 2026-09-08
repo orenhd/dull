@@ -21,17 +21,28 @@
   --color-surface-sunken: #f4f4f4;
   --color-feedback-error: #b3261e;
 
-  /* ---- Typography ---- */
+  /* ---- Typography ----
+     Hebrew is NOT just a font-family swap - Rubik/Assistant render
+     optically smaller than Archivo Black/Inter at the same font-size, and
+     Hebrew letterforms (no ascenders/descenders) carry vertical rhythm
+     differently. Both font-size and line-height are overridden per role
+     under :root[lang="he"] below, keeping the token NAMES identical so
+     component CSS (font-size: var(--typography-size-h1) etc.) never has
+     to branch on locale - only the app wiring (<html lang>) does. */
   --typography-family-headline: 'Archivo Black', 'Arial Black', sans-serif;
   --typography-family-body: 'Inter', Arial, sans-serif;
   --typography-weight-regular: 400;
   --typography-weight-bold: 700;
+  --typography-weight-black: 900;
   --typography-size-h1: 48px;
   --typography-size-h2: 32px;
   --typography-size-h3: 20px;
   --typography-size-body-strong: 18px;
   --typography-size-body: 16px;
   --typography-size-caption: 13px;
+  --typography-line-height-heading: 1.15;
+  --typography-line-height-body: 1.5;
+  --typography-line-height-caption: 1.4;
 
   /* ---- Spacing ---- */
   --space-xs: 4px;
@@ -49,4 +60,45 @@
   --motion-duration-fast: 120ms;
   --motion-duration-base: 240ms;
   --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ==========================================================================
+   Hebrew typography overrides
+   --------------------------------------------------------------------------
+   Requires the app to set <html lang="he"> (and dir="rtl") when the active
+   locale is Hebrew - e.g. via i18next's languageChanged event syncing
+   document.documentElement.lang/dir. Nothing here works until that's wired.
+
+   Font-size values are NOT a uniform ratio of the Latin sizes - optical
+   correction shrinks as size grows (measured: Rubik 900 needed +6.25% at
+   32px but only +4.69% at 64px vs Archivo Black; Assistant SemiBold needed
+   +11.1% at 18px vs Inter SemiBold, Assistant Regular +12.5% at 16px vs
+   Inter Regular). Measured directly (h2, body, body-strong): confident.
+   Interpolated/extrapolated (h1, h3, caption): reasonable estimates: spot-check
+   visually once real content renders, adjust if something looks off - it's
+   just a token, not a rebuild.
+
+   Line-height values are DERIVED, not guessed: each one solves for the
+   Hebrew ratio that reproduces the exact same absolute leading (px) as its
+   Latin counterpart at the Latin size+ratio, e.g. body: 16px x 1.5 = 24px
+   target -> 24 / 18px (Hebrew body size) = 1.33. This is the print-world
+   'shared baseline grid' convention (same leading across scripts set at
+   different point sizes) expressed as a unitless ratio instead of a fixed
+   px value, so it still scales correctly with browser text-zoom/a11y
+   font-size preferences - a fixed px leading would not.
+   ========================================================================== */
+:root[lang="he"] {
+  --typography-family-headline: 'Rubik', 'Arial Black', sans-serif;
+  --typography-family-body: 'Assistant', Arial, sans-serif;
+
+  --typography-size-h1: 51px;           /* estimate (interpolated) - spot-check */
+  --typography-size-h2: 34px;           /* measured */
+  --typography-size-h3: 21px;           /* estimate (extrapolated) - spot-check */
+  --typography-size-body-strong: 20px;  /* measured */
+  --typography-size-body: 18px;         /* measured */
+  --typography-size-caption: 15px;      /* estimate (extrapolated) - spot-check */
+
+  --typography-line-height-heading: 1.08; /* solves h1 (55.2/51) and h2 (36.8/34) exactly; ~2% off h3 (23/21=1.10), acceptable given h3's size is itself an estimate */
+  --typography-line-height-body: 1.34;    /* splits body (24/18=1.33) and body-strong (27/20=1.35) - both within 0.5% of this */
+  --typography-line-height-caption: 1.21; /* 18.2/15 */
 }
