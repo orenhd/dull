@@ -12,7 +12,8 @@
     "prisma:studio": "prisma studio",
     "images:generate": "tsx scripts/generate-web-images.ts",
     "seed": "tsx prisma/seed.ts",
-    "oauth-logo:generate": "tsx scripts/generate-oauth-logo.ts"
+    "oauth-logo:generate": "tsx scripts/generate-oauth-logo.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

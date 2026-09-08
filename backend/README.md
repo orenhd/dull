@@ -38,6 +38,24 @@
 - `dev-tools/google-signin-test.html` — בדיקת login מלאה (Google Sign-In
   אמיתי -> session cookie -> POST /orders) - ראו `dev-tools/README.md`.
 
+## פריסה (Render)
+- **Root Directory**: `backend` (המונורפו כולל גם docs/hi-res/db - Render צריך לדעת שהאפליקציה חיה בתת-תיקייה).
+- **Region**: Frankfurt - קרוב ביותר ל-Neon (גם הוא Frankfurt) ולקהל היעד בישראל.
+- **Build Command**: `npm ci && npm run images:generate && npm run build`
+  (חובה לכלול `images:generate` - תיקיית `public/images` היא build artifact
+  ולא נשמרת ב-git, אז בלי זה השרת החי לא יגיש שום תמונה).
+- **Pre-Deploy Command**: `npx prisma migrate deploy` (מריץ מיגרציות ממתינות
+  לפני שהגרסה החדשה מקבלת תנועה - לא `migrate dev`, זה אינטראקטיבי ולא מתאים
+  ל-CI/deploy). אם זה לא זמין ב-plan החינמי, לשלב בתוך ה-Build Command במקום.
+- **Start Command**: `npm run start`
+- **משתני סביבה** (Environment tab בדשבורד - `.env` עצמו כמובן לא מגיע ל-git):
+  `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `RESEND_API_KEY`,
+  `EMAIL_FROM`, `NODE_ENV=production`. לא צריך להגדיר `PORT` - Render מזריק
+  אותו בעצמו וה-קוד כבר קורא מ-`env.PORT`.
+- **מגבלת free tier**: השירות "נרדם" אחרי 15 דקות בלי תנועה, והבקשה הראשונה
+  אחרי זה לוקחת כ-30-60 שניות (Render מעיר אותו). 750 שעות instance חינם
+  לחודש לכל workspace.
+
 ## סטטוס
 קיים: סכימת DB מלאה, seed עם מוצרים אמיתיים, `/products` (קטלוג + פריט),
 `/auth/google` (login + session cookie), `/orders` (יצירה/רשימה/פריט),
