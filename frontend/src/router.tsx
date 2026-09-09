@@ -14,6 +14,8 @@ import { CheckoutPage } from "@/pages/CheckoutPage";
 import { OrdersPage } from "@/pages/OrdersPage";
 import { OrderDetailPage } from "@/pages/OrderDetailPage";
 import { DisclaimerPage } from "@/pages/DisclaimerPage";
+import { PrivacyPage } from "@/pages/PrivacyPage";
+import { TermsPage } from "@/pages/TermsPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PRODUCT_CATEGORY } from "@/constants";
 
@@ -108,6 +110,22 @@ const disclaimerRoute = createRoute({
   component: DisclaimerPage,
 });
 
+// /privacy, /terms - Privacy Policy / Terms of Service (docs/SCREENS_INVENTORY.md
+// מסך 16). תנאי סף ל-Publish של Google OAuth consent screen בקונסולה - לא
+// יוזמת מוצר, דרישה טכנית חיצונית (docs/PRD.md סעיף 12.13). אין auth/params -
+// עמודי תוכן סטטיים לחלוטין, בדיוק כמו /disclaimer ממש למעלה.
+const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/privacy",
+  component: PrivacyPage,
+});
+
+const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/terms",
+  component: TermsPage,
+});
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   productRoute,
@@ -119,6 +137,8 @@ const routeTree = rootRoute.addChildren([
   ordersRoute,
   orderDetailRoute,
   disclaimerRoute,
+  privacyRoute,
+  termsRoute,
 ]);
 
 export const router = createRouter({

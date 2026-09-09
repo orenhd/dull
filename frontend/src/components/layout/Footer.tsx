@@ -8,6 +8,11 @@
 // אותם שני משפטים. חשוב כנקודת-כניסה קבועה לעמוד המלא גם למשתמש שכבר סגר
 // את DisclaimerBanner.tsx (הבאנר החד-פעמי) - בלעדיו, אחרי הסגירה הראשונה
 // אין דרך לחזור לעמוד המלא חוץ מניווט ישיר ב-URL.
+//
+// עדכון 2026-09-09 (docs/SCREENS_INVENTORY.md מסך 16, נבנה): נוספה שורת
+// קישורים ל-/privacy ו-/terms - תנאי סף ל-Publish של Google OAuth consent
+// screen (ראו docs/PRD.md סעיף 12.13). שורה נפרדת, לא בתוך פסקת ה-disclaimer
+// הקיימת - זה תוכן שונה לגמרי (מדיניות/תנאים, לא הומאז'/דיסקליימר זכויות).
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 
@@ -21,6 +26,15 @@ export function Footer() {
           {t("footer.disclaimer")}{" "}
           <Link to="/disclaimer" className="underline hover:text-text-base">
             {t("footer.readMore")}
+          </Link>
+        </p>
+        <p>
+          <Link to="/privacy" className="underline hover:text-text-base">
+            {t("footer.privacyLink")}
+          </Link>
+          {" | "}
+          <Link to="/terms" className="underline hover:text-text-base">
+            {t("footer.termsLink")}
           </Link>
         </p>
       </div>

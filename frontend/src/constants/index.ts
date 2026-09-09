@@ -12,6 +12,12 @@ export const DEFAULT_LOCALE: Locale = "en";
 
 export const CURRENCY_SYMBOL = "₪";
 
+// כתובת יצירת קשר ציבורית - מוצגת ב-Privacy Policy/Terms of Service
+// (docs/SCREENS_INVENTORY.md מסך 16) לבקשות מידע/מחיקת נתונים. מקור יחיד
+// (לא כפול בכל locale JSON) - מוזרק דרך אינטרפולציה (t("...", { email:
+// CONTACT_EMAIL })), בדיוק כמו שאר הערכים הלא-מתורגמים (bandCreditName וכו').
+export const CONTACT_EMAIL = "orenhd123@gmail.com";
+
 // --- Routes ---
 // נתיבי ה-router כמחרוזות בודדות - ראו src/router.tsx. שימוש ב-`as const`
 // שומר type-safety מול TanStack Router (שמצליב את הנתיב עם ה-param types).

@@ -62,7 +62,9 @@
   "footer": {
     "disclaimer": "This is an educational/demo project. No real purchase or payment takes place.",
     "rightsNote": "Band logos and names belong to their respective owners and are shown as a non-commercial homage.",
-    "readMore": "Learn more"
+    "readMore": "Learn more",
+    "privacyLink": "Privacy Policy",
+    "termsLink": "Terms of Service"
   },
   "disclaimer": {
     "title": "Disclaimer",
@@ -167,5 +169,77 @@
     "title": "Page not found",
     "body": "That page doesn't exist.",
     "backHome": "Back to home"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: September 2026",
+    "intro": "This page explains what information Dull collects, why, and how it's handled. Dull is an educational/demo e-commerce project — this isn't a binding legal document, but it accurately reflects what the site actually does.",
+    "dataCollected": {
+      "title": "What we collect",
+      "account": "When you sign in with Google, we receive your email address and name from your Google account.",
+      "orders": "When you place an order at checkout, we collect the shipping details and order information you enter (name, address, phone, and the items ordered)."
+    },
+    "thirdPartySignIn": {
+      "title": "Third-party sign-in",
+      "body": "Sign-in is handled by Google Sign-In. Additional sign-in options (such as Facebook Login) may be added in the future."
+    },
+    "cookies": {
+      "title": "Cookies",
+      "body": "We use a single httpOnly session cookie to keep you signed in. It's used only for authentication — we don't use cookies for tracking or advertising."
+    },
+    "payments": {
+      "title": "Payments",
+      "body": "Checkout on Dull is entirely simulated. No real charge is ever made, no credit card details are collected, and no payment processor is involved."
+    },
+    "howWeUse": {
+      "title": "How we use your information",
+      "body": "Your information is used only to run the site: to sign you in, to show your order history, and to display the shipping details you entered for an order."
+    },
+    "dataSharing": {
+      "title": "Data sharing",
+      "body": "We don't sell your information to anyone. It isn't shared with third parties beyond the sign-in provider you chose to use."
+    },
+    "contact": {
+      "title": "Contact & data deletion",
+      "body": "To ask a question about your data, or to request it be deleted, email {{email}}."
+    },
+    "changes": {
+      "title": "Changes",
+      "body": "If this policy changes, the update will be posted on this page."
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "about": {
+      "title": "About Dull",
+      "body": "Dull is a streetwear e-commerce project offering shirts and footwear inspired by classic band-merch design."
+    },
+    "notRealStore": {
+      "title": "This is a demo, not a real store",
+      "body": "Dull is an educational/demo portfolio project. Orders placed here are not real orders — nothing is shipped, and no real payment is ever taken."
+    },
+    "acceptableUse": {
+      "title": "Acceptable use",
+      "body": "Please use this site respectfully and don't attempt to abuse, disrupt, or misuse it or the accounts of other users."
+    },
+    "intellectualProperty": {
+      "title": "Intellectual property",
+      "body": "The band logos and names referenced on this site are used as a non-commercial homage and belong to their respective owners — see the <disclaimer>Disclaimer</disclaimer> page for details. All other design and content on this site belongs to its creator."
+    },
+    "noWarranty": {
+      "title": "No warranty",
+      "body": "This site is provided as-is, as a demo project, without warranties of any kind."
+    },
+    "changes": {
+      "title": "Changes",
+      "body": "These terms may be updated from time to time; the current version is always the one posted on this page."
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "Questions about these terms can be sent to {{email}}."
+    }
+  },
+  "authConsent": {
+    "text": "By continuing, you agree to our <terms>Terms of Service</terms> and <privacy>Privacy Policy</privacy>."
   }
 }
