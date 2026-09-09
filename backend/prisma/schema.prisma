@@ -12,8 +12,18 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Neon: DATABASE_URL הוא ה-connection הממוזג (pooled, דרך PgBouncer, "-pooler"
+  // בשם ה-host) - טוב ומהיר לשאילתות רגילות של האפליקציה בזמן ריצה, אבל *לא*
+  // נתמך ל-`prisma migrate deploy`. הסיבה: המנעול שמונע הרצת מיגרציות
+  // מקבילות (`SELECT pg_advisory_lock(...)`) הוא מנעול ברמת session חי, ו-
+  // PgBouncer ב-transaction pooling mode לא שומר session יציב מול הלקוח -
+  // אז הבקשה לנעילה פשוט נתקעת ונופלת בטיימאאוט (P1002). directUrl הוא
+  // connection נפרד וישיר (unpooled, בלי "-pooler") ש-Prisma CLI (migrate/
+  // studio) משתמש בו במקום - האפליקציה עצמה ב-runtime ממשיכה על DATABASE_URL
+  // הממוזג הרגיל, אין לזה שום השפעה עליה.
+  directUrl = env("DIRECT_URL")
 }
 
 enum ProductCategory {
