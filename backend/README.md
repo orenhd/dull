@@ -42,7 +42,7 @@
 - **Root Directory**: `backend` (המונורפו כולל גם docs/hi-res/db - Render צריך לדעת שהאפליקציה חיה בתת-תיקייה).
 - **Language**: Node (לא Docker - אין Dockerfile בפרויקט, במכוון).
 - **Region**: Frankfurt - קרוב ביותר ל-Neon (גם הוא Frankfurt) ולקהל היעד בישראל.
-- **Build Command**: `npm install --include=dev && npm run build && npm run images:generate`
+- **Build Command**: `npm install --include=dev && npm run frontend:build && npm run build && npm run images:generate`
   - `--include=dev` **קריטי ולא קוסמטי**: מכיוון ש-`NODE_ENV=production` מוגדר
     כמשתנה סביבה (ראו למטה), ו-Render מזריק את משתני הסביבה גם לשלב ה-Build
     ולא רק ל-runtime - וההתנהגות המתועדת של npm היא לדלג על `devDependencies`
@@ -50,6 +50,15 @@
     לא מותקנים ו-`tsc` נכשל עם שגיאות "Cannot find name 'process'" וכו',
     למרות שהם רשומים כהלכה ב-`package.json`. גילינו את זה בדרך הקשה - ראו
     "בעיות שנתקלנו בהן" למטה אם זה קורה שוב.
+  - `frontend:build` (נוסף 2026-09, `docs/PRD.md` סעיף 12.10) - מריץ
+    `scripts/render-build.ts`: מבצע `npm install --include=dev && npm run
+    build` בתוך `frontend/` (אותה סיבה בדיוק לגבי `--include=dev` - vite/
+    typescript/tailwindcss הם devDependencies שם), ומעתיק את `frontend/dist`
+    ל-`backend/public/web`. זה מאחד frontend+backend לאותו Render service
+    ואותו origin (`https://dull.onrender.com`) - סוגר את ה-TODO הישן על CORS
+    (ראו allowlist מפורש עכשיו ב-`src/index.ts`) ומייתר את סוגיית ה-SameSite
+    cross-origin ל-production. **חייב לרוץ לפני `npm run build` של ה-backend
+    עצמו** (הסדר בפקודה למעלה) - לא תלות טכנית, אבל שומר על סדר הגיוני אחד.
   - `images:generate` חובה - תיקיית `public/images` היא build artifact
     ולא נשמרת ב-git, אז בלי זה השרת החי לא יגיש שום תמונה.
 - **Pre-Deploy Command**: `npx prisma migrate deploy` (מריץ מיגרציות ממתינות
@@ -59,9 +68,14 @@
 - **Health Check Path**: `/health`.
 - **Auto-Deploy**: On Commit - כל push ל-main מפעיל דיפלוי אוטומטית.
 - **משתני סביבה** (Environment tab בדשבורד - `.env` עצמו כמובן לא מגיע ל-git):
-  `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `JWT_SECRET`, `RESEND_API_KEY`,
-  `EMAIL_FROM`, `NODE_ENV=production`. לא צריך להגדיר `PORT` - Render מזריק
-  אותו בעצמו וה-קוד כבר קורא מ-`env.PORT`.
+  `DATABASE_URL`, `DIRECT_URL` (connection ישיר, unpooled, ל-Neon - נדרש
+  ע"י `prisma migrate deploy`, ראו `.env.example` להסבר המלא), `GOOGLE_CLIENT_ID`,
+  `JWT_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `NODE_ENV=production`, ובנוסף
+  (2026-09, לצורך `npm run frontend:build`) `VITE_API_BASE_URL=https://
+  dull.onrender.com` ו-`VITE_GOOGLE_CLIENT_ID` (אותו ערך כמו `GOOGLE_CLIENT_ID`
+  - Vite חושף ל-client bundle רק משתנים עם prefix `VITE_`, שום סוד קיים לא
+  נחשף גם ביושבו באותה רשימה). לא צריך להגדיר `PORT` - Render מזריק אותו
+  בעצמו וה-קוד כבר קורא מ-`env.PORT`.
 - **גרסת Node**: מוגדרת מפורשות ב-`package.json` (`"engines": {"node": "22.x"}`)
   כדי לתאום לגרסה המקומית (22.x) ולמנוע ברירת מחדל שונה של Render.
 - **Workspace Plan מול Instance Type - שני מקומות שונים לגמרי בדשבורד**:
@@ -88,10 +102,15 @@
 
 ## סטטוס
 קיים: סכימת DB מלאה, seed עם מוצרים אמיתיים, `/products` (קטלוג + פריט),
-`/auth/google` (login + session cookie), `/orders` (יצירה/רשימה/פריט),
-מייל תודה + מתנת PDF (Resend + pdf-lib, תוכן placeholder בכוונה - העיצוב/
-הקופי הסופיים עוד לא נקבעו), צינור תמונות web, ניהול מוצרים דרך Prisma
-Studio. **השרת פרוס ורץ בפועל** ב-Render: https://dull.onrender.com
-(`/health`, `/products` נבדקו ועובדים).
-אין עדיין: frontend (לא באחריות Backend - באחריות Oren), תוכן סופי למייל/
-PDF המתנה, נכסי מוצר נוספים (Immortal, שאר Grave) לפי הזמינות.
+`/auth/google` (login + session cookie), `/auth/me`, `/orders` (יצירה/
+רשימה/פריט, כולל snapshot של שם/בחירה/תמונה בזמן הרכישה), מייל תודה +
+מתנת PDF (Resend + pdf-lib, תוכן placeholder בכוונה - העיצוב/הקופי
+הסופיים עוד לא נקבעו), צינור תמונות web, ניהול מוצרים דרך Prisma Studio.
+**מ-2026-09**: ה-frontend (React/Vite, בבנייה ע"י Oren בשיחה נפרדת -
+ראו `frontend/TECH_SPEC.md`) מאוחד לאותו Render service - נבנה ומוגש
+דרך `npm run frontend:build`/`express.static`, כולל meta-injection
+per-product (`og:title`/`og:image`) לתצוגות מקדימה בשיתוף קישור
+(`docs/PRD.md` סעיף 12.10). **השרת פרוס ורץ בפועל** ב-Render:
+https://dull.onrender.com (`/health`, `/products` נבדקו ועובדים).
+אין עדיין: תוכן סופי למייל/PDF המתנה, נכסי מוצר נוספים (Immortal, שאר
+Grave) לפי הזמינות.

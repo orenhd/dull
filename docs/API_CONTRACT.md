@@ -4,12 +4,14 @@
 
 ## Base URL
 
+**עדכון 2026-09 (`docs/PRD.md` סעיף 12.10):** ה-frontend הבנוי מוגש עכשיו מאותו Render service כמו ה-API עצמו (`scripts/render-build.ts` מעתיק את `frontend/dist` ל-`backend/public/web`, ו-`backend/src/index.ts` מגיש אותו) - בפרודקשן זה **same-origin לגמרי**, לא שני domains נפרדים. `VITE_API_BASE_URL` עדיין נחוץ (ראה למטה) והערך שלו לא השתנה - רק שעכשיו כשקוראים לו מתוך עמוד שמוגש מאותו origin, הבקשות בפועל לא נושאות `Origin` header כלל (הדפדפן שולח אותו רק ב-cross-origin), אז ה-CORS allowlist למטה כמעט ולא נכנס לפעולה בפרודקשן - הוא נשאר רלוונטי בעיקר ל-dev מקומי.
+
 | סביבה | כתובת |
 |---|---|
-| Production | `https://dull.onrender.com` |
-| Dev מקומי | `http://localhost:4000` (`npm run dev` בתיקיית `backend`) |
+| Production | `https://dull.onrender.com` (גם ה-API וגם ה-frontend הבנוי, אותו origin) |
+| Dev מקומי | `http://localhost:4000` (`npm run dev` בתיקיית `backend`) - ה-frontend ממשיך לרוץ בנפרד על `http://localhost:5173` (Vite dev server), זה נשאר cross-origin ב-dev |
 
-לפי מוסכמת ה-`env.ts` שכבר קיימת ב-backend, ה-frontend צריך טוקן env מקביל משלו: **`VITE_API_BASE_URL`**, נקרא במקום יחיד (`src/config/env.ts` ב-frontend, מוולד עם Zod), לא hardcoded באף fetch call.
+לפי מוסכמת ה-`env.ts` שכבר קיימת ב-backend, ה-frontend צריך טוקן env מקביל משלו: **`VITE_API_BASE_URL`**, נקרא במקום יחיד (`src/config/env.ts` ב-frontend, מוולד עם Zod), לא hardcoded באף fetch call. ב-Render, `VITE_API_BASE_URL` ו-`VITE_GOOGLE_CLIENT_ID` (ראו סעיף Auth למטה) מוגדרים כ-Environment Variables רגילים על אותו service - Vite קורא `VITE_*` ישירות מ-`process.env` בזמן ה-build (`npm run frontend:build`), אין קובץ `.env` פיזי בפרודקשן.
 
 ## Auth ו-cookies — הכי חשוב לא לפספס
 
@@ -18,7 +20,7 @@
 - ה-frontend צריך **את אותו** Google OAuth Client ID שיש ל-backend (`GOOGLE_CLIENT_ID`) כדי לאתחל את כפתור ה-Sign-In - זה מזהה ציבורי (לא סוד), חשוף לצד לקוח לגיטימית. שם מוצע: `VITE_GOOGLE_CLIENT_ID`.
 - **בדיקת מצב התחברות בטעינת/רענון דף:** `GET /auth/me` — ראו למטה. ה-cookie הוא httpOnly בכוונה (הגנה מפני XSS) כך שאין דרך אחרת ל-frontend לדעת אם המשתמש מחובר.
 - **גלישה כ-Guest מלאה בכל האתר, כולל הוספה לעגלה** - login נדרש רק במעבר מהעגלה ל-checkout (ראו `docs/PRD.md` סעיף 11.4).
-- **CORS**: כרגע `origin: true` (פתוח לכל origin, עם `credentials: true`) - יש TODO קיים בקוד להגביל ל-allowlist מפורש ברגע שיש domain אמיתי ל-frontend. **כשה-frontend יעלה לדומיין קבוע (Vercel/Netlify/וכו') - זו פנייה חובה חזרה לשיחת ה-backend**, לא רק frontend-side.
+- **CORS**: **עודכן 2026-09** - allowlist מפורש (לא `origin: true` פתוח יותר): `http://localhost:5173` ו-`https://dull.onrender.com`. אם ה-frontend-dev-server ירוץ אי-פעם על פורט אחר מ-5173, או אם יתווסף domain נוסף - זו פנייה חובה חזרה לשיחת ה-backend, לא שינוי frontend-side עצמאי.
 
 ## Endpoints
 
@@ -65,6 +67,11 @@
 }
 ```
 **הלוגיקה שה-frontend צריך לממש**: לכל בחירת המשתמש (Fit+Colorway+Size) - למצוא את ה-`variant` שה-`axisValueIds` שלו הם בדיוק אותה קבוצת ה-id-ים שנבחרו (חיתוך/השוואת סטים), ואת ה-`media` הרלוונטית לפי אותה שיטה (ל-media יכולה להיות תלות בציר אחד בלבד, למשל Colorway - אז ה-`axisValueIds` שלה יהיה subset, לא set מלא). `dependsOnValueId` על ערך-ציר אומר שהערך הזה רלוונטי רק כשערך-ציר אחר נבחר (למשל: מידה מסוימת רלוונטית רק ל-Fit מסוים).
+
+**חשוב (נוסף 2026-09, `docs/PRD.md` 12.10) - content negotiation על אותו נתיב:** `GET /products/:slug` מגיש עכשיו **שני דברים שונים** לפי מי מבקש, לא רק JSON:
+- קריאת ה-API הרגילה מה-SPA עצמו (בדיוק כמו שמתועד למעלה) - **לא צריך שום שינוי בקוד ה-frontend הקיים**. `fetch()` בלי `Accept` header מפורש (המצב הנוכחי ב-`client.ts`) ימשיך לקבל JSON כרגיל.
+- ניווט דפדפן ישיר / בוט תצוגה-מקדימה (WhatsApp/Slack/iMessage/Facebook/Twitter/Telegram/Discord/LinkedIn) מקבל את `index.html` הבנוי, עם `<title>`/`og:title`/`og:image`/`og:url`/`twitter:*` מוזרקים per-product בצד השרת (bots כאלה כמעט אף פעם לא מריצים JS).
+- ההבחנה מבוססת על `Accept` header (מי ששולח `text/html` מפורש מקבל HTML) + רשימת User-Agent ידועה כגיבוי. **אם אי-פעם תרצו לשנות את `client.ts` להוסיף `Accept: application/json` מפורש** - זה עדיין יעבוד נכון (JSON תמיד ינצח כשמבוקש מפורשות), אבל **לעולם אל תוסיפו `Accept: text/html`** לקריאות ה-API הפנימיות - זה ישבור את הזיהוי ויחזיר HTML במקום JSON.
 
 ### `POST /auth/google`
 Body: `{ "credential": "<google id token>" }`. מגדיר session cookie. תגובה: `{ "user": { "id", "email", "name" } }`.

@@ -1,6 +1,7 @@
 // Routes לקטלוג המוצרים - קריאה בלבד (read-only). אין כאן עדיין הרשמה/הזמנות.
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
+import { getProductBySlug } from "../lib/products.js";
 import { localize, parseLocale } from "../lib/i18n.js";
 import { DEFAULT_PAGE_SIZE } from "../constants/index.js";
 
@@ -58,23 +59,9 @@ productsRouter.get("/:slug", async (req, res, next) => {
   try {
     const locale = parseLocale(req.query.locale);
 
-    const product = await prisma.product.findUnique({
-      where: { slug: req.params.slug },
-      include: {
-        axes: {
-          orderBy: { sortOrder: "asc" },
-          include: { values: { orderBy: { sortOrder: "asc" } } },
-        },
-        variants: {
-          where: { isActive: true },
-          include: { axisSelections: true },
-        },
-        media: {
-          orderBy: { sortOrder: "asc" },
-          include: { axisValues: true },
-        },
-      },
-    });
+    // שאילתת Prisma משותפת עם lib/metaInjection.ts (docs/PRD.md 12.10) -
+    // לא כפילות מקומית, ראו lib/products.ts.
+    const product = await getProductBySlug(req.params.slug);
 
     if (!product || !product.isActive) {
       res.status(404).json({ error: "PRODUCT_NOT_FOUND" });

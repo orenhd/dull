@@ -11,6 +11,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "images:generate": "tsx scripts/generate-web-images.ts",
+    "frontend:build": "tsx scripts/render-build.ts",
     "seed": "tsx prisma/seed.ts",
     "oauth-logo:generate": "tsx scripts/generate-oauth-logo.ts",
     "postinstall": "prisma generate"
