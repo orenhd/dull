@@ -56,13 +56,25 @@ export function verifySessionToken(token: string): SessionPayload | null {
 }
 
 // httpOnly כדי ש-JS בצד הלקוח לא יוכל לקרוא את העוגייה (מגן על XSS גונב-session).
-// secure מופעל רק כש-NODE_ENV=production כי בפיתוח מקומי (http://localhost)
-// דפדפנים חוסמים עוגיות עם secure על חיבור לא-https.
+//
+// sameSite/secure תלויי-סביבה, לא קבועים - וזה לא קוסמטי, זה תוקן אחרי באג
+// אמיתי: ה-frontend וה-backend הם origins שונים לגמרי (scheme+domain, לא רק
+// port), אז זה תרחיש cross-site. עוגיית SameSite=Lax לא נשלחת בבקשות
+// fetch/XHR חוצות-site (בשום method, לא רק "מסוכנים") - רק בניווט top-level
+// של הדפדפן. זה בדיוק מה שקרה: ה-login "הצליח" (Set-Cookie על תגובת fetch
+// חוצה-origin כן נשמר - זה לא חסום ע"י SameSite, רק השליחה חזרה כן), אבל כל
+// בקשה הבאה (POST /orders, GET /auth/me) לא צירפה את העוגייה וקיבלה
+// טיפול כ"לא מחובר". הפתרון: SameSite=None בפרודקשן - אבל זה *מחייב*
+// Secure=true, אחרת דפדפנים דוחים את העוגייה בשקט (בלי שום שגיאה גלויה
+// שמצביעה על הסיבה). ב-dev מקומי (http://localhost, לא https) נשארים על
+// Lax/לא-secure כי דפדפנים חוסמים secure על חיבור לא-https, ו-dev הוא
+// same-site ממילא (רק port שונה) כך ש-Lax שם עובד תקין.
 export function sessionCookieOptions(): CookieOptions {
+  const isProduction = env.NODE_ENV === "production";
   return {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: SESSION_COOKIE_MAX_AGE_MS,
   };
 }
