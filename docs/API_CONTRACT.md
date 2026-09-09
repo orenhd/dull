@@ -16,6 +16,7 @@
 - ה-session הוא **httpOnly cookie חתום**, לא token ב-localStorage/header. כל בקשה שדורשת התחברות (הכל תחת `/orders`) חייבת להישלח עם `credentials: 'include'` (fetch) / `withCredentials: true` (axios) - אחרת ה-cookie לא יישלח והשרת יחזיר 401 דרך `requireAuth`.
 - Google Sign-In מתבצע **כולו בצד ה-frontend** (Google Identity Services, לא redirect מהשרת) - ה-frontend מקבל `credential` (ID token) מ-Google ושולח אותו ל-`POST /auth/google`. השרת מאמת, יוצר/מוצא משתמש, ומחזיר cookie.
 - ה-frontend צריך **את אותו** Google OAuth Client ID שיש ל-backend (`GOOGLE_CLIENT_ID`) כדי לאתחל את כפתור ה-Sign-In - זה מזהה ציבורי (לא סוד), חשוף לצד לקוח לגיטימית. שם מוצע: `VITE_GOOGLE_CLIENT_ID`.
+- **בדיקת מצב התחברות בטעינת/רענון דף:** `GET /auth/me` — ראו למטה. ה-cookie הוא httpOnly בכוונה (הגנה מפני XSS) כך שאין דרך אחרת ל-frontend לדעת אם המשתמש מחובר.
 - **גלישה כ-Guest מלאה בכל האתר, כולל הוספה לעגלה** - login נדרש רק במעבר מהעגלה ל-checkout (ראו `docs/PRD.md` סעיף 11.4).
 - **CORS**: כרגע `origin: true` (פתוח לכל origin, עם `credentials: true`) - יש TODO קיים בקוד להגביל ל-allowlist מפורש ברגע שיש domain אמיתי ל-frontend. **כשה-frontend יעלה לדומיין קבוע (Vercel/Netlify/וכו') - זו פנייה חובה חזרה לשיחת ה-backend**, לא רק frontend-side.
 
@@ -67,6 +68,13 @@
 
 ### `POST /auth/google`
 Body: `{ "credential": "<google id token>" }`. מגדיר session cookie. תגובה: `{ "user": { "id", "email", "name" } }`.
+
+### `GET /auth/me`
+**נוסף 2026-09-09** לצורך בדיקת מצב התחברות בטעינת/רענון דף (checkout צריך לדעת אם להציג login או לדלג עליו). **תמיד מחזיר 200**, גם כשלא מחובר - זו בדיקת מצב רגילה, לא "כישלון":
+- מחובר: `200 { "user": { "id", "email", "name" } }` (אותו shape כמו `POST /auth/google`).
+- לא מחובר / cookie לא בתוקף: `200 { "user": null }`.
+
+בלי body, בלי דרישת `credentials: 'include'`-שהיא-קריטית-במיוחד (אבל כן לשלוח אותו, אחרת גם משתמש מחובר ייראה כ-`null`).
 
 ### `POST /auth/logout`
 בלי body. מנקה את ה-cookie. תגובה: `{ "ok": true }`.

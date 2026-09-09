@@ -5,7 +5,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
-import { verifyGoogleIdToken, signSessionToken, sessionCookieOptions } from "../lib/auth.js";
+import { verifyGoogleIdToken, signSessionToken, verifySessionToken, sessionCookieOptions } from "../lib/auth.js";
 import { SESSION_COOKIE_NAME } from "../constants/index.js";
 
 export const authRouter = Router();
@@ -47,6 +47,30 @@ authRouter.post("/google", async (req, res, next) => {
     res.json({
       user: { id: identityRow.user.id, email: identityRow.user.email, name: identityRow.user.name },
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /auth/me - בדיקת מצב התחברות בטעינת/רענון דף. ה-session cookie הוא
+// httpOnly בכוונה (הגנה מפני XSS) - כלומר JS בצד הלקוח לא יכול לקרוא אותו
+// בעצמו כדי לדעת אם המשתמש מחובר. זה route "בדיקת מצב", לא "פעולה שיכולה
+// להיכשל": חוסר-חיבור הוא תוצאה תקנית (200 { user: null }), לא שגיאה
+// (401) - כך שה-frontend לא צריך לתפוס שגיאה בכל טעינת עמוד רגילה. בכוונה
+// לא משתמשים ב-requireAuth middleware כאן - הוא עונה 401 על חוסר-session,
+// בדיוק ההתנהגות שלא רוצים ב-route הזה.
+authRouter.get("/me", async (req, res, next) => {
+  try {
+    const token = req.cookies?.[SESSION_COOKIE_NAME];
+    const session = typeof token === "string" ? verifySessionToken(token) : null;
+
+    if (!session) {
+      res.json({ user: null });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: session.userId } });
+    res.json({ user: user ? { id: user.id, email: user.email, name: user.name } : null });
   } catch (err) {
     next(err);
   }
