@@ -8,6 +8,7 @@ import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { sendThankYouEmail } from "../lib/email.js";
 import { findFlatMediaUrl } from "../lib/media.js";
+import { buildSelectionLabelSnapshot } from "../lib/variantLabel.js";
 import { localize } from "../lib/i18n.js";
 import { DEFAULT_LOCALE } from "../constants/index.js";
 
@@ -40,7 +41,9 @@ ordersRouter.post("/", async (req, res, next) => {
       where: { id: { in: variantIds }, isActive: true },
       include: {
         product: { include: { media: { include: { axisValues: true } } } },
-        axisSelections: true,
+        // axisValue.axis נדרש כדי לבנות selectionLabelSnapshot בסדר הצירים
+        // הנכון (VariantAxis.sortOrder) - לא רק ה-id-ים כמו ב-findFlatMediaUrl.
+        axisSelections: { include: { axisValue: { include: { axis: true } } } },
       },
     });
     const variantById = new Map(variants.map((v) => [v.id, v]));
@@ -78,6 +81,10 @@ ordersRouter.post("/", async (req, res, next) => {
                 quantity: item.quantity,
                 unitPriceAgorot: variant.priceAgorot,
                 productNameSnapshot: variant.product.name as Prisma.InputJsonValue,
+                selectionLabelSnapshot: buildSelectionLabelSnapshot(
+                  variant.axisSelections,
+                ) as Prisma.InputJsonValue,
+                flatImageUrlSnapshot: findFlatMediaUrl(variant.product.media, variant.axisSelections),
               };
             }),
           },

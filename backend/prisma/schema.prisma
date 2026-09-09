@@ -182,15 +182,20 @@ model Order {
   items OrderItem[]
 }
 
-// שומרים snapshot של שם המוצר והמחיר בזמן הרכישה - שינוי/מחיקה עתידיים של
-// המוצר לא ישנו הזמנה היסטורית בדיעבד.
+// שומרים snapshot של שם המוצר, המחיר, תיאור הבחירה ותמונת המוצר בזמן הרכישה -
+// שינוי/מחיקה עתידיים של המוצר/הוריאנט/המדיה לא ישנו הזמנה היסטורית בדיעבד.
+// selectionLabelSnapshot/flatImageUrlSnapshot נוספו לצורך היסטוריית הזמנות
+// ב-frontend (הצגת "מה בדיוק נקנה" בלי לצטרך live-join מול הוריאנט הנוכחי) -
+// שניהם Nullable כי הזמנות ישנות (לפני ה-migration הזה) לא יקבלו ערך למפרע.
 model OrderItem {
-  id                  String         @id @default(cuid())
-  orderId             String
-  order               Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productVariantId    String
-  productVariant      ProductVariant @relation(fields: [productVariantId], references: [id])
-  quantity            Int
-  unitPriceAgorot     Int
-  productNameSnapshot Json           // { en, he } בזמן הרכישה
+  id                    String         @id @default(cuid())
+  orderId               String
+  order                 Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productVariantId      String
+  productVariant        ProductVariant @relation(fields: [productVariantId], references: [id])
+  quantity              Int
+  unitPriceAgorot       Int
+  productNameSnapshot   Json           // { en, he } בזמן הרכישה
+  selectionLabelSnapshot Json?         // { en, he } - למשל { en: "Women's, Light, S", he: "..." }
+  flatImageUrlSnapshot  String?        // נתיב יחסי (כמו Media.url), אותה לוגיקת match כמו findFlatMediaUrl
 }

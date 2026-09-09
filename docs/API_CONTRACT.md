@@ -89,7 +89,7 @@ Body:
 ```
 - המחיר **תמיד** מחושב בשרת מה-DB - לא לשלוח מחיר מה-frontend, הוא יתעלם ממנו ממילא.
 - שגיאות אפשריות: `400 { error: "VARIANT_NOT_FOUND", productVariantId }`, `400 { error: "OUT_OF_STOCK", productVariantId }`.
-- הצלחה: `201 { order: { id, totalAgorot, items: [...], ... } }`.
+- הצלחה: `201 { order: { id, totalAgorot, items: [...], ... } }` — צורת `items[]` מפורטת למטה (זהה ב-`GET /orders`/`GET /orders/:id`).
 - **אין תשלום אמיתי** (v1 - "רכישה חינמית", ראו PRD 11.2). אחרי יצירת ההזמנה נשלח מייל תודה + PDF מתנה ל-מייל המשתמש - אין ל-frontend שום תפקיד בזה, זה effect צד-שרת מלא.
 
 ### `GET /orders` — **דורש login**
@@ -97,6 +97,26 @@ Body:
 
 ### `GET /orders/:id` — **דורש login**
 הזמנה בודדת, בעלים בלבד - `404 { error: "ORDER_NOT_FOUND" }` גם אם ההזמנה קיימת אבל שייכת למשתמש אחר (לא 403, בכוונה - לא לחשוף קיום).
+
+### צורת `OrderItem` (בשלוש התגובות למעלה — `POST /orders`, `GET /orders`, `GET /orders/:id`)
+
+**נוסף 2026-09-09**: לכל שורת הזמנה יש עכשיו, בנוסף ל-`productNameSnapshot` הקיים, גם `selectionLabelSnapshot` ו-`flatImageUrlSnapshot` — לצורך הצגת היסטוריית הזמנות (`GET /orders`) בלי לצטרך live-join מול הוריאנט/המוצר הנוכחיים (שיכולים להשתנות/להימחק). **שני השדות, כמו `productNameSnapshot`, הם snapshot שנלכד בזמן הרכישה** — לא מחושבים מחדש בקריאה:
+
+```json
+{
+  "id": "...",
+  "productVariantId": "...",
+  "quantity": 1,
+  "unitPriceAgorot": 8900,
+  "productNameSnapshot": { "en": "Darkthrone Tee", "he": "..." },
+  "selectionLabelSnapshot": { "en": "Women's, Light, S", "he": "..." },
+  "flatImageUrlSnapshot": "/images/darkthrone-tee-women-light.webp"
+}
+```
+
+- `selectionLabelSnapshot` — מחרוזת מוכנה-לתצוגה לכל locale, בונה מערכי-הציר שהרכיבו את הוריאנט (Fit/Colorway/Size...) בסדר ה-`sortOrder` של הצירים במוצר. אין צורך שה-frontend יבנה אותה בעצמו מ-`axisValueIds`.
+- `flatImageUrlSnapshot` — נתיב **יחסי** (בדיוק כמו `flatImageUrl`/`media[].url` במקומות אחרים במסמך הזה) — יש לצרף ל-base URL באותה שיטה (`resolveMediaUrl()`), לא להניח כתובת מלאה.
+- **הזמנות שבוצעו לפני 2026-09-09** (לפני ה-migration): שני השדות יהיו `null` — יש להתייחס לכך ב-frontend (למשל: להסתיר את התמונה/התיאור אם `null`, לא לזרוק שגיאה).
 
 ## שגיאות כלליות
 
