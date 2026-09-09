@@ -10,6 +10,29 @@
       content="Dull — plain, clean streetwear with an official band print. Measured, verifiable, no hype."
     />
     <!--
+      Open Graph/Twitter Card - ברירת מחדל גנרית לכל עמוד (docs/PRD.md
+      סעיף 12.10). זה קובץ סטטי אחד (SPA) - אין דרך לשנות אותו per-route
+      מה-client בלבד, כי בוטים של תצוגה-מקדימה בשיתוף (Facebook/WhatsApp/
+      Slack/iMessage וכו') כמעט אף פעם לא מריצים JS, רק קוראים HTML גולמי.
+      עמוד פריט (/products/:slug) מקבל דריסה per-product אמיתית בצד השרת
+      (backend, לפני שה-HTML הזה נשלח) - שם וגם og:image אמיתי (תמונת ה-flat)
+      במקום ברירת המחדל כאן. אם משנים כאן את ה-og:title/og:description
+      (למשל ב-<title>/<meta property="og:title">) - לוודא סנכרון מול לוגיקת
+      ה-string-replace בצד השרת שמחפשת בדיוק את הערכים האלה.
+      אין עדיין og:image גנרי - צריך צילום קמפיין אמיתי (עדיין לא קיים,
+      ראו docs/PRD.md) לפני שמוסיפים אחד; בלי og:image, רוב הפלטפורמות
+      פשוט מציגות תצוגה מקדימה בלי תמונה, לא שוברות.
+    -->
+    <meta property="og:site_name" content="Dull" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Dull" />
+    <meta
+      property="og:description"
+      content="Dull — plain, clean streetwear with an official band print. Measured, verifiable, no hype."
+    />
+    <meta property="og:url" content="https://dull.onrender.com/" />
+    <meta name="twitter:card" content="summary" />
+    <!--
       lang/dir מתחילים ב-en/ltr כברירת מחדל סטטית (תואם ל-DEFAULT_LOCALE
       של ה-backend). src/hooks/useLocaleSync.ts מסנכרן אותם בפועל מול
       react-i18next ברגע שהאפליקציה עולה - ראו TECH_SPEC סעיף 3.
