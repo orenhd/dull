@@ -19,7 +19,10 @@ export function getProductBySlug(slug: string) {
       },
       media: {
         orderBy: { sortOrder: "asc" },
-        include: { axisValues: true },
+        // axisValue.sortOrder (לא רק axisValueId) נדרש ע"י
+        // findDefaultFlatMediaUrl/findDefaultCampaignMediaUrl (lib/media.ts) -
+        // דירוג "ברירת מחדל" לפי sortOrder של ערכי-הציר עצמם.
+        include: { axisValues: { include: { axisValue: true } } },
       },
     },
   });

@@ -2,6 +2,7 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { getProductBySlug } from "../lib/products.js";
+import { findDefaultCampaignMediaUrl, findDefaultFlatMediaUrl } from "../lib/media.js";
 import { localize, parseLocale } from "../lib/i18n.js";
 import { DEFAULT_PAGE_SIZE } from "../constants/index.js";
 
@@ -21,14 +22,14 @@ productsRouter.get("/", async (req, res, next) => {
       take: DEFAULT_PAGE_SIZE,
       include: {
         variants: { where: { isActive: true }, select: { priceAgorot: true } },
-        media: { orderBy: { sortOrder: "asc" } },
+        // axisValue.sortOrder נדרש ע"י findDefaultFlatMediaUrl/
+        // findDefaultCampaignMediaUrl (lib/media.ts) - ראו שם להסבר המלא.
+        media: { orderBy: { sortOrder: "asc" }, include: { axisValues: { include: { axisValue: true } } } },
       },
     });
 
     const items = products.map((product) => {
       const prices = product.variants.map((v) => v.priceAgorot);
-      const flatImage = product.media.find((m) => m.role === "FLAT") ?? null;
-      const campaignImage = product.media.find((m) => m.role === "CAMPAIGN") ?? null;
 
       return {
         id: product.id,
@@ -40,8 +41,12 @@ productsRouter.get("/", async (req, res, next) => {
         // null אם למוצר אין עדיין וריאנטים (כמו placeholder "45 Grave") -
         // גם אז הוא לא היה מגיע לכאן כי isActive=false, אבל נשארים מוגנים.
         priceAgorot: prices.length > 0 ? Math.min(...prices) : null,
-        flatImageUrl: flatImage?.url ?? null,
-        campaignImageUrl: campaignImage?.url ?? null,
+        // "ברירת מחדל" - אותה פונקציה בדיוק בשני התפקידים (flat בכרטיס,
+        // campaign ב-hover) ובדיוק אותה פונקציה כמו lib/metaInjection.ts -
+        // כך ה-hover-swap תמיד עקבי (אותו גוון/גזרה בשתי התמונות), ותצוגת
+        // השיתוף (og:image) תמיד תואמת את מה שמוצג בכרטיס עצמו.
+        flatImageUrl: findDefaultFlatMediaUrl(product.media),
+        campaignImageUrl: findDefaultCampaignMediaUrl(product.media),
       };
     });
 

@@ -7,7 +7,7 @@
 // מחדל כאן הם היעד להחלפה - לשמור סנכרון בין שני הקבצים אם משהו שם משתנה.
 import type { Request } from "express";
 import { getProductBySlug } from "./products.js";
-import { findFlatMediaUrl } from "./media.js";
+import { findDefaultFlatMediaUrl } from "./media.js";
 import { localize } from "./i18n.js";
 import { DEFAULT_LOCALE } from "../constants/index.js";
 
@@ -120,12 +120,13 @@ export async function buildProductMetaValues(
     if (!title) return null;
 
     const baseUrl = `${req.protocol}://${req.get("host")}`;
-    // וריאנט "מייצג" (הראשון) - מספיק לתמונת flat גנרית לעמוד המוצר, אותו
-    // עיקרון בדיוק כמו imageUrl במייל אישור הזמנה (routes/orders.ts).
-    const relativeImageUrl = findFlatMediaUrl(
-      product.media,
-      product.variants[0]?.axisSelections ?? [],
-    );
+    // "ברירת מחדל" משותפת עם הכרטיס בקטלוג (routes/products.ts, GET /) -
+    // אותה פונקציה בדיוק, lib/media.ts - כדי שתמונת השיתוף וכרטיס הקטלוג
+    // תמיד יציגו את אותו גוון/גזרה (docs/PRD.md סעיף 6, הוכרע 2026-09-09).
+    // *לא* product.variants[0] (כפי שהיה כאן קודם) - לוריאנטים אין orderBy
+    // מוגדר בכלל, אז "הראשון" היה בפועל שרירותי/לא-מוגדר, לא "ברירת מחדל"
+    // אמיתית.
+    const relativeImageUrl = findDefaultFlatMediaUrl(product.media);
 
     return {
       title,
