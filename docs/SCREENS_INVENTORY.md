@@ -89,6 +89,8 @@
 
 הערה: זהו המסך היחיד ב-MVP שאינו נגזר מצורך פרסונה - הכללתו נובעת מחשיפת זכויות יוצרים, לא ממסע לקוח.
 
+**מימוש חי (`docs/PRD.md` סעיף 12.9, נבנה 2026-09-09):** עמוד `/disclaimer` (`frontend/src/pages/DisclaimerPage.tsx`, ללא auth) מציג גרסה מורחבת של שני משפטי ה-footer הקיימים. הבאנר (`frontend/src/components/layout/DisclaimerBanner.tsx`) מופיע כ-flex-item רגיל מתחת ל-header, נעלם לצמיתות (דגל `localStorage`) עם סגירה או לחיצה על "לפרטים נוספים". `frontend/src/components/layout/Footer.tsx` מקבל גם הוא קישור קבוע ל-`/disclaimer`, כדי שהעמוד המלא יישאר נגיש גם אחרי שהבאנר נסגר.
+
 ---
 
 ## 8. Wishlist — הוסר מה-MVP (ראו סעיף 14, עדכון 2026-09-08)

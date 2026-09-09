@@ -3,6 +3,7 @@ import { useLocaleSync } from "@/hooks/useLocaleSync";
 import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
 import { SkipLink } from "./SkipLink";
 import { SiteHeader } from "./SiteHeader";
+import { DisclaimerBanner } from "./DisclaimerBanner";
 import { Footer } from "./Footer";
 import { ToastHost } from "./ToastHost";
 
@@ -25,6 +26,10 @@ export function RootLayout({ children }: { children: ReactNode }) {
     <div className="flex h-[100dvh] flex-col overflow-hidden">
       <SkipLink />
       <SiteHeader />
+      {/* DisclaimerBanner.tsx - flex-item רגיל (shrink-0), לא fixed overlay -
+          כשמוצג הוא פשוט מכווץ את <main> כמו כל שאר ה-app-shell, ונעלם
+          כליל (מחזיר null) לאחר סגירה/ביקור ראשון - ראו הערה מלאה שם. */}
+      <DisclaimerBanner />
       {/* min-h-0 הכרחי: flex-item עם overflow-y-auto לא באמת יגלול בלי זה
           (ברירת המחדל min-height:auto מונעת מה-item להתכווץ מתחת לגובה
           התוכן שלו, וכל ה-<div> היה גדל ודוחף את ה-footer מחוץ למסך). */}

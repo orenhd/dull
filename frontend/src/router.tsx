@@ -13,6 +13,7 @@ import { CartPage } from "@/pages/CartPage";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { OrdersPage } from "@/pages/OrdersPage";
 import { OrderDetailPage } from "@/pages/OrderDetailPage";
+import { DisclaimerPage } from "@/pages/DisclaimerPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PRODUCT_CATEGORY } from "@/constants";
 
@@ -97,6 +98,16 @@ export const orderDetailRoute = createRoute({
   component: OrderDetailPage,
 });
 
+// /disclaimer - Disclaimer זכויות להקות + באנר חד-פעמי (docs/SCREENS_INVENTORY.md
+// מסך 7). מגיעים לכאן משני מקומות: DisclaimerBanner.tsx (הבאנר החד-פעמי
+// בכניסה הראשונה) ו-Footer.tsx (קישור קבוע "לפרטים נוספים", לחזרה גם אחרי
+// שהבאנר נסגר). אין auth/params - עמוד תוכן סטטי לחלוטין.
+const disclaimerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/disclaimer",
+  component: DisclaimerPage,
+});
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   productRoute,
@@ -107,6 +118,7 @@ const routeTree = rootRoute.addChildren([
   checkoutRoute,
   ordersRoute,
   orderDetailRoute,
+  disclaimerRoute,
 ]);
 
 export const router = createRouter({
