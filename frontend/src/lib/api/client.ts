@@ -24,15 +24,26 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
-async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
+// POST (וכל method עם body) - body אופציונלי בכוונה: POST /auth/logout
+// נשלח "בלי body" לפי docs/API_CONTRACT.md - אם body===undefined לא נשלח
+// Content-Type/גוף כלל (לא "{}" ריק), כדי להישאר תואם מדויק לחוזה.
+interface MutateOptions extends RequestOptions {
+  body?: unknown;
+}
+
+async function apiFetch<T>(path: string, method: "GET" | "POST", options: MutateOptions = {}): Promise<T> {
   const url = new URL(path, env.VITE_API_BASE_URL);
   if (options.locale) {
     url.searchParams.set("locale", options.locale);
   }
 
+  const hasBody = options.body !== undefined;
   const res = await fetch(url, {
+    method,
     credentials: "include",
     signal: options.signal,
+    headers: hasBody ? { "Content-Type": "application/json" } : undefined,
+    body: hasBody ? JSON.stringify(options.body) : undefined,
   });
 
   if (!res.ok) {
@@ -49,7 +60,9 @@ async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<
 }
 
 export const api = {
-  get: <T>(path: string, options?: RequestOptions) => apiFetch<T>(path, options),
+  get: <T>(path: string, options?: RequestOptions) => apiFetch<T>(path, "GET", options),
+  post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    apiFetch<T>(path, "POST", { ...options, body }),
 };
 
 // media.url מגיע מה-backend כנתיב יחסי ("/images/x.webp" - ראו backend/src/

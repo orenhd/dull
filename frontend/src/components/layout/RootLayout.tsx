@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useLocaleSync } from "@/hooks/useLocaleSync";
+import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
 import { SkipLink } from "./SkipLink";
 import { SiteHeader } from "./SiteHeader";
 import { Footer } from "./Footer";
@@ -7,6 +8,11 @@ import { ToastHost } from "./ToastHost";
 
 export function RootLayout({ children }: { children: ReactNode }) {
   useLocaleSync();
+  // בדיקת session חד-פעמית (GET /auth/me) - ראו hooks/useAuthBootstrap.ts.
+  // מופעלת כאן, ברמת ה-root, ולא בתוך CheckoutPage עצמו - כדי שהבדיקה
+  // תתחיל מיד עם טעינת האפליקציה (לא רק כשמגיעים בפועל ל-/checkout), וכך
+  // בזמן שהמשתמש מנווט בקטלוג התשובה כבר תהיה מוכנה כשיגיע לעגלה.
+  useAuthBootstrap();
 
   return (
     // App-shell (בקשת Oren, 2026-09-08): header ו-footer צמודים תמיד לקצוות

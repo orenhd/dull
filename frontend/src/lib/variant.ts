@@ -86,15 +86,26 @@ export function isCombinationSoldOut(variants: ProductVariant[], partialIds: Rea
   return matching.every((v) => v.stockQty <= 0);
 }
 
+// המפריד הוויזואלי הקבוע בין רכיבי תיאור-בחירה (Fit/Colorway/Size...) - הוצא
+// לפונקציה נפרדת (2026-09-09) כדי שישמש גם את buildSelectionLabel למטה וגם
+// את OrderDetailPage.tsx, שמקבל מה-backend כבר array מוכן של הרכיבים
+// (`selectionLabelSnapshot`, ראו docs/API_CONTRACT.md) - הבקאנד מכוון בכוונה
+// להחזיר array ולא string מחובר, כדי שהמפריד יישאר עניין frontend-י בלבד
+// (אם יתעצב מחדש בעתיד, לא ישפיע על snapshot היסטורי - ראו backend/src/lib/
+// variantLabel.ts).
+export function joinSelectionLabelParts(parts: string[]): string {
+  return parts.filter(Boolean).join(" · ");
+}
+
 // תווית קריאה-לבנאדם לצירוף שנבחר, למשל "Women's · Faded Batik · M" -
 // נבנית בזמן "Add to Bag" (יש לנו את כל תוויות הצירים ביד) ונשמרת כ-cache
 // על ה-CartItem עצמו (ראו src/stores/cartStore.ts), אבל זה קפוא בשפה שהייתה
 // פעילה באותו רגע - ראו variantSelectionLabel() למטה לגרסה שמתעדכנת.
 export function buildSelectionLabel(axes: VariantAxis[], selection: AxisSelection): string {
-  return axes
+  const labels = axes
     .map((axis) => axis.values.find((v) => v.id === selection[axis.key])?.label)
-    .filter((label): label is string => Boolean(label))
-    .join(" · ");
+    .filter((label): label is string => Boolean(label));
+  return joinSelectionLabelParts(labels);
 }
 
 // בונה AxisSelection (axis.key -> valueId) מ-variant.axisValueIds הגולמי,

@@ -14,6 +14,14 @@
       של ה-backend). src/hooks/useLocaleSync.ts מסנכרן אותם בפועל מול
       react-i18next ברגע שהאפליקציה עולה - ראו TECH_SPEC סעיף 3.
     -->
+    <!--
+      Google Identity Services (GIS) - טעינה כ-script גלובלי היא ההמלצה
+      הרשמית של גוגל (לא npm package - ראו developers.google.com/identity/
+      gsi/web/guides/client-library), ולא רק ל-checkout: הטעינה כאן ולא
+      lazy בתוך GoogleSignInButton.tsx כי היא זולה (script קטן, async/defer
+      לא חוסם רינדור) והרכיב עצמו כבר צריך "לחכות" ל-window.google מוכן.
+    -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <div id="root"></div>

@@ -10,6 +10,9 @@ import { ProductPage } from "@/pages/ProductPage";
 import { CollectionPage } from "@/pages/CollectionPage";
 import { AboutPage } from "@/pages/AboutPage";
 import { CartPage } from "@/pages/CartPage";
+import { CheckoutPage } from "@/pages/CheckoutPage";
+import { OrdersPage } from "@/pages/OrdersPage";
+import { OrderDetailPage } from "@/pages/OrderDetailPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PRODUCT_CATEGORY } from "@/constants";
 
@@ -65,6 +68,35 @@ const cartRoute = createRoute({
   component: CartPage,
 });
 
+// /checkout - docs/SCREENS_INVENTORY.md מסכים 11-12 (מוזגו למסך אחד, ראו
+// הערה בראש CheckoutPage.tsx). אין guard ברמת ה-router (למשל beforeLoad
+// שבודק authStore) - הבדיקה "האם מחובר" (מסונכרנת מול GET /auth/me, ראו
+// stores/authStore.ts ו-hooks/useAuthBootstrap.ts) קורית בתוך הקומפוננטה
+// עצמה (מציגה מסך Sign-In/טעינה במקום הטופס), לא כניתוב-מחדש ברמת ה-route.
+const checkoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout",
+  component: CheckoutPage,
+});
+
+// /orders - היסטוריית הזמנות (docs/SCREENS_INVENTORY.md מסך 9, MVP-גבוהה
+// מאז סעיף 13). אותה מוסכמת auth כמו /checkout ממש למעלה - אין guard
+// ברמת ה-router, הבדיקה קורית בתוך OrdersPage עצמה.
+const ordersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/orders",
+  component: OrdersPage,
+});
+
+// /orders/$orderId - פירוט הזמנה בודדת. מיוצא (כמו productRoute למעלה)
+// כי OrderDetailPage.tsx צריך את ה-route object עצמו בשביל useParams()
+// המוקלד ({ orderId: string }, ראו module augmentation בתחתית הקובץ).
+export const orderDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/orders/$orderId",
+  component: OrderDetailPage,
+});
+
 const routeTree = rootRoute.addChildren([
   homeRoute,
   productRoute,
@@ -72,6 +104,9 @@ const routeTree = rootRoute.addChildren([
   footwearRoute,
   aboutRoute,
   cartRoute,
+  checkoutRoute,
+  ordersRoute,
+  orderDetailRoute,
 ]);
 
 export const router = createRouter({

@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { wordmarkClassName } from "@/lib/wordmark";
 import { useCartStore, selectCartItemCount } from "@/stores/cartStore";
+import { useAuthStore } from "@/stores/authStore";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface NavItem {
@@ -67,6 +68,27 @@ function CartLink({ onNavigate }: { onNavigate?: () => void }) {
     >
       {t("cart.navLabel")}
       {count > 0 ? ` (${count})` : ""}
+    </Link>
+  );
+}
+
+// לינק "ההזמנות שלי" - מוצג רק כשיש משתמש מחובר (authStore.user), בניגוד
+// ל-CartLink למעלה שמוצג תמיד (העגלה לא דורשת login). ה-endpoint ממילא
+// דורש login (docs/API_CONTRACT.md) ו-OrdersPage תציג רק מסך "יש להתחבר"
+// למשתמש-אורח - עדיף לא להציג פריט ניווט שמוביל ישר לשם.
+function OrdersLink({ onNavigate }: { onNavigate?: () => void }) {
+  const { t } = useTranslation();
+  const user = useAuthStore((s) => s.user);
+  if (!user) return null;
+
+  return (
+    <Link
+      to="/orders"
+      onClick={onNavigate}
+      className="inline-block px-xs py-xs text-caption text-text-muted hover:text-text-base"
+      activeProps={{ className: "text-text-base font-bold" }}
+    >
+      {t("orders.navLabel")}
     </Link>
   );
 }
@@ -139,6 +161,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-sm">
+          <OrdersLink />
           <CartLink />
           <LanguageSwitcher />
         </div>
@@ -152,6 +175,9 @@ export function SiteHeader() {
                 <NavLink item={item} onNavigate={() => setMenuOpen(false)} />
               </li>
             ))}
+            <li>
+              <OrdersLink onNavigate={() => setMenuOpen(false)} />
+            </li>
             <li>
               <CartLink onNavigate={() => setMenuOpen(false)} />
             </li>

@@ -87,8 +87,69 @@
     "quantity": "כמות",
     "remove": "הסרה",
     "total": "סה\"כ",
-    "checkout": "מעבר לתשלום",
-    "checkoutComingSoon": "תהליך התשלום עדיין לא בנוי — בתור הבא."
+    "checkout": "מעבר לתשלום"
+  },
+  "auth": {
+    "signInError": "ההתחברות נכשלה — נסה/י שוב."
+  },
+  "checkout": {
+    "title": "השלמת ההזמנה",
+    "shippingTitle": "פרטי משלוח",
+    "fields": {
+      "fullName": "שם מלא",
+      "phone": "טלפון",
+      "addressLine": "כתובת",
+      "city": "עיר",
+      "postalCode": "מיקוד"
+    },
+    "summaryTitle": "סיכום הזמנה",
+    "noRealChargeNote": "זהו פרויקט הדגמה — לא יתבצע חיוב אמיתי.",
+    "placeOrder": "בצע הזמנה",
+    "placingOrder": "מבצע/ת הזמנה…",
+    "checkingSession": "בודק/ת מצב התחברות…",
+    "signInTitle": "יש להתחבר כדי להמשיך",
+    "signInBody": "הגלישה כאורח/ת והסל שלך נשמרים — התחברות נדרשת רק כדי לבצע את ההזמנה.",
+    "signedInAs": "מחובר/ת בתור {{name}}",
+    "signOut": "התנתקות",
+    "backToCart": "חזרה לסל",
+    "successTitle": "ההזמנה בוצעה",
+    "successBody": "תודה — סכום ההזמנה שלך היה {{total}}.",
+    "successEmailNote": "מייל אישור בדרך אליך.",
+    "sessionExpired": "ההתחברות פגה — יש להתחבר מחדש כדי לבצע את ההזמנה.",
+    "outOfStock": "אחד הפריטים בסל אזל הרגע מהמלאי. יש לבדוק את הסל.",
+    "variantNotFound": "אחד הפריטים בסל כבר לא זמין. יש לבדוק את הסל.",
+    "genericError": "משהו השתבש בביצוע ההזמנה. נסה/י שוב."
+  },
+  "orders": {
+    "navLabel": "הזמנות",
+    "title": "ההזמנות שלך",
+    "loading": "טוען את ההזמנות שלך…",
+    "errorTitle": "לא הצלחנו לטעון את ההזמנות שלך כרגע",
+    "errorBody": "משהו השתבש בטעינת היסטוריית ההזמנות. נסה/י שוב.",
+    "retry": "נסה/י שוב",
+    "emptyTitle": "אין עדיין הזמנות",
+    "emptyBody": "אחרי שתבצע/י הזמנה, היא תופיע כאן.",
+    "backToCatalog": "חזרה לקטלוג",
+    "backToOrders": "חזרה להזמנות שלך",
+    "signInTitle": "יש להתחבר כדי לראות את ההזמנות שלך",
+    "signInBody": "היסטוריית ההזמנות שייכת לחשבון שלך — יש להתחבר עם Google כדי לצפות בה.",
+    "checkingSession": "בודק/ת מצב התחברות…",
+    "orderIdLabel": "הזמנה",
+    "placedOn": "בוצעה בתאריך {{date}}",
+    "itemsCountOne": "פריט אחד",
+    "itemsCountOther": "{{count}} פריטים",
+    "viewDetails": "צפייה בפרטים",
+    "status": {
+      "PLACED": "בוצעה",
+      "FULFILLED": "סופקה",
+      "CANCELLED": "בוטלה"
+    },
+    "itemsTitle": "פריטים",
+    "shippingTitle": "משלוח אל",
+    "total": "סה\"כ",
+    "notFoundTitle": "לא מצאנו את ההזמנה הזו",
+    "notFoundBody": "ייתכן שהיא שייכת לחשבון אחר, או שהקישור לא מעודכן.",
+    "viewOrder": "צפייה בהזמנה"
   },
   "notFound": {
     "title": "העמוד לא נמצא",

@@ -87,8 +87,69 @@
     "quantity": "Qty",
     "remove": "Remove",
     "total": "Total",
-    "checkout": "Checkout",
-    "checkoutComingSoon": "Checkout isn't built yet — coming next."
+    "checkout": "Checkout"
+  },
+  "auth": {
+    "signInError": "Sign-in failed — please try again."
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingTitle": "Shipping details",
+    "fields": {
+      "fullName": "Full name",
+      "phone": "Phone",
+      "addressLine": "Address",
+      "city": "City",
+      "postalCode": "Postal code"
+    },
+    "summaryTitle": "Order summary",
+    "noRealChargeNote": "This is a demo — no real charge will be made.",
+    "placeOrder": "Place order",
+    "placingOrder": "Placing order…",
+    "checkingSession": "Checking your sign-in status…",
+    "signInTitle": "Sign in to continue",
+    "signInBody": "Guest browsing and your bag are saved — signing in is only needed to place the order.",
+    "signedInAs": "Signed in as {{name}}",
+    "signOut": "Sign out",
+    "backToCart": "Back to your bag",
+    "successTitle": "Order placed",
+    "successBody": "Thanks — your order total was {{total}}.",
+    "successEmailNote": "A confirmation email is on its way.",
+    "sessionExpired": "You were signed out — please sign in again to place the order.",
+    "outOfStock": "One of the items in your bag just sold out. Please review your bag.",
+    "variantNotFound": "One of the items in your bag is no longer available. Please review your bag.",
+    "genericError": "Something went wrong placing your order. Please try again."
+  },
+  "orders": {
+    "navLabel": "Orders",
+    "title": "Your Orders",
+    "loading": "Loading your orders…",
+    "errorTitle": "We can't load your orders right now",
+    "errorBody": "Something went wrong loading your order history. Please try again.",
+    "retry": "Try again",
+    "emptyTitle": "No orders yet",
+    "emptyBody": "Once you place an order, it will show up here.",
+    "backToCatalog": "Back to the catalog",
+    "backToOrders": "Back to your orders",
+    "signInTitle": "Sign in to see your orders",
+    "signInBody": "Your order history is tied to your account — sign in with Google to view it.",
+    "checkingSession": "Checking your sign-in status…",
+    "orderIdLabel": "Order",
+    "placedOn": "Placed on {{date}}",
+    "itemsCountOne": "1 item",
+    "itemsCountOther": "{{count}} items",
+    "viewDetails": "View details",
+    "status": {
+      "PLACED": "Placed",
+      "FULFILLED": "Fulfilled",
+      "CANCELLED": "Cancelled"
+    },
+    "itemsTitle": "Items",
+    "shippingTitle": "Shipping to",
+    "total": "Total",
+    "notFoundTitle": "We can't find this order",
+    "notFoundBody": "It may belong to a different account, or the link is out of date.",
+    "viewOrder": "View order"
   },
   "notFound": {
     "title": "Page not found",
