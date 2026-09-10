@@ -29,6 +29,7 @@ declare global {
           initialize: (config: {
             client_id: string;
             callback: (response: { credential: string }) => void;
+            itp_support?: boolean;
           }) => void;
           renderButton: (
             parent: HTMLElement,
@@ -75,9 +76,16 @@ export function GoogleSignInButton() {
       }
     }
 
+    // itp_support: true - נדרש כדי ש-GIS יעבוד תקין ב-Safari (iOS/macOS) עם
+    // Intelligent Tracking Prevention מופעל (ברירת המחדל שם). בלעדיו נצפה
+    // מסך לבן קבוע שנתקע ב-accounts.google.com/gsi/transform (דווח: iPhone
+    // XS, iOS 18.7.6, Safari ישיר - לא embedded browser). ברירת המחדל של
+    // הפרמטר עצמו היא false - חובה להעביר אותו במפורש. ראו תיעוד גוגל:
+    // developers.google.com/identity/gsi/web/reference/js-reference#itp_support
     window.google.accounts.id.initialize({
       client_id: env.VITE_GOOGLE_CLIENT_ID,
       callback: handleCredentialResponse,
+      itp_support: true,
     });
     // מרוקן לפני רינדור חוזר (למשל בעקבות החלפת שפה - locale ב-deps מטה) -
     // GIS לא מחליף כפתור קיים לבד, רק מוסיף עוד אחד לתוך ה-container.
