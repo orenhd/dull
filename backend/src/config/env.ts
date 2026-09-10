@@ -27,17 +27,25 @@ const envSchema = z.object({
   // ואף פעם לא בקוד) - ראו את ה-README לגבי ההבחנה בין שני הקבצים.
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters - generate with `openssl rand -hex 32`"),
 
-  // מפתח API של Resend (resend.com/api-keys) - סוד אמיתי, לא ב-.env.example.
-  RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
-
-  // כתובת "מאת" למיילים. תלוי-סביבה במובהק: לפני אימות דומיין משלנו מול
-  // Resend, חייבים להשתמש בכתובת ה-sandbox שלהם (onboarding@resend.dev) -
-  // ברגע שיש דומיין אמיתי, זה משתנה בלי לגעת בקוד בכלל.
+  // שליחת מייל דרך Gmail SMTP (לא Resend יותר - ראו הערה מפורטת ב-
+  // lib/email.ts על הסיבה למעבר: כתובת ה-sandbox של Resend,
+  // onboarding@resend.dev, יכולה לשלוח *רק* לכתובת שנרשמת איתה ל-Resend -
+  // כל נמען אחר נכשל בשקט עם 403. בלי דומיין מאומת משלנו, זה לא שימיש
+  // ללקוחות אמיתיים. Gmail SMTP שולח לכל נמען מיד, בלי לרכוש דומיין).
   //
-  // פורמט: כתובת בלבד ("a@b.com"), או עם שם תצוגה ("Dull <a@b.com>") - שם
-  // התצוגה הוא מה שהנמען רואה בתיבת הדואר שלו, נפרד לגמרי מהכתובת הטכנית
-  // (שיכולה להישאר onboarding@resend.dev גם ככה). לא z.string().email()
-  // בכוונה - זה היה פוסל את פורמט "שם <כתובת>".
+  // GMAIL_USER: כתובת ה-Gmail ששולחת בפועל (חשבון אמיתי, לא alias).
+  // GMAIL_APP_PASSWORD: סוד אמיתי בן 16 תווים - *לא* הסיסמה הרגילה של
+  // החשבון. נוצר ב-myaccount.google.com/apppasswords, ודורש שתחילה
+  // תפעיל 2-Step Verification בחשבון. לא ב-.env.example.
+  GMAIL_USER: z.string().email("GMAIL_USER must be a valid email address"),
+  GMAIL_APP_PASSWORD: z.string().min(1, "GMAIL_APP_PASSWORD is required"),
+
+  // כתובת "מאת" למיילים. שם התצוגה חופשי ("Dull <a@b.com>") - שם התצוגה
+  // הוא מה שהנמען רואה בתיבת הדואר שלו - אבל הכתובת הטכנית בתוך ה-<>
+  // חייבת להיות זהה ל-GMAIL_USER (או alias מאומת תחת Gmail -> Settings ->
+  // Accounts -> "Send mail as"), אחרת Gmail דוחה את השליחה או משכתב את
+  // הכתובת בשקט. לא z.string().email() בכוונה - זה היה פוסל את פורמט
+  // "שם <כתובת>".
   EMAIL_FROM: z.string().min(3, "EMAIL_FROM is required"),
 });
 

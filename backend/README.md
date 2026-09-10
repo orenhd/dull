@@ -70,7 +70,8 @@
 - **משתני סביבה** (Environment tab בדשבורד - `.env` עצמו כמובן לא מגיע ל-git):
   `DATABASE_URL`, `DIRECT_URL` (connection ישיר, unpooled, ל-Neon - נדרש
   ע"י `prisma migrate deploy`, ראו `.env.example` להסבר המלא), `GOOGLE_CLIENT_ID`,
-  `JWT_SECRET`, `RESEND_API_KEY`, `EMAIL_FROM`, `NODE_ENV=production`, ובנוסף
+  `JWT_SECRET`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM` (Gmail SMTP -
+  לא Resend יותר, ראו `.env.example`/`src/lib/email.ts`), `NODE_ENV=production`, ובנוסף
   (2026-09, לצורך `npm run frontend:build`) `VITE_API_BASE_URL=https://
   dull.onrender.com` ו-`VITE_GOOGLE_CLIENT_ID` (אותו ערך כמו `GOOGLE_CLIENT_ID`
   - Vite חושף ל-client bundle רק משתנים עם prefix `VITE_`, שום סוד קיים לא
@@ -104,8 +105,9 @@
 קיים: סכימת DB מלאה, seed עם מוצרים אמיתיים, `/products` (קטלוג + פריט),
 `/auth/google` (login + session cookie), `/auth/me`, `/orders` (יצירה/
 רשימה/פריט, כולל snapshot של שם/בחירה/תמונה בזמן הרכישה), מייל תודה +
-מתנת PDF (Resend + pdf-lib, תוכן placeholder בכוונה - העיצוב/הקופי
-הסופיים עוד לא נקבעו), צינור תמונות web, ניהול מוצרים דרך Prisma Studio.
+מתנת PDF (Gmail SMTP דרך nodemailer + pdf-lib - עברנו מ-Resend ב-2026-09,
+ראו `src/lib/email.ts`; תוכן placeholder בכוונה - העיצוב/הקופי הסופיים
+עוד לא נקבעו), צינור תמונות web, ניהול מוצרים דרך Prisma Studio.
 **מ-2026-09**: ה-frontend (React/Vite, בבנייה ע"י Oren בשיחה נפרדת -
 ראו `frontend/TECH_SPEC.md`) מאוחד לאותו Render service - נבנה ומוגש
 דרך `npm run frontend:build`/`express.static`, כולל meta-injection

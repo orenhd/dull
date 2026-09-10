@@ -1,29 +1,38 @@
 // שליחת מייל התודה ההומוריסטי אחרי הזמנה, עם ה"מתנה" (PDF) מצורפת וטבלת
-// פריטים עם תמונת thumbnail. משתמש ב-Resend (resend.com) - free tier, לא
-// צריך SMTP/App Password אישי.
+// פריטים עם תמונת thumbnail. משתמש ב-Gmail SMTP (nodemailer) עם App
+// Password של Oren - לא Resend יותר.
+//
+// **למה עברנו מ-Resend (2026-09)**: כל עוד אין דומיין אמיתי מאומת מול
+// Resend, ה-sandbox שלהם (onboarding@resend.dev) יכול לשלוח *רק* לכתובת
+// שנרשמת איתה ל-Resend עצמו - כל נמען אחר (למשל לקוח אמיתי, או אשתו של
+// Oren בבדיקה) מקבל 403 בשקט (רק ל-console.error ב-routes/orders.ts,
+// לא משפיע על ההזמנה עצמה - זה איך שהתקלה התגלתה בכלל: הזמנה הצליחה,
+// מייל פשוט לא הגיע, בלי שגיאה גלויה). רכישת דומיין אפשרית אבל לא
+// חובה - Gmail SMTP שולח לכל נמען אמיתי מיידית, בחינם, בלי דומיין.
 //
 // למה thumbnail הוא צירוף inline (CID) ולא <img src="https://...">: אין
 // עדיין deploy ציבורי של ה-backend (רץ רק על localhost שלך) - שרתי המייל
-// של הנמען לא יכולים לטעון תמונה מ-localhost. Resend תומך בהטמעת תמונה
-// כצירוף עם inlineContentId, ומפנים אליה מה-HTML עם cid:<id> - זה עובד
-// גם בלי URL ציבורי בכלל, כי בייטים התמונה נשלחים בתוך המייל עצמו.
-//
-// שים לב: השדה הנכון ב-SDK הוא inlineContentId, לא contentId (שם שדה
-// שגוי שראיתי בתיעוד/דוגמאות אונליין) - עם contentId Resend פשוט מתעלם
-// מהשדה בשקט (לא שגיאה!) ושולח כצירוף רגיל בלי Content-ID header בכלל,
-// בדיוק התסמין שראינו: התמונה מגיעה, אבל ה-<img cid:...> בגוף המייל שבור.
-// ודאתי את שם השדה הנכון ישירות מול node_modules/resend/dist/index.d.ts,
-// לא מול תיעוד חיצוני - שם המקור האמיתי היחיד כשיש אי-התאמה.
+// של הנמען לא יכולים לטעון תמונה מ-localhost. nodemailer תומך בהטמעת
+// תמונה כצירוף עם שדה cid, ומפנים אליה מה-HTML עם cid:<id> - זה עובד גם
+// בלי URL ציבורי בכלל, כי בייטי התמונה נשלחים בתוך המייל עצמו.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { extensionToMimeType } from "./mime.js";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
 import { generateGiftPdf } from "./giftPdf.js";
 import { formatAgorot } from "./money.js";
 import { PUBLIC_IMAGES_DIR } from "./paths.js";
 
-const resend = new Resend(env.RESEND_API_KEY);
+// service: "gmail" - קונפיגורציית ה-host/port/secure המוכרת של Gmail
+// SMTP מובנית ב-nodemailer, לא צריך לפרט אותם ידנית. auth.pass הוא ה-
+// App Password (16 תווים), לא סיסמת החשבון הרגילה - Gmail חוסם login
+// SMTP עם סיסמה רגילה כשיש 2-Step Verification מופעל (וזו דרישת סף
+// ליצירת App Password מלכתחילה).
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: { user: env.GMAIL_USER, pass: env.GMAIL_APP_PASSWORD },
+});
 
 export type ThankYouEmailItem = {
   name: string;
@@ -116,7 +125,7 @@ export async function sendThankYouEmail(params: {
       return {
         filename,
         content,
-        inlineContentId: contentIdByIndex(index),
+        cid: contentIdByIndex(index),
         contentType: extensionToMimeType(filename),
       };
     }),
@@ -124,7 +133,7 @@ export async function sendThankYouEmail(params: {
 
   const itemsTableHtml = buildItemsTableHtml(params.items, contentIdByIndex);
 
-  await resend.emails.send({
+  await transporter.sendMail({
     from: env.EMAIL_FROM,
     to: params.toEmail,
     subject: EMAIL_COPY.subject,
