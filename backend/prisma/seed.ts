@@ -13,6 +13,12 @@ type LocaleText = { en: string; he: string };
 const MENS_SIZES = ["S", "M", "L", "XL", "XXL"];
 const WOMENS_SIZES = ["Petite", "S", "M", "L", "XL"];
 
+// מידות סנדלים - EU (המוסכמה שהכי מוכרת לקהל הישראלי, לא US/UK) - גם כאן
+// תלויות בגזרה בדיוק כמו מידות החולצות (dependsOnValueId), כי הטווח שונה
+// בין גברים לנשים.
+const SANDALS_MENS_EU_SIZES = ["40", "41", "42", "43", "44", "45", "46"];
+const SANDALS_WOMENS_EU_SIZES = ["36", "37", "38", "39", "40", "41"];
+
 type ShirtMediaFile = {
   fit: "mens" | "womens";
   colorway: "light" | "dark";
@@ -155,8 +161,10 @@ async function createShirtProduct(opts: {
 }
 
 async function createSandalsProduct() {
-  // מבנה שונה במכוון מהחולצות: רק ציר Fit, בלי Colorway ובלי Size - ולכן
-  // לא עובר דרך createShirtProduct. אין תמונת קמפיין (per PRD) - flat בלבד.
+  // מבנה שונה במכוון מהחולצות: אין Colorway (רק Fit + Size) - ולכן לא עובר
+  // דרך createShirtProduct, אבל ה-Size כן קיים מעכשיו (2026-09, ה1 מהבריף
+  // ל-Dull Creative) - EU sizing, תלוי-גזרה באותה מנגנון dependsOnValueId
+  // בדיוק כמו מידות החולצות. אין תמונת קמפיין (per PRD) - flat בלבד.
   const product = await prisma.product.create({
     data: {
       slug: "dull-sandals",
@@ -173,10 +181,13 @@ async function createSandalsProduct() {
   const fitAxis = await prisma.variantAxis.create({
     data: { productId: product.id, key: "fit", label: { en: "Fit", he: "גזרה" }, sortOrder: 0 },
   });
+  const sizeAxis = await prisma.variantAxis.create({
+    data: { productId: product.id, key: "size", label: { en: "Size (EU)", he: "מידה (EU)" }, sortOrder: 1 },
+  });
 
-  const fits: Array<{ key: "mens" | "womens"; label: LocaleText; file: string }> = [
-    { key: "mens", label: { en: "Men's", he: "גברים" }, file: "sandals-mens" },
-    { key: "womens", label: { en: "Women's", he: "נשים" }, file: "sandals-womens" },
+  const fits: Array<{ key: "mens" | "womens"; label: LocaleText; file: string; euSizes: string[] }> = [
+    { key: "mens", label: { en: "Men's", he: "גברים" }, file: "sandals-mens", euSizes: SANDALS_MENS_EU_SIZES },
+    { key: "womens", label: { en: "Women's", he: "נשים" }, file: "sandals-womens", euSizes: SANDALS_WOMENS_EU_SIZES },
   ];
 
   for (const [i, f] of fits.entries()) {
@@ -196,17 +207,38 @@ async function createSandalsProduct() {
       data: { mediaId: media.id, axisValueId: fitValue.id },
     });
 
-    const variant = await prisma.productVariant.create({
-      data: {
-        productId: product.id,
-        sku: `SANDALS-${f.key}`.toUpperCase(),
-        priceAgorot: 17900, // ₪179 - מחיר סופי
-        stockQty: 10,
-      },
-    });
-    await prisma.variantAxisSelection.create({
-      data: { variantId: variant.id, axisValueId: fitValue.id },
-    });
+    // מידות EU תלויות בגזרה (40-46 גברים / 36-41 נשים - שונה בין השתיים) -
+    // key מקדים בגזרה כדי שלא יתנגש (mens-eu-40 מול womens-eu-40, שתיהן "40").
+    const sizeValues = await Promise.all(
+      f.euSizes.map((label, sizeIndex) =>
+        prisma.variantAxisValue.create({
+          data: {
+            axisId: sizeAxis.id,
+            key: `${f.key}-eu-${label}`,
+            label: { en: label, he: label },
+            sortOrder: sizeIndex,
+            dependsOnValueId: fitValue.id,
+          },
+        }),
+      ),
+    );
+
+    for (const sizeValue of sizeValues) {
+      const variant = await prisma.productVariant.create({
+        data: {
+          productId: product.id,
+          sku: `SANDALS-${f.key}-${sizeValue.key}`.toUpperCase(),
+          priceAgorot: 17900, // ₪179 - מחיר סופי
+          stockQty: 10,
+        },
+      });
+      await prisma.variantAxisSelection.createMany({
+        data: [
+          { variantId: variant.id, axisValueId: fitValue.id },
+          { variantId: variant.id, axisValueId: sizeValue.id },
+        ],
+      });
+    }
   }
 
   return product;
