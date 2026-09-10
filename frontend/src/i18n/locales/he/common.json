@@ -27,21 +27,25 @@
   "sizeGuide": {
     "summary": "מדריך מידות",
     "intro": "נמדד שטוח, בסנטימטרים, עבור הגזרה הזו.",
+    "introFootwear": "כל המידות הן במידות EU.",
     "columns": {
       "size": "מידה",
       "chest": "חזה",
       "length": "אורך",
-      "sleeve": "שרוול"
+      "sleeve": "שרוול",
+      "sizeEu": "מידה (EU)",
+      "footLength": "אורך כף הרגל (ס\"מ)"
     },
     "note": "בין שתי מידות? הכותנה עברה כביסה מוקדמת ולא תתארך בכביסה - כדאי לקחת את הגדולה יותר.",
-    "unavailable": "טבלת מידות עדיין לא זמינה לגזרה הזו."
+    "noteFootwear": "בין שתי מידות? מומלץ לקחת את המידה הגדולה יותר.",
+    "unavailable": "מדריך מידות עדיין לא זמין לגזרה הזו."
   },
   "materials": {
     "title": "חומרים וטיפוח"
   },
   "actions": {
     "addToBag": "הוספה לסל",
-    "addedToBagToast": "נוסף לסל — מידה {{size}}."
+    "addedToBagToast": "נוסף לסל — {{details}}"
   },
   "soldOut": {
     "title": "אזל מהמלאי",
@@ -112,6 +116,7 @@
   "checkout": {
     "title": "השלמת ההזמנה",
     "shippingTitle": "פרטי משלוח",
+    "allFieldsRequired": "כל השדות הבאים הם שדות חובה.",
     "fields": {
       "fullName": "שם מלא",
       "phone": "טלפון",

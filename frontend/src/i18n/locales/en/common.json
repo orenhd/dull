@@ -27,21 +27,25 @@
   "sizeGuide": {
     "summary": "Size guide",
     "intro": "Measured flat, in centimetres, for this fit.",
+    "introFootwear": "All sizes below are EU sizing.",
     "columns": {
       "size": "Size",
       "chest": "Chest",
       "length": "Length",
-      "sleeve": "Sleeve"
+      "sleeve": "Sleeve",
+      "sizeEu": "Size (EU)",
+      "footLength": "Foot length (cm)"
     },
     "note": "Between two sizes? The cotton is pre-shrunk, so it will not gain length in the wash. Take the larger one.",
-    "unavailable": "A size chart isn't available for this fit yet."
+    "noteFootwear": "Between two sizes? We'd recommend sizing up.",
+    "unavailable": "A size guide isn't available for this fit yet."
   },
   "materials": {
     "title": "Materials & Care"
   },
   "actions": {
     "addToBag": "Add to Bag",
-    "addedToBagToast": "Added to bag — size {{size}}."
+    "addedToBagToast": "Added to bag — {{details}}"
   },
   "soldOut": {
     "title": "Sold out",
@@ -112,6 +116,7 @@
   "checkout": {
     "title": "Checkout",
     "shippingTitle": "Shipping details",
+    "allFieldsRequired": "All fields below are required.",
     "fields": {
       "fullName": "Full name",
       "phone": "Phone",

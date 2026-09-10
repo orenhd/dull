@@ -20,7 +20,7 @@ import { joinSelectionLabelParts } from "@/lib/variant";
 import { formatAgorot } from "@/lib/money";
 import { formatOrderDate } from "@/lib/date";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
-import { ContentSkeleton } from "@/components/feedback/Skeletons";
+import { OrderDetailSkeleton } from "@/components/feedback/Skeletons";
 import type { OrderRecord, OrderLineItem } from "@/types/order";
 
 // סדר תצוגה קבוע לשדות הכתובת (types/order.ts, ShippingAddress) - לא
@@ -154,9 +154,14 @@ export function OrderDetailPage() {
   }
 
   if (query.isPending) {
+    // תוקן 2026-09-10 (docs/PRD.md סעיף 12.17): היה ContentSkeleton המשותף
+    // עם עמוד הפריט - צורה שונה לגמרי מפירוט הזמנה (form עם chips/select
+    // מול רשימת פריטים+תמונות+סיכום). OrderDetailSkeleton הייעודי כבר כולל
+    // בעצמו את כל ה-className של המעטפת האמיתית (OrderDetailContent) - אין
+    // צורך בעטיפה נוספת כאן מעבר ל-aria-busy עצמו.
     return (
-      <div aria-busy="true" className="mx-auto max-w-[720px] px-md py-lg">
-        <ContentSkeleton />
+      <div aria-busy="true">
+        <OrderDetailSkeleton />
       </div>
     );
   }

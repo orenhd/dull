@@ -24,6 +24,7 @@ import { localizeText } from "@/lib/localize";
 import { formatAgorot } from "@/lib/money";
 import { formatOrderDate } from "@/lib/date";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { LINE_BODY_STRONG, LINE_CAPTION, PULSE } from "@/components/feedback/Skeletons";
 import type { OrderRecord } from "@/types/order";
 
 function OrderRow({ order }: { order: OrderRecord }) {
@@ -120,11 +121,29 @@ export function OrdersPage() {
           <p role="status" aria-live="polite" className="sr-only">
             {t("orders.loading")}
           </p>
+          {/* תוקן 2026-09-10 (docs/PRD.md סעיף 12.17): השלד הקודם היה רק 2
+              בארים גנריים (h-md/h-sm) - חסר לגמרי את השורה השנייה של
+              OrderRow (סטטוס + קישור "צפייה בפרטים") ואת הסכום המיושר לימין
+              בשורה הראשונה, ובנוסף השתמש בגבהי-סולם-ריווח שלא תאמו את
+              גובה-השורה האמיתי של text-body-strong/text-caption. עכשיו ממפה
+              את שתי השורות של OrderRow במדויק (משתמש ב-LINE_BODY_STRONG/
+              LINE_CAPTION/PULSE המיוצאים מ-Skeletons.tsx, כדי לא לשכפל את
+              נוסחת ה-calc() כמחרוזת). */}
           <ul className="m-0 flex list-none flex-col p-0" aria-hidden="true">
             {Array.from({ length: 3 }, (_, i) => (
               <li key={i} className="flex flex-col gap-xs border-b border-border-base py-md">
-                <span className="block h-md w-[60%] animate-pulse-soft rounded-sm bg-surface-sunken" />
-                <span className="block h-sm w-[35%] animate-pulse-soft rounded-sm bg-surface-sunken" />
+                <div className="flex items-start justify-between gap-sm">
+                  <div className="flex min-w-0 flex-col gap-xs">
+                    <span className={`block w-32 ${LINE_BODY_STRONG} ${PULSE}`} />
+                    <span className={`block w-24 ${LINE_CAPTION} ${PULSE}`} />
+                    <span className={`block w-[60%] ${LINE_CAPTION} ${PULSE}`} />
+                  </div>
+                  <span className={`w-16 flex-none ${LINE_BODY_STRONG} ${PULSE}`} />
+                </div>
+                <div className="flex items-center justify-between gap-sm">
+                  <span className={`block w-20 ${LINE_CAPTION} ${PULSE}`} />
+                  <span className={`w-24 ${LINE_BODY_STRONG} ${PULSE}`} />
+                </div>
               </li>
             ))}
           </ul>

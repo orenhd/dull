@@ -58,6 +58,15 @@ export function AddToBagForm({ product, selection }: AddToBagFormProps) {
     }
     if (!variant || outOfStock) return;
 
+    // תוקן 2026-09-10 (docs/PRD.md סעיף 12.17, בקשת Oren ג2): התווית שנשלחת
+    // ל-toast מחושבת פעם אחת ומשמשת גם את CartItem.selectionLabel וגם את
+    // הודעת ה-toast - היה קודם חישוב נפרד (sizeLabel בלבד) לטוסט, שהציג רק
+    // את המידה. buildSelectionLabel() כבר מרכיבה בדיוק את הפורמט המבוקש
+    // ("Women's · Light · L") מכל הצירים הקיימים למוצר הזה - ולכן, למוצר
+    // בלי ציר Fit/Colorway (כמו הסנדלים), היא כבר מניבה "מין · מידה" בלבד
+    // באופן טבעי, בלי לוגיקה מותנית נוספת כאן.
+    const selectionLabel = buildSelectionLabel(product.axes, axisSelection);
+
     const flatImage = findMedia(product.media, MEDIA_ROLE.flat, selectedIds);
     addItem({
       variantId: variant.id,
@@ -66,11 +75,10 @@ export function AddToBagForm({ product, selection }: AddToBagFormProps) {
       sku: variant.sku,
       priceAgorot: variant.priceAgorot,
       imageUrl: flatImage ? resolveMediaUrl(flatImage.url) : null,
-      selectionLabel: buildSelectionLabel(product.axes, axisSelection),
+      selectionLabel,
     });
 
-    const sizeLabel = sizeAxis?.values.find((v) => v.id === axisSelection.size)?.label ?? "";
-    showToast(t("actions.addedToBagToast", { size: sizeLabel }));
+    showToast(t("actions.addedToBagToast", { details: selectionLabel }));
   }
 
   return (
@@ -85,7 +93,7 @@ export function AddToBagForm({ product, selection }: AddToBagFormProps) {
         sizeError={showSizeError}
       />
 
-      <SizeGuideAccordion fitKey={fitValueKey} />
+      <SizeGuideAccordion category={product.category} fitKey={fitValueKey} />
 
       <MaterialsCard description={product.description} />
 

@@ -195,6 +195,13 @@ export function CheckoutPage() {
 
         <fieldset className="m-0 flex flex-col gap-sm border-0 p-0">
           <legend className="mb-xs text-body-strong font-bold text-text-base">{t("checkout.shippingTitle")}</legend>
+          {/* נוסף 2026-09-10 (docs/PRD.md סעיף 12.17, בקשת Oren: "פיתרון UI
+              אלגנטי ולא תוקפני... בלי חזרתיות יתר") - הערה תמציתית אחת מתחת
+              ל-legend, במקום כוכבית "*" חוזרת על כל label (שדורשת גם מקרא
+              נפרד להסבר מה "*" אומר) או טקסט "(חובה)" שחוזר חמש פעמים. כל
+              השדות כבר מסומנים required ב-<input> בפועל (ולידציה דפדפנית
+              אמיתית) - זו רק הבהרה ויזואלית קדימה, לא באג בהיעדרה. */}
+          <p className="m-0 text-caption text-text-muted">{t("checkout.allFieldsRequired")}</p>
           {SHIPPING_FIELDS.map(({ key, type }) => (
             <div key={key} className="flex flex-col gap-xs">
               <label htmlFor={key} className="text-caption text-text-muted">

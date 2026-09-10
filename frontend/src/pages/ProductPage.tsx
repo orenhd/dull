@@ -17,7 +17,7 @@ import { ProductGallery } from "@/components/product/ProductGallery";
 import { AddToBagForm } from "@/components/product/AddToBagForm";
 import { BandCredit } from "@/components/product/BandCredit";
 import { SoldOutNotice } from "@/components/product/SoldOutNotice";
-import { GallerySkeleton, ContentSkeleton } from "@/components/feedback/Skeletons";
+import { GallerySkeleton, ProductContentSkeleton } from "@/components/feedback/Skeletons";
 import { formatAgorot } from "@/lib/money";
 import { PRODUCT_CATEGORY } from "@/constants";
 import type { Product } from "@/types/product";
@@ -77,14 +77,19 @@ export function ProductPage() {
   });
 
   if (query.isPending) {
+    // תוקן 2026-09-10 (docs/PRD.md סעיף 12.17): ה-section הזה היה עם pt-md
+    // קבוע (כל הרוחבים) - ה-section האמיתי למטה (ProductPageContent) מוסיף
+    // ריפוד עליון רק בדסקטופ (desktop:pt-md). במובייל זה גרם ל-16px קפיצה
+    // כלפי מעלה כשהתוכן האמיתי נטען - עכשיו זהה בדיוק לשורת ה-className
+    // של ה-section האמיתי.
     return (
-      <section aria-busy="true" className="mx-auto flex max-w-[1200px] min-w-0 flex-col gap-lg px-md pt-md pb-xl desktop:flex-row desktop:items-start desktop:gap-xl">
+      <section aria-busy="true" className="mx-auto flex max-w-[1200px] min-w-0 flex-col gap-lg px-md pb-xl desktop:flex-row desktop:items-start desktop:gap-xl desktop:pt-md">
         <p role="status" aria-live="polite" className="sr-only">
           {t("states.loading")}
         </p>
         <GallerySkeleton />
-        <div className="min-w-0 desktop:flex-1 desktop:basis-[400px]">
-          <ContentSkeleton />
+        <div aria-hidden="true" className="flex min-w-0 flex-col gap-lg desktop:flex-1 desktop:basis-[400px]">
+          <ProductContentSkeleton />
         </div>
       </section>
     );

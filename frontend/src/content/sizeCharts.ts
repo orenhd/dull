@@ -53,3 +53,50 @@ export function getSizeChartForFitKey(fitKey: string): SizeChartRow[] | null {
   if (fitKey === "womens") return SIZE_CHART_WOMENS;
   return null;
 }
+
+// ============================================================================
+// נעליים/סנדלים (docs/PRD.md סעיף 12.19, בקשת Oren 2026-09-10) - קובץ נפרד
+// לגמרי מהחולצות למעלה, לא רק כי הצירים חסרים (colorway), אלא כי הפריטים
+// שנמדדים שונים לגמרי (רגל, לא גוף). שים לב: ל-fit axis value key יש אותם
+// ערכים בדיוק ("mens"/"womens") כמו בחולצות (backend/prisma/seed.ts) - אבל
+// אלו *לא* אותו מוצר/קטגוריה, אז אסור לקרוא ל-getSizeChartForFitKey למעלה
+// עבור נעליים (זה יחזיר את טבלת מידות ה*גוף* של חולצות, שגוי לגמרי) - ראו
+// getSandalsSizeChartForFitKey הנפרד למטה, ו-SizeGuideAccordion.tsx שמפריד
+// בין השניים לפי product.category, לא לפי fitKey בלבד.
+//
+// המספרים כאן (אורך כף הרגל בס"מ) מבוססים על טבלת המרה מקובלת מידת-EU-
+// לאורך-כף-רגל, נפוצה בענף ההנעלה (לא מדידה בפועל של המוצר הספציפי שלנו -
+// "לא צריך מספרים מדויקים על המילימטר", בקשת Oren, 2026-09-10). בכוונה
+// *בלי* עמודת רוחב, למרות שהוצעה: בניגוד לאורך, אין המרה סטנדרטית מוסכמת
+// אחת לרוחב-כף-רגל לפי מידת EU בענף ההנעלה - רוחב תלוי בגזרת ה-last של
+// הנעל הספציפית, לא רק במידה המספרית. מספר "רוחב" מומצא היה נותן תחושת
+// דיוק מזויפת - גרוע יותר מלא להציג את העמודה בכלל.
+export interface FootwearSizeChartRow {
+  size: string; // EU - תואם ל-label של ערך-הציר Size בפועל (SANDALS_MENS_EU_SIZES/SANDALS_WOMENS_EU_SIZES, backend/prisma/seed.ts)
+  footLengthCm: number;
+}
+
+export const SANDALS_SIZE_CHART_MENS: FootwearSizeChartRow[] = [
+  { size: "40", footLengthCm: 25.5 },
+  { size: "41", footLengthCm: 26 },
+  { size: "42", footLengthCm: 27 },
+  { size: "43", footLengthCm: 27.5 },
+  { size: "44", footLengthCm: 28.5 },
+  { size: "45", footLengthCm: 29 },
+  { size: "46", footLengthCm: 30 },
+];
+
+export const SANDALS_SIZE_CHART_WOMENS: FootwearSizeChartRow[] = [
+  { size: "36", footLengthCm: 22.5 },
+  { size: "37", footLengthCm: 23.5 },
+  { size: "38", footLengthCm: 24 },
+  { size: "39", footLengthCm: 24.5 },
+  { size: "40", footLengthCm: 25.5 },
+  { size: "41", footLengthCm: 26 },
+];
+
+export function getSandalsSizeChartForFitKey(fitKey: string): FootwearSizeChartRow[] | null {
+  if (fitKey === "mens") return SANDALS_SIZE_CHART_MENS;
+  if (fitKey === "womens") return SANDALS_SIZE_CHART_WOMENS;
+  return null;
+}
