@@ -4,6 +4,9 @@
     "menu": "תפריט",
     "languageSwitch": "English"
   },
+  "header": {
+    "greeting": "שלום, {{name}}"
+  },
   "nav": {
     "home": "בית",
     "shirts": "טי-שירטס",

@@ -4,6 +4,9 @@
     "menu": "Menu",
     "languageSwitch": "עברית"
   },
+  "header": {
+    "greeting": "Hi, {{name}}"
+  },
   "nav": {
     "home": "Home",
     "shirts": "T-Shirts",
