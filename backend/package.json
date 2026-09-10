@@ -14,6 +14,7 @@
     "frontend:build": "tsx scripts/render-build.ts",
     "seed": "tsx prisma/seed.ts",
     "oauth-logo:generate": "tsx scripts/generate-oauth-logo.ts",
+    "stock:reset": "tsx scripts/reset-stock.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

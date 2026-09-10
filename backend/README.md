@@ -37,6 +37,13 @@
 - `requests.http` — בקשות GET לקטלוג (עם REST Client extension ל-VS Code).
 - `dev-tools/google-signin-test.html` — בדיקת login מלאה (Google Sign-In
   אמיתי -> session cookie -> POST /orders) - ראו `dev-tools/README.md`.
+- **מקרי-קצה של מלאי ("אזל המלאי")**: `npm run prisma:studio`, לשנות ידנית
+  `stockQty` של וריאנט(ים) ספציפיים (ל-0 או לפחות מהכמות שרוצים לבדוק
+  בעגלה) ולוודא ש-`OUT_OF_STOCK`/`SoldOutNotice` בפרונטאנד מגיבים נכון.
+  `npm run stock:reset` (`scripts/reset-stock.ts`) מחזיר את כל הוריאנטים
+  ל-10 יחידות בסוף - בלי להריץ `npm run seed` מחדש (שהיה מוחק ומחדש את כל
+  הקטלוג עם id-ים חדשים, ושובר כל עגלה/הזמנה קיימת שמצביעה על ה-id-ים
+  הישנים) - בטוח להריץ נגד DB עם הזמנות אמיתיות.
 
 ## פריסה (Render)
 - **Root Directory**: `backend` (המונורפו כולל גם docs/hi-res/db - Render צריך לדעת שהאפליקציה חיה בתת-תיקייה).
