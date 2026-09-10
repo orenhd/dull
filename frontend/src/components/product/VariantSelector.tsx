@@ -69,12 +69,12 @@ export function VariantSelector({
               </option>
             ))}
           </select>
-          <p
-            id="size-error"
-            role="alert"
-            hidden={!sizeError}
-            className="mt-[calc(-1*var(--space-sm))] text-caption text-feedback-error"
-          >
+          {/* תוקן 2026-09-10 (docs/PRD.md סעיף 12.16, דיווח Oren) - היה margin
+              עליון שלילי (mt-[calc(-1*var(--space-sm))]) שמשך את שורת השגיאה
+              *מעלה*, לתוך גבול ה-select במקום ליצור רווח מתחתיו. mt-xs חיובי
+              (--space-xs, 4px) - רווח צר וסביר מתחת לתיבה, לא נוגע ב-margin
+              האופקי/RTL בכלל (margin-top לא תלוי כיוון כתיבה). */}
+          <p id="size-error" role="alert" hidden={!sizeError} className="mt-xs text-caption text-feedback-error">
             {t("variant.sizeRequired")}
           </p>
         </div>
