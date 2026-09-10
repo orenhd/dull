@@ -40,7 +40,27 @@ export type ThankYouEmailItem = {
   unitPriceAgorot: number;
   /** URL יחסי כמו "/images/foo.webp", או null אם לא נמצאה תמונת flat תואמת */
   imageUrl: string | null;
+  /**
+   * תיאור הבחירה (Fit/Colorway/Size...) - אותם רכיבים לא-מחוברים שנשמרים
+   * כ-selectionLabelSnapshot ב-DB (backend/src/lib/variantLabel.ts), locale
+   * אנגלית בלבד - כל שאר תוכן המייל הזה אנגלי (placeholder, ראו README).
+   * null אם למוצר אין בכלל צירי וריאנט (לא קורה היום בפועל, אבל
+   * selectionLabelSnapshot עצמו nullable ב-DB אז שומרים על אותה גמישות).
+   */
+  selectionLabel: string[] | null;
 };
+
+// בריחה בסיסית ל-HTML - חשוב כאן כי שלא כמו שאר התוכן הקבוע בקובץ הזה,
+// שדות הכתובת (ושם הפריט, שם הנמען) מגיעים ממשתמש אמיתי דרך טופס ה-checkout -
+// בלי escaping תו כמו "<" בשם רחוב היה יכול לשבור את מבנה ה-HTML של המייל.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 const EMAIL_COPY = {
   subject: "Your (very fake) Dull order confirmation",
@@ -63,10 +83,18 @@ function buildItemsTableHtml(items: ThankYouEmailItem[], contentIdByIndex: (inde
         ? `<img src="cid:${contentIdByIndex(index)}" width="64" height="64" style="object-fit:cover;border-radius:4px;" alt="${item.name}">`
         : "";
       const lineTotal = formatAgorot(item.unitPriceAgorot * item.quantity);
+      // שורת המפרט (למשל "Men's · Light · M") מתחת לשם, בדיוק כמו בעגלה/
+      // checkout/היסטוריית הזמנות (joinSelectionLabelParts ב-frontend, אותו
+      // מפריד " · ") - כדי שהמייל יתאם למה שהמשתמש ראה באתר. מוצג רק אם יש
+      // בכלל מפרט (למוצרים בלי צירי וריאנט - לא קורה היום - selectionLabel יהיה ריק/null).
+      const selectionLabelHtml =
+        item.selectionLabel && item.selectionLabel.length > 0
+          ? `<div style="color:#888;font-size:12px;margin-top:2px;">${escapeHtml(item.selectionLabel.join(" · "))}</div>`
+          : "";
       return `
         <tr>
           <td style="padding:8px;">${thumbnailCell}</td>
-          <td style="padding:8px;">${item.name}</td>
+          <td style="padding:8px;">${escapeHtml(item.name)}${selectionLabelHtml}</td>
           <td style="padding:8px;text-align:center;">${item.quantity}</td>
           <td style="padding:8px;text-align:left;">${formatAgorot(item.unitPriceAgorot)}</td>
           <td style="padding:8px;text-align:left;"><strong>${lineTotal}</strong></td>
@@ -91,6 +119,46 @@ function buildItemsTableHtml(items: ThankYouEmailItem[], contentIdByIndex: (inde
   `;
 }
 
+// תוויות ידידותיות לשדות הכתובת הידועים כיום (frontend/src/types/order.ts,
+// ShippingAddress) - shippingAddress עצמו חופשי לגמרי בסכימה (Json, אין
+// עדיין טופס משלוח סופי ב-PRD, ראו routes/orders.ts), אז מפתח לא-מוכר
+// (אם הטופס ישתנה בעתיד) עדיין מוצג - רק עם שם השדה הגולמי כתווית fallback,
+// לא נעלם בשקט. כך "כל הפרטים שהוזנו" מוצגים תמיד, גם בלי לתאם שוב את שני
+// הצדדים בכל שינוי טופס.
+const SHIPPING_FIELD_LABELS: Record<string, string> = {
+  fullName: "Full name",
+  phone: "Phone",
+  addressLine: "Address",
+  city: "City",
+  postalCode: "Postal code",
+};
+
+function buildShippingAddressHtml(shippingAddress: Record<string, unknown>): string {
+  const rows = Object.entries(shippingAddress)
+    .filter(([, value]) => value !== null && value !== undefined && String(value).trim() !== "")
+    .map(([key, value]) => {
+      const label = SHIPPING_FIELD_LABELS[key] ?? key;
+      return `
+        <tr>
+          <td style="padding:2px 12px 2px 0;color:#888;white-space:nowrap;vertical-align:top;">${escapeHtml(label)}</td>
+          <td style="padding:2px 0;">${escapeHtml(String(value))}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  if (!rows) return "";
+
+  return `
+    <div style="margin:16px 0;">
+      <p style="margin:0 0 4px;font-weight:bold;">Shipping to</p>
+      <table style="border-collapse:collapse;" cellspacing="0" cellpadding="0">
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
 // קורא קובץ תמונה מ-public/images לצורך צירוף inline. לא מפיל את כל
 // שליחת המייל אם קובץ בודד חסר (למשל npm run images:generate לא רץ) -
 // פשוט לא יהיה thumbnail לפריט הזה, השאר עדיין נשלח.
@@ -110,6 +178,13 @@ export async function sendThankYouEmail(params: {
   orderId: string;
   totalAgorot: number;
   items: ThankYouEmailItem[];
+  /**
+   * אותו Json חופשי שנשמר על ה-Order (routes/orders.ts, body.shippingAddress) -
+   * בפועל תמיד ShippingAddress מה-frontend, אבל לא מוולד כאן, ראו
+   * buildShippingAddressHtml. חשוב לאשר למשתמש שהכתובת נקלטה נכון (Oren,
+   * 2026-09-10) - זה כל הסיבה שזה נמצא במייל בכלל.
+   */
+  shippingAddress: Record<string, unknown>;
 }): Promise<void> {
   const giftPdf = await generateGiftPdf(params.recipientName);
 
@@ -132,6 +207,7 @@ export async function sendThankYouEmail(params: {
   );
 
   const itemsTableHtml = buildItemsTableHtml(params.items, contentIdByIndex);
+  const shippingAddressHtml = buildShippingAddressHtml(params.shippingAddress);
 
   await transporter.sendMail({
     from: env.EMAIL_FROM,
@@ -142,6 +218,7 @@ export async function sendThankYouEmail(params: {
         ${EMAIL_COPY.intro(params.recipientName, params.orderId)}
         ${itemsTableHtml}
         <p style="text-align:right;font-size:18px;">Total: <strong>${formatAgorot(params.totalAgorot)}</strong></p>
+        ${shippingAddressHtml}
         ${EMAIL_COPY.outro}
       </div>
     `,

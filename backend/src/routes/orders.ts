@@ -119,6 +119,10 @@ ordersRouter.post("/", async (req, res, next) => {
             quantity: item.quantity,
             unitPriceAgorot: variant.priceAgorot,
             imageUrl: findFlatMediaUrl(variant.product.media, variant.axisSelections),
+            // אותה פונקציה שבונה את ה-selectionLabelSnapshot שנשמר על ה-
+            // OrderItem למעלה - locale אנגלית בלבד, כי כל שאר תוכן המייל
+            // הזה אנגלי (ראו ThankYouEmailItem.selectionLabel ב-lib/email.ts).
+            selectionLabel: buildSelectionLabelSnapshot(variant.axisSelections).en ?? null,
           };
         });
         await sendThankYouEmail({
@@ -127,6 +131,9 @@ ordersRouter.post("/", async (req, res, next) => {
           orderId: order.id,
           totalAgorot,
           items: emailItems,
+          // "לאשר שהכתובת ופרטי המשלוח נקלטו נכון" (Oren, 2026-09-10) - אותו
+          // Json חופשי שנשמר על ה-Order, לא רק snapshot חלקי.
+          shippingAddress: body.shippingAddress,
         });
       }
     } catch (err) {
