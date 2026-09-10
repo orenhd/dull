@@ -170,9 +170,17 @@ async function createSandalsProduct() {
       slug: "dull-sandals",
       category: ProductCategory.FOOTWEAR,
       name: { en: "Dull Sandals", he: "סנדלי Dull" },
+      // הוחלף (2026-09) ממשפט מוטו שיווקי ("The sandals designed for our
+      // campaign models...") לפסקת חומרים/ייצור אמיתית - זה השדה שמוצג תחת
+      // "Materials & Care" בעמוד המוצר (MaterialsCard.tsx), לא caption
+      // שיווקי. עור עליון+בטנה / מדרס מרופד / סוליית גומי - מפרט זהה בין
+      // Men's ל-Women's (נבדק: קמעונאים בטווח מחיר דומה כמו Next/Aldo
+      // משתמשים באותו מפרט חומרים לגברים ולנשים באותה קולקציית סנדלים -
+      // ההבדל בין הגזרות הוא רק במידות/רצועות, לא בחומר עצמו - ולכן שדה
+      // description יחיד למוצר, בלי תלות ב-Fit, נכון גם מבחינה עובדתית).
       description: {
-        en: "The sandals designed for our campaign models - now available.",
-        he: "הסנדלים שעוצבו עבור דוגמני הקמפיין שלנו - עכשיו זמינים.",
+        en: "Leather upper and lining, cushioned footbed, rubber outsole.",
+        he: "עור בעליון ובבטנה, מדרס מרופד, סוליית גומי.",
       },
       isActive: true,
     },
@@ -307,6 +315,13 @@ async function main() {
       slug: "45-grave-tee",
       category: ProductCategory.SHIRT,
       name: { en: "45 Grave Tee", he: "חולצת 45 גרייב" },
+      // אותו מפרט בדיוק כמו Darkthrone/Immortal (אושר ע"י Oren, 2026-09) -
+      // אותה עובדת ייצור בפועל (כל החולצות מאותו קו ייצור), אין סיבה
+      // שהמפרט יהיה שונה רק כי אין עדיין נכסים חזותיים למוצר הזה.
+      description: {
+        en: "100% combed cotton, 180 gsm, pre-shrunk. Water-based ink print.",
+        he: "כותנה 100% מסורקת, 180 גרם, כביסה מוקדמת. הדפסה בדיו מבוססת מים.",
+      },
       bandCreditName: "45 Grave",
       bandCreditUrl: "https://en.wikipedia.org/wiki/45_Grave", // אין לייבל יציב/דיסקוגרפיה מרכזית - ויקיפדיה כמקור הכי יציב
       isActive: false, // אין עדיין שום חומר חזותי - לא מוצג באתר עד שיהיה
