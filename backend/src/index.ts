@@ -2,6 +2,7 @@ import fs from "node:fs";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { ZodError } from "zod";
 import { env } from "./config/env.js";
 import { productsRouter } from "./routes/products.js";
 import { authRouter } from "./routes/auth.js";
@@ -96,7 +97,18 @@ app.get("*", (_req, res) => {
 // error handler גלובלי - Express 4 לא תופס דחיית Promise שלא טופלה בתוך
 // route אוטומטית, לכן כל route קורא ל-next(err) ב-catch, וזה מרכז את
 // התגובה האחידה ללקוח (JSON, לא HTML של stack trace).
+//
+// ZodError מקבל טיפול מיוחד (2026-09, נוסף יחד עם MAX_LINE_ITEM_QUANTITY
+// ב-routes/orders.ts): לפני זה, *כל* כשל ולידציה של schema.parse() (למשל
+// body חסר, quantity לא חוקי) היה נופל לכאן ומוחזר כ-500 "INTERNAL_ERROR" -
+// מטעה (זו שגיאת קלט של הלקוח, לא תקלת שרת) וגם היה נראה בלוגים כתקלה
+// אמיתית. עכשיו זה 400 עם פירוט ה-issues של zod - נכון לכל route שמשתמש
+// ב-.parse() (orders/auth/products), לא רק להוספה החדשה.
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err instanceof ZodError) {
+    res.status(400).json({ error: "VALIDATION_ERROR", issues: err.issues });
+    return;
+  }
   console.error(err);
   res.status(500).json({ error: "INTERNAL_ERROR" });
 });

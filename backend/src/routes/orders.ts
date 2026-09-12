@@ -10,7 +10,7 @@ import { sendThankYouEmail } from "../lib/email.js";
 import { findFlatMediaUrl } from "../lib/media.js";
 import { buildSelectionLabelSnapshot } from "../lib/variantLabel.js";
 import { localize } from "../lib/i18n.js";
-import { DEFAULT_LOCALE } from "../constants/index.js";
+import { DEFAULT_LOCALE, MAX_LINE_ITEM_QUANTITY } from "../constants/index.js";
 
 export const ordersRouter = Router();
 
@@ -21,7 +21,11 @@ const createOrderSchema = z.object({
     .array(
       z.object({
         productVariantId: z.string().min(1),
-        quantity: z.number().int().positive(),
+        // MAX_LINE_ITEM_QUANTITY (2026-09, Oren): עד עכשיו לא הייתה שום
+        // תקרה חוץ מ-stockQty בפועל - אפשר היה להקליד כל מספר בשדה הכמות
+        // בעגלה. זו אכיפת השרת (מקור-אמת); ה-frontend מוסיף אותה תקרה גם
+        // ב-UI כנוחות, אבל לא סומכים עליו - בקשה ישירה ל-API עדיין עוברת דרך כאן.
+        quantity: z.number().int().positive().max(MAX_LINE_ITEM_QUANTITY),
       }),
     )
     .min(1),
