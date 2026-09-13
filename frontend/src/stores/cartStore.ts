@@ -7,7 +7,7 @@
 // ומוכן לצריכה משם בלי שינוי.
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { CART_STORAGE_KEY } from "@/constants";
+import { CART_STORAGE_KEY, MAX_LINE_ITEM_QUANTITY } from "@/constants";
 
 export interface CartItem {
   variantId: string;
@@ -36,17 +36,25 @@ export const useCartStore = create<CartState>()(
     (set) => ({
       items: [],
 
+      // MAX_LINE_ITEM_QUANTITY (docs/PRD.md, בקשת Oren 2026-09-13): נאכף כאן,
+      // ב-store עצמו, לא רק ב-onChange של ה-<input> ב-CartPage.tsx - יש שתי
+      // דרכים נפרדות להגדיל את הכמות של שורת עגלה: הקלדה ישירה (setQuantity,
+      // למטה) ו-addItem המצטבר (למשל כמה לחיצות רצופות על "Add to Bag" מעמוד
+      // הפריט על אותו וריאנט שכבר בעגלה) - שתיהן חייבות clamp, לא רק אחת.
+      // האכיפה האמיתית היא בשרת (routes/orders.ts) - זו רק מניעת UX מוקדמת.
       addItem: (item, quantity = 1) =>
         set((state) => {
           const existing = state.items.find((i) => i.variantId === item.variantId);
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.variantId === item.variantId ? { ...i, quantity: i.quantity + quantity } : i,
+                i.variantId === item.variantId
+                  ? { ...i, quantity: Math.min(i.quantity + quantity, MAX_LINE_ITEM_QUANTITY) }
+                  : i,
               ),
             };
           }
-          return { items: [...state.items, { ...item, quantity }] };
+          return { items: [...state.items, { ...item, quantity: Math.min(quantity, MAX_LINE_ITEM_QUANTITY) }] };
         }),
 
       removeItem: (variantId) =>
@@ -57,7 +65,11 @@ export const useCartStore = create<CartState>()(
           items:
             quantity <= 0
               ? state.items.filter((i) => i.variantId !== variantId)
-              : state.items.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)),
+              : state.items.map((i) =>
+                  i.variantId === variantId
+                    ? { ...i, quantity: Math.min(quantity, MAX_LINE_ITEM_QUANTITY) }
+                    : i,
+                ),
         })),
 
       clear: () => set({ items: [] }),

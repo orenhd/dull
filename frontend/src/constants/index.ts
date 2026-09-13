@@ -53,3 +53,12 @@ export const PRODUCT_CATEGORY = {
   shirt: "SHIRT",
   footwear: "FOOTWEAR",
 } as const;
+
+// תקרת כמות לכל שורת עגלה/הזמנה (אותו variantId) - עד 2026-09 לא הייתה שום
+// תקרה חוץ מ-stockQty בפועל (Oren מצא שאפשר היה להקליד כל מספר בשדה הכמות
+// בעגלה). **זהה בכוונה ל-backend/src/constants/index.ts** - שני הצדדים
+// חייבים להסכים על אותו ערך, אחרת המשתמש יכול להגיע בקלות ל-400
+// VALIDATION_ERROR מהשרת (routes/orders.ts, createOrderSchema) בלי שה-UI
+// מנע ממנו מראש. **אכיפה אמיתית היא בצד השרת** - הבדיקה כאן (cartStore.ts,
+// CartPage.tsx) היא נוחות UX בלבד, לא קו ההגנה.
+export const MAX_LINE_ITEM_QUANTITY = 5;

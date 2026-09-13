@@ -23,6 +23,7 @@ import { useCartStore, selectCartTotalAgorot } from "@/stores/cartStore";
 import { useFreshCartItems } from "@/hooks/useFreshCartItems";
 import { formatAgorot } from "@/lib/money";
 import { buttonClassName } from "@/components/ui/Button";
+import { MAX_LINE_ITEM_QUANTITY } from "@/constants";
 
 export function CartPage() {
   const { t } = useTranslation();
@@ -77,9 +78,13 @@ export function CartPage() {
                     type="number"
                     inputMode="numeric"
                     min={1}
+                    max={MAX_LINE_ITEM_QUANTITY}
                     value={item.quantity}
                     onChange={(event) =>
-                      setQuantity(item.variantId, Math.max(1, Math.trunc(Number(event.target.value)) || 1))
+                      setQuantity(
+                        item.variantId,
+                        Math.min(MAX_LINE_ITEM_QUANTITY, Math.max(1, Math.trunc(Number(event.target.value)) || 1)),
+                      )
                     }
                     className="w-16 rounded-sm border border-border-base px-xs py-xs text-body text-text-base"
                   />
