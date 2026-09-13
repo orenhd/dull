@@ -31,8 +31,21 @@ import { ApiError } from "@/lib/api/client";
 import { formatAgorot } from "@/lib/money";
 import { Button } from "@/components/ui/Button";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { OutOfStockNotice } from "@/components/checkout/OutOfStockNotice";
 import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 import type { Order, OrderErrorBody, ShippingAddress } from "@/types/order";
+
+// מצב ה-"אזל מהמלאי" האינפורמטיבי (docs/PRD.md, בקשת Oren 2026-09-13) -
+// snapshot מלא (לא רק variantId) שנלקח מ-freshItems *ברגע השליחה* (לפני
+// שה-cartStore מתעדכן ל-availableQty, ראו handleSubmit) - כדי שהתמונה/שם/
+// מפרט שמוצגים בהודעה תמיד יהיו של הפריט שבאמת נכשל, גם אחרי שהכמות בעגלה
+// (ואולי הפריט כולו, אם availableQty===0) כבר השתנתה.
+interface OutOfStockInfo {
+  itemName: string;
+  itemLabel: string;
+  imageUrl: string | null;
+  availableQty: number;
+}
 
 const EMPTY_SHIPPING: ShippingAddress = {
   fullName: "",
@@ -60,11 +73,13 @@ export function CheckoutPage() {
   const items = useCartStore((s) => s.items);
   const total = useCartStore(selectCartTotalAgorot);
   const clearCart = useCartStore((s) => s.clear);
+  const setQuantity = useCartStore((s) => s.setQuantity);
   const freshItems = useFreshCartItems();
 
   const [shipping, setShipping] = useState<ShippingAddress>(EMPTY_SHIPPING);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [outOfStockInfo, setOutOfStockInfo] = useState<OutOfStockInfo | null>(null);
   const [order, setOrder] = useState<Order | null>(null);
 
   // docs/PRD.md סעיף 20 - "Checkout Started". יורה פעם אחת בלבד (ref, לא
@@ -164,6 +179,7 @@ export function CheckoutPage() {
     event.preventDefault();
     setSubmitting(true);
     setFormError(null);
+    setOutOfStockInfo(null);
     try {
       const { order: placedOrder } = await createOrder({
         items: items.map((item) => ({ productVariantId: item.variantId, quantity: item.quantity })),
@@ -186,8 +202,27 @@ export function CheckoutPage() {
         setFormError(t("checkout.sessionExpired"));
       } else if (error instanceof ApiError && error.status === 400) {
         const body = error.body as OrderErrorBody | null;
-        if (body?.error === "OUT_OF_STOCK") {
-          setFormError(t("checkout.outOfStock"));
+        if (body?.error === "OUT_OF_STOCK" && typeof body.availableQty === "number") {
+          // freshItems כאן הוא ה-snapshot מרגע השליחה (לפני ה-setQuantity
+          // למטה) - ראו הערה על OutOfStockInfo למעלה. אם הפריט לא נמצא
+          // (לא אמור לקרות בפועל - נפילה חזרה להודעה הגנרית הישנה, בלי
+          // תמונה/שם/מפרט ריקים).
+          const failedItem = freshItems.find((i) => i.variantId === body.productVariantId);
+          if (failedItem) {
+            setOutOfStockInfo({
+              itemName: failedItem.displayName,
+              itemLabel: failedItem.displayLabel,
+              imageUrl: failedItem.imageUrl,
+              availableQty: body.availableQty,
+            });
+            // מעדכן את הכמות בעגלה בפועל ל-availableQty (בקשת Oren: "לא
+            // ביקש במפורש אבל נשמע כמו שיפור UX טבעי") - 0 מסיר את הפריט
+            // מהעגלה לגמרי (setQuantity הקיים כבר עושה את זה, ראו
+            // cartStore.ts), לא משאיר כמות שגויה שהמשתמש צריך לתקן ידנית.
+            setQuantity(body.productVariantId, body.availableQty);
+          } else {
+            setFormError(t("checkout.outOfStock"));
+          }
         } else if (body?.error === "VARIANT_NOT_FOUND") {
           setFormError(t("checkout.variantNotFound"));
         } else {
@@ -238,6 +273,15 @@ export function CheckoutPage() {
             </div>
           ))}
         </fieldset>
+
+        {outOfStockInfo && (
+          <OutOfStockNotice
+            imageUrl={outOfStockInfo.imageUrl}
+            itemName={outOfStockInfo.itemName}
+            itemLabel={outOfStockInfo.itemLabel}
+            availableQty={outOfStockInfo.availableQty}
+          />
+        )}
 
         {formError && (
           <p role="alert" className="m-0 text-caption text-feedback-error">

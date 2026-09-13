@@ -139,6 +139,10 @@
     "successEmailNote": "A confirmation email is on its way.",
     "sessionExpired": "You were signed out — please sign in again to place the order.",
     "outOfStock": "One of the items in your bag just sold out. Please review your bag.",
+    "outOfStockDetail": {
+      "reduced": "Only {{count}} left — we've updated the quantity in your bag to match. Please try again.",
+      "removed": "This item just sold out and was removed from your bag. Please review your bag and try again."
+    },
     "variantNotFound": "One of the items in your bag is no longer available. Please review your bag.",
     "genericError": "Something went wrong placing your order. Please try again."
   },

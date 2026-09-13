@@ -43,6 +43,11 @@ export type OrderErrorCode = "VARIANT_NOT_FOUND" | "OUT_OF_STOCK";
 export interface OrderErrorBody {
   error: OrderErrorCode;
   productVariantId: string;
+  // רק ב-OUT_OF_STOCK (routes/orders.ts, backend) - המלאי האמיתי הנוכחי של
+  // הוריאנט שנכשל, כדי שאפשר יהיה להציג הודעה אינפורמטיבית ב-checkout
+  // ("נשארו רק X") במקום הודעה גנרית ("אזל מהמלאי" בלי מספר) - ראו
+  // CheckoutPage.tsx, handleSubmit. אופציונלי (לא קיים ב-VARIANT_NOT_FOUND).
+  availableQty?: number;
 }
 
 // --- היסטוריית הזמנות (GET /orders, GET /orders/:id) ---
