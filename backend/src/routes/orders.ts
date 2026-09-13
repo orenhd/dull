@@ -59,7 +59,15 @@ ordersRouter.post("/", async (req, res, next) => {
         return;
       }
       if (variant.stockQty < item.quantity) {
-        res.status(400).json({ error: "OUT_OF_STOCK", productVariantId: item.productVariantId });
+        // availableQty נוסף (2026-09, Oren): בלי זה ה-frontend לא יכול לומר
+        // למשתמש כמה יחידות באמת יש - רק "אזל", בלי מספר. המטרה: הודעת
+        // checkout אינפורמטיבית (איזה פריט, כמה זמין) במקום הודעה גנרית
+        // שמשאירה את המשתמש לנחש למה להוריד את הכמות בעגלה.
+        res.status(400).json({
+          error: "OUT_OF_STOCK",
+          productVariantId: item.productVariantId,
+          availableQty: variant.stockQty,
+        });
         return;
       }
     }

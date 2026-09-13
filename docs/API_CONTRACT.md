@@ -95,7 +95,8 @@ Body:
 }
 ```
 - המחיר **תמיד** מחושב בשרת מה-DB - לא לשלוח מחיר מה-frontend, הוא יתעלם ממנו ממילא.
-- שגיאות אפשריות: `400 { error: "VARIANT_NOT_FOUND", productVariantId }`, `400 { error: "OUT_OF_STOCK", productVariantId }`.
+- `quantity` לכל פריט מוגבל ל-`MAX_LINE_ITEM_QUANTITY` (5, `constants/index.ts`, נוסף 2026-09) - זהה בכוונה לערך המקביל ב-frontend, ראו הערה שם.
+- שגיאות אפשריות: `400 { error: "VARIANT_NOT_FOUND", productVariantId }`, `400 { error: "OUT_OF_STOCK", productVariantId, availableQty }` (`availableQty` נוסף 2026-09 - המלאי האמיתי הנוכחי של הוריאנט, כדי שה-frontend יוכל להציג הודעה מפורטת ולא רק "אזל"), `400 { error: "VALIDATION_ERROR", issues }` (נוסף 2026-09 - כשל zod גנרי, כולל למשל חריגה מ-`MAX_LINE_ITEM_QUANTITY` בכמות פריט בודד - `issues` הוא מערך ה-issues הגולמי של zod).
 - הצלחה: `201 { order: { id, totalAgorot, items: [...], ... } }` — צורת `items[]` מפורטת למטה (זהה ב-`GET /orders`/`GET /orders/:id`).
 - **אין תשלום אמיתי** (v1 - "רכישה חינמית", ראו PRD 11.2). אחרי יצירת ההזמנה נשלח מייל תודה + PDF מתנה ל-מייל המשתמש - אין ל-frontend שום תפקיד בזה, זה effect צד-שרת מלא.
 
