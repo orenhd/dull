@@ -185,15 +185,20 @@
     "dataCollected": {
       "title": "What we collect",
       "account": "When you sign in with Google, we receive your email address and name from your Google account.",
-      "orders": "When you place an order at checkout, we collect the shipping details and order information you enter (name, address, phone, and the items ordered)."
+      "orders": "When you place an order at checkout, we collect the shipping details and order information you enter (name, address, phone, and the items ordered).",
+      "analytics": "We also collect basic usage analytics (such as pages viewed, products viewed, and checkout actions) through Mixpanel, to understand how the site is used."
     },
     "thirdPartySignIn": {
       "title": "Third-party sign-in",
       "body": "Sign-in is handled by Google Sign-In. Additional sign-in options (such as Facebook Login) may be added in the future."
     },
+    "analytics": {
+      "title": "Analytics",
+      "body": "We use Mixpanel, a third-party analytics service, to understand how visitors use the site (for example, which products are viewed and whether checkout is completed). Tracking starts anonymously when you visit; once you sign in, it's linked to your account, and your name and email (from your Google sign-in) are added to your Mixpanel profile so activity can be attributed to you rather than an anonymous ID. It isn't used for advertising, and we don't sell this data."
+    },
     "cookies": {
       "title": "Cookies",
-      "body": "We use a single httpOnly session cookie to keep you signed in. It's used only for authentication — we don't use cookies for tracking or advertising."
+      "body": "We use a single httpOnly session cookie to keep you signed in. It's used only for authentication."
     },
     "payments": {
       "title": "Payments",

@@ -12,6 +12,14 @@ const envSchema = z.object({
   // אבל מוולד כאן כבר עכשיו כדי שהחלק הזה של התשתית לא יידרש שוב מאוחר
   // יותר. לא סוד (ראו docs/API_CONTRACT.md).
   VITE_GOOGLE_CLIENT_ID: z.string().min(1, "VITE_GOOGLE_CLIENT_ID is required"),
+
+  // Mixpanel project token (docs/PRD.md סעיף 20, בקשת Oren 2026-09-12) -
+  // *אופציונלי בכוונה*, בניגוד לשני הערכים למעלה: אנליטיקה היא תוספת
+  // best-effort, לא תלות קריטית - האתר חייב להמשיך לעבוד במלואו גם בלי
+  // טוקן מוגדר (dev מקומי לפני שנפתח חשבון Mixpanel, או אם החשבון ייסגר/
+  // יימחק בעתיד). src/lib/analytics.ts בודק בעצמו אם הערך קיים ונשאר
+  // no-op בשקט אם לא - ראו שם.
+  VITE_MIXPANEL_TOKEN: z.string().optional(),
 });
 
 export const env = envSchema.parse(import.meta.env);

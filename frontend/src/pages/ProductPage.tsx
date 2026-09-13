@@ -3,6 +3,7 @@
 // למצבי הקצה (טעינה/ריק/שגיאה). מבוסס ישירות על github.com/orenhd/dull-demo
 // (index.html + style.css + script.js) - ראו הערות בקומפוננטות הבנות
 // לכל מקום שבו המימוש האמיתי (מול API אמיתי) חייב לסטות מהדמו הסטטי.
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -19,6 +20,7 @@ import { BandCredit } from "@/components/product/BandCredit";
 import { SoldOutNotice } from "@/components/product/SoldOutNotice";
 import { GallerySkeleton, ProductContentSkeleton } from "@/components/feedback/Skeletons";
 import { formatAgorot } from "@/lib/money";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { PRODUCT_CATEGORY } from "@/constants";
 import type { Product } from "@/types/product";
 
@@ -75,6 +77,18 @@ export function ProductPage() {
     queryKey: ["product", slug, locale],
     queryFn: ({ signal }) => getProduct(slug, locale, signal),
   });
+
+  // docs/PRD.md סעיף 20 - "Product Viewed". תלוי ב-id (לא ב-query.data
+  // עצמו כ-reference) כדי לא להסתמך על structural-sharing של React Query
+  // בשביל נכונות - יורה פעם אחת לכל מוצר-בפועל שבאמת נטען, גם אם ה-object
+  // יוחלף ברענון locale (slug/id לא משתנים).
+  const productId = query.data?.product.id;
+  useEffect(() => {
+    const product = query.data?.product;
+    if (!product) return;
+    trackEvent(ANALYTICS_EVENTS.productViewed, { slug: product.slug, name: product.name, category: product.category });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- productId (למעלה) הוא ה-dep האמיתי, לא query.data
+  }, [productId]);
 
   if (query.isPending) {
     // תוקן 2026-09-10 (docs/PRD.md סעיף 12.17): ה-section הזה היה עם pt-md

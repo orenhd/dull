@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useLocaleSync } from "@/hooks/useLocaleSync";
 import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
+import { useAnalyticsIdentity } from "@/hooks/useAnalyticsIdentity";
 import { SkipLink } from "./SkipLink";
 import { SiteHeader } from "./SiteHeader";
 import { DisclaimerBanner } from "./DisclaimerBanner";
@@ -14,6 +15,10 @@ export function RootLayout({ children }: { children: ReactNode }) {
   // תתחיל מיד עם טעינת האפליקציה (לא רק כשמגיעים בפועל ל-/checkout), וכך
   // בזמן שהמשתמש מנווט בקטלוג התשובה כבר תהיה מוכנה כשיגיע לעגלה.
   useAuthBootstrap();
+  // Mixpanel identify/reset בעקבות שינוי authStore.user - ראו hooks/
+  // useAnalyticsIdentity.ts להסבר המלא (למה זה מרוכז כאן ולא מפוזר בכל
+  // login/logout).
+  useAnalyticsIdentity();
 
   return (
     // App-shell (בקשת Oren, 2026-09-08): header ו-footer צמודים תמיד לקצוות

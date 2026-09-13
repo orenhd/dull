@@ -19,7 +19,7 @@
 // שדות טופס המשלוח (docs/API_CONTRACT.md: "כל מבנה - טופס המשלוח עוד לא
 // נקבע סופית ב-PRD"): סט מינימלי - שם מלא, טלפון, כתובת, עיר, מיקוד - ראו
 // docs/PRD.md סעיף 12.5 ו-src/types/order.ts.
-import { useState, type FormEvent } from "react";
+import { useState, useRef, useEffect, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useCartStore, selectCartTotalAgorot } from "@/stores/cartStore";
@@ -31,6 +31,7 @@ import { ApiError } from "@/lib/api/client";
 import { formatAgorot } from "@/lib/money";
 import { Button } from "@/components/ui/Button";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 import type { Order, OrderErrorBody, ShippingAddress } from "@/types/order";
 
 const EMPTY_SHIPPING: ShippingAddress = {
@@ -65,6 +66,19 @@ export function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [order, setOrder] = useState<Order | null>(null);
+
+  // docs/PRD.md סעיף 20 - "Checkout Started". יורה פעם אחת בלבד (ref, לא
+  // state - אין צורך ברינדור נוסף) ברגע שכל התנאים האמיתיים מתקיימים: יש
+  // פריטים בעגלה, בדיקת ה-session הסתיימה, והמשתמש בפועל מחובר (כלומר
+  // ה-checkout "האמיתי", לא אחד מהמצבים הזמניים/חוסמים למעלה). מוצב לפני
+  // כל return מוקדם - חובה לפי Rules of Hooks.
+  const trackedCheckoutStarted = useRef(false);
+  useEffect(() => {
+    if (trackedCheckoutStarted.current) return;
+    if (order || items.length === 0 || authStatus !== "ready" || !user) return;
+    trackedCheckoutStarted.current = true;
+    trackEvent(ANALYTICS_EVENTS.checkoutStarted, { itemCount: items.length, totalAgorot: total });
+  }, [order, items, authStatus, user, total]);
 
   if (order) {
     return (
@@ -157,6 +171,12 @@ export function CheckoutPage() {
       });
       clearCart();
       setOrder(placedOrder);
+      // docs/PRD.md סעיף 20 - "Order Placed".
+      trackEvent(ANALYTICS_EVENTS.orderPlaced, {
+        orderId: placedOrder.id,
+        totalAgorot: placedOrder.totalAgorot,
+        itemCount: items.length,
+      });
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         // ה-session פג/בוטל בפועל בין הרגע שה-authStore חשב שהמשתמש מחובר

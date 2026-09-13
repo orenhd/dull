@@ -9,6 +9,7 @@ import { findMedia, buildSelectionLabel } from "@/lib/variant";
 import { MEDIA_ROLE } from "@/constants";
 import { useCartStore } from "@/stores/cartStore";
 import { useToastStore } from "@/stores/toastStore";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 import type { Product } from "@/types/product";
 import type { useVariantSelection } from "@/hooks/useVariantSelection";
 
@@ -75,6 +76,15 @@ export function AddToBagForm({ product, selection }: AddToBagFormProps) {
       sku: variant.sku,
       priceAgorot: variant.priceAgorot,
       imageUrl: flatImage ? resolveMediaUrl(flatImage.url) : null,
+      selectionLabel,
+    });
+
+    // docs/PRD.md סעיף 20 - "Added to Bag".
+    trackEvent(ANALYTICS_EVENTS.addedToBag, {
+      productSlug: product.slug,
+      productName: product.name,
+      sku: variant.sku,
+      priceAgorot: variant.priceAgorot,
       selectionLabel,
     });
 

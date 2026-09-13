@@ -3,8 +3,11 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import "@/i18n"; // side-effect: מאתחל את i18next לפני שהעץ מצטייר
+import { initAnalytics } from "@/lib/analytics"; // side-effect: מאתחל Mixpanel (no-op אם אין טוקן, ראו שם)
 import { router } from "@/router";
 import "@/styles/index.css";
+
+initAnalytics();
 
 const queryClient = new QueryClient({
   defaultOptions: {

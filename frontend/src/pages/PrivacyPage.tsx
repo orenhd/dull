@@ -47,9 +47,17 @@ export function PrivacyPage() {
 
         <Section
           title={t("privacy.dataCollected.title")}
-          body={[t("privacy.dataCollected.account"), t("privacy.dataCollected.orders")]}
+          body={[
+            t("privacy.dataCollected.account"),
+            t("privacy.dataCollected.orders"),
+            t("privacy.dataCollected.analytics"),
+          ]}
         />
         <Section title={t("privacy.thirdPartySignIn.title")} body={t("privacy.thirdPartySignIn.body")} />
+        {/* נוסף 2026-09-12 (docs/PRD.md סעיף 20, בעקבות הוספת Mixpanel) - בין
+            thirdPartySignIn ל-cookies: אחרי "איך מתחברים" ולפני "מה שומרים
+            בדפדפן", לפני payments (שאין לו קשר לאנליטיקס). */}
+        <Section title={t("privacy.analytics.title")} body={t("privacy.analytics.body")} />
         <Section title={t("privacy.cookies.title")} body={t("privacy.cookies.body")} />
         <Section title={t("privacy.payments.title")} body={t("privacy.payments.body")} />
         <Section title={t("privacy.howWeUse.title")} body={t("privacy.howWeUse.body")} />

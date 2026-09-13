@@ -18,6 +18,7 @@ import { loginWithGoogle } from "@/lib/api/auth";
 import { useAuthStore } from "@/stores/authStore";
 import { useToastStore } from "@/stores/toastStore";
 import { useApiLocale } from "@/hooks/useApiLocale";
+import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 
 // טיפוס מינימלי ל-window.google - רק החלק שבאמת בשימוש כאן. אין חבילת
 // @types רשמית ל-GIS, אז מוצהר ידנית במקום any גורף.
@@ -71,6 +72,10 @@ export function GoogleSignInButton() {
       try {
         const { user } = await loginWithGoogle(response.credential);
         setUser(user);
+        // אירוע נפרד מ-identify (hooks/useAnalyticsIdentity.ts, שרק מסנכרן
+        // זהות בשקט) - זו כניסה אינטראקטיבית טרייה בפועל, לא שחזור session
+        // קיים בטעינת דף. docs/PRD.md סעיף 20.
+        trackEvent(ANALYTICS_EVENTS.signInCompleted);
       } catch {
         showToast(t("auth.signInError"));
       }
