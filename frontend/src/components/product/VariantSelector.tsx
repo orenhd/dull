@@ -31,7 +31,17 @@ export function VariantSelector({
   // מידה זמינה-מבנית - זה soldOutSizeIds עצמו, המשמש לסימון בתוך ה-<option>-ים
   // למטה). קדימות ל-sizeError (לא נבחרה מידה בכלל) - שתי ההודעות חולקות את
   // אותו <p> מתחת ל-select, בדיוק כבקשת Oren ("על אותו שטנץ").
-  const selectedSizeSoldOut = Boolean(selection.size) && soldOutSizeIds.has(selection.size);
+  //
+  // תוקן 2026-09-14 (דיווח Oren, build שבר): AxisSelection הוא Record<string,
+  // string> - selection.size מוקלד string|undefined (noUncheckedIndexedAccess
+  // ב-tsconfig, אותה סיבה ש-selection[axis.key] בשאר הקובץ תמיד עובר דרך
+  // .find()/אופרטורים בטוחים). Boolean(selection.size) בודק truthy, אבל לא
+  // מצמצם (narrow) את הטיפוס בגישה השנייה (soldOutSizeIds.has(selection.size))
+  // - כל גישה ל-property מבוסס index signature נבדקת בנפרד ב-TS. הפתרון:
+  // ללכוד בשם קבוע (selectedSize) ולהשתמש בביטוי שמצמצם בפועל (ternary על
+  // המשתנה עצמו), לא בקריאה ל-Boolean().
+  const selectedSize = selection.size;
+  const selectedSizeSoldOut = selectedSize ? soldOutSizeIds.has(selectedSize) : false;
   const sizeMessageKey = sizeError ? "variant.sizeRequired" : selectedSizeSoldOut ? "variant.sizeSoldOut" : null;
 
   return (
