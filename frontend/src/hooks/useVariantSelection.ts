@@ -14,17 +14,23 @@ import {
   getAvailableAxisValues,
   getSoldOutSizeIds,
   isCombinationSoldOut,
+  SIZE_AXIS_KEY,
   type AxisSelection,
 } from "@/lib/variant";
 import type { Product } from "@/types/product";
 
-const SIZE_AXIS_KEY = "size";
-
-export function useVariantSelection(product: Product) {
+// docs/PRD.md סעיף 13 (קישור משותף ל-Fit/Colorway ב-URL) - initialDesired
+// אופציונלי, נצרך **רק** דרך ה-lazy initializer של useState למטה. קריטי:
+// זה חייב להישאר המקום היחיד שבו search/initialDesired משפיעים על ה-state
+// - שום useEffect שמאזין לזה ומעדכן selection מחדש (זה ייצור לולאה מול
+// ה-useEffect ההפוך ב-ProductPage.tsx שכותב state->URL). ה-caller
+// (ProductPage.tsx) אחראי לתרגם URL->AxisSelection לפני הקריאה (
+// deriveDesiredFromSearch, lib/variant.ts).
+export function useVariantSelection(product: Product, initialDesired: AxisSelection = {}) {
   const nonSizeAxes = useMemo(() => product.axes.filter((a) => a.key !== SIZE_AXIS_KEY), [product.axes]);
   const sizeAxis = useMemo(() => product.axes.find((a) => a.key === SIZE_AXIS_KEY), [product.axes]);
 
-  const [selection, setSelection] = useState<AxisSelection>(() => deriveSelection(nonSizeAxes, {}));
+  const [selection, setSelection] = useState<AxisSelection>(() => deriveSelection(nonSizeAxes, initialDesired));
 
   const selectedIds = useMemo(() => new Set(Object.values(selection)), [selection]);
 

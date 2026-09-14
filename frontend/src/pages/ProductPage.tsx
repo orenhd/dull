@@ -10,7 +10,7 @@ import { Link } from "@tanstack/react-router";
 import { productRoute } from "@/router";
 import { getProduct } from "@/lib/api/products";
 import { ApiError } from "@/lib/api/client";
-import { getStartingPriceAgorot } from "@/lib/variant";
+import { buildSearchFromSelection, deriveDesiredFromSearch, getStartingPriceAgorot } from "@/lib/variant";
 import { useVariantSelection } from "@/hooks/useVariantSelection";
 import { useApiLocale } from "@/hooks/useApiLocale";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
@@ -30,8 +30,29 @@ function categoryLabel(category: Product["category"], t: (key: string) => string
 
 function ProductPageContent({ product }: { product: Product }) {
   const { t } = useTranslation();
-  const selection = useVariantSelection(product);
+  const navigate = productRoute.useNavigate();
+
+  // docs/PRD.md סעיף 13 - קישור משותף ל-Fit/Colorway דרך query params
+  // (?fit=<key>&colorway=<key>, docs/API_CONTRACT.md). כיוון URL->state:
+  // נקרא **רק פעם אחת**, כ-initialDesired ל-useVariantSelection (הלאה,
+  // דרך ה-lazy initializer של useState שם) - לא memoized בכוונה (זול
+  // לחשב, ומכוון לא-להיכנס ל-dependency array של שום אפקט, ראו למטה).
+  const search = productRoute.useSearch();
+  const initialDesired = deriveDesiredFromSearch(product.axes, search);
+  const selection = useVariantSelection(product, initialDesired);
   const { variant, selectedIds, isColorwaySoldOut } = selection;
+
+  // כיוון ההפוך state->URL: כתיבה רציפה של הבחירה החיה לשורת הכתובת בכל
+  // שינוי (כולל מיד ב-mount, עם ברירת המחדל/מה-URL שנקלט - כך שהכתובת
+  // תמיד מדויקת ומוכנה להעתקה/שיתוף בלי צורך בכפתור "העתק קישור" נפרד).
+  // replace:true חובה - כל שינוי בחירה לא אמור ליצור entry חדש בהיסטוריית
+  // הדפדפן (חוויית "אחורה" גרועה אחרת). קריטי: תלוי רק ב-selection.selection
+  // (לא ב-search כלל) - כדי לא ליצור לולאה מול הכיוון ההפוך למעלה.
+  useEffect(() => {
+    const nextSearch = buildSearchFromSelection(product.axes, selection.selection);
+    void navigate({ search: nextSearch, replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- product.axes קבוע לכל חיי הקומפוננטה; navigate יציב (route-scoped)
+  }, [selection.selection]);
 
   // אין תת-כותרת דינאמית "בהיר/כהה" מתחת לשם המוצר (הוסר בכוונה,
   // 2026-09-08) - הסימון על ה-chip הנבחר בבורר הווריאנט כבר מספיק.

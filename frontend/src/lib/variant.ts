@@ -11,6 +11,12 @@ import type { AxisValue, Media, MediaRole, Product, ProductVariant, VariantAxis 
 
 export type AxisSelection = Record<string, string>; // axis.key -> axisValueId
 
+// שם הציר הקבוע "מידה" - מרוכז כאן (לא רק ב-useVariantSelection.ts כמו
+// שהיה עד 2026-09-14) כי גם deriveDesiredFromSearch/buildSearchFromSelection
+// למטה צריכות לדעת לדלג עליו (הקישור המשותף ב-URL הוא Fit/Colorway בלבד,
+// לא Size - ראו docs/PRD.md סעיף 13). מפתח יחיד, לא שכפול מחרוזת "size".
+export const SIZE_AXIS_KEY = "size";
+
 function isAvailable(value: AxisValue, selectedIds: ReadonlySet<string>): boolean {
   return value.dependsOnValueId == null || selectedIds.has(value.dependsOnValueId);
 }
@@ -72,6 +78,44 @@ export function resolveSelection(product: Product, desired: AxisSelection): Reso
   const selectedIds = selectionToIdSet(selection);
   const variant = findVariant(product.variants, selectedIds);
   return { selection, selectedIds, variant };
+}
+
+// קישור משותף ל-Fit+Colorway דרך query params (docs/PRD.md סעיף 13,
+// docs/API_CONTRACT.md: "?<axisKey>=<valueKey>" - הבקאנד כבר קורא בדיוק
+// את אותו פורמט כדי לקבוע og:image/twitter:image/og:url לתצוגה מקדימה).
+// **key, לא id** - ה-key יציב וקריא-לאדם (part of API contract), בעוד
+// ה-id הוא מזהה פנימי של ה-DB שלא בטוח יציב/משמעותי מחוץ למערכת. ה-state
+// הפנימי (AxisSelection) עדיין עובד על id-ים כרגיל (findVariant וכו') -
+// שתי הפונקציות האלה הן רק שכבת תרגום בגבול ה-URL, בשני הכיוונים.
+//
+// חד-כיווני בכוונה בכל כיוון בנפרד: URL->state קורה *פעם אחת בלבד*, דרך
+// ה-lazy initializer של useState ב-useVariantSelection.ts (לא useEffect
+// שמאזין ל-search - זה היה יוצר לולאה מול הכתיבה ההפוכה state->URL
+// ב-ProductPage.tsx). לא כולל Size - "הקישור המשותף" הוא Fit/Colorway
+// (מה שקובע og:image), לא בחירת מידה אישית.
+export function deriveDesiredFromSearch(axes: VariantAxis[], search: Record<string, string>): AxisSelection {
+  const result: AxisSelection = {};
+  for (const axis of axes) {
+    if (axis.key === SIZE_AXIS_KEY) continue;
+    const rawValue = search[axis.key];
+    if (rawValue == null) continue;
+    const value = axis.values.find((v) => v.key === rawValue);
+    if (value) result[axis.key] = value.id; // "fail open" - key לא תואם/לא קיים -> מדלגים בשקט
+  }
+  return result;
+}
+
+// ההפוך ל-deriveDesiredFromSearch למעלה - נקראת ברציפות (בכל שינוי בחירה)
+// מ-ProductPage.tsx כדי לכתוב את הבחירה החיה חזרה לשורת הכתובת.
+export function buildSearchFromSelection(axes: VariantAxis[], selection: AxisSelection): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const axis of axes) {
+    if (axis.key === SIZE_AXIS_KEY) continue;
+    const valueId = selection[axis.key];
+    const value = valueId ? axis.values.find((v) => v.id === valueId) : undefined;
+    if (value) result[axis.key] = value.key;
+  }
+  return result;
 }
 
 

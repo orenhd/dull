@@ -35,9 +35,24 @@ const homeRoute = createRoute({
 });
 
 // /products/$slug - $slug הוא path param מוקלד. ראו src/pages/ProductPage.tsx.
+// validateSearch גנרי (2026-09-14, docs/PRD.md סעיף 13, קישור משותף
+// ל-Fit/Colorway) - שומר רק זוגות מפתח/ערך שהם string ממש (מסנן undefined/
+// מערכים/כל דבר אחר ש-URLSearchParams לא צפוי להפיק, מגן מפני URL מורכב
+// שהוזן ידנית). לא מוגדר לפי שמות צירים ספציפיים (fit/colorway) בכוונה -
+// המוצרים שונים יכולים להגדיר צירים שונים (ראו VariantAxis.key, מגיע
+// מה-DB, לא קבוע-קומפייל) - הפרשנות ל"אילו מפתחות רלוונטיים" קורית ב-
+// deriveDesiredFromSearch (lib/variant.ts), לא כאן. "fail open" עקבי עם
+// הבקאנד (docs/API_CONTRACT.md סעיף 13) - שום ולידציה שנכשלת בזריקת שגיאה.
 export const productRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/products/$slug",
+  validateSearch: (search: Record<string, unknown>): Record<string, string> => {
+    const result: Record<string, string> = {};
+    for (const [key, value] of Object.entries(search)) {
+      if (typeof value === "string") result[key] = value;
+    }
+    return result;
+  },
   component: ProductPage,
 });
 

@@ -6,8 +6,8 @@
 // html קבוע. frontend/index.html מכיל הערה שמסמנת בדיוק אילו ערכי ברירת-
 // מחדל כאן הם היעד להחלפה - לשמור סנכרון בין שני הקבצים אם משהו שם משתנה.
 import type { Request } from "express";
-import { getProductBySlug } from "./products.js";
-import { findDefaultFlatMediaUrl } from "./media.js";
+import { getProductBySlug, type ProductWithRelations } from "./products.js";
+import { findDefaultFlatMediaUrl, findFlatMediaUrl } from "./media.js";
 import { localize } from "./i18n.js";
 import { DEFAULT_LOCALE } from "../constants/index.js";
 
@@ -50,6 +50,44 @@ interface ProductMetaValues {
   title: string;
   pageUrl: string;
   imageUrl: string | null;
+}
+
+// תמיכה בשיתוף קומבינציה ספציפית (Fit+Colorway, 2026-09 - אורן ביקש שקישור
+// משותף לקומבינציה מסוימת יציג גם בתצוגה המקדימה את התמונה הנכונה, לא רק
+// בעמוד עצמו אחרי טעינה). ה-frontend קורא/כותב את אותם query params (מפתח =
+// VariantAxis.key, ערך = VariantAxisValue.key - למשל ?fit=mens&colorway=dark,
+// ראו frontend/src/pages/ProductPage.tsx). גנרי במכוון על כל הצירים חוץ
+// מ-Size - לא "fit"/"colorway" הארדקוד בקוד - כך שגם סנדלים (שאין להם
+// בכלל ציר Colorway) וגם כל ציר עתידי נוסף עובדים בלי שינוי כאן.
+//
+// "fail open" מלא, עקבי עם שאר הקובץ: כל query string חלקי/לא-תקין (ציר
+// חסר מה-URL, ערך לא קיים על הציר, קישור ישן מלפני reseed שבו ה-key עצמו
+// כבר לא קיים) מחזיר null - ה-caller נופל בחזרה לברירת המחדל המדורגת
+// הרגילה, לעולם לא שגיאה. דורש התאמה ל-*כל* הצירים הלא-Size של המוצר (לא
+// התאמה חלקית) - אחרת אין קומבינציה שלמה להצליב מול תמונה, וממילא
+// findFlatMediaUrl לא היה מוצא כלום (תמונות flat מתויגות בכל צירי
+// ה-Fit+Colorway יחד, לא בציר בודד - ראו lib/media.ts).
+const SIZE_AXIS_KEY = "size";
+
+function resolveSelectedAxisValueIds(
+  axes: ProductWithRelations["axes"],
+  query: Request["query"],
+): Set<string> | null {
+  const comboAxes = axes.filter((axis) => axis.key !== SIZE_AXIS_KEY);
+  if (comboAxes.length === 0) return null;
+
+  const axisValueIds = new Set<string>();
+  for (const axis of comboAxes) {
+    const rawValue = query[axis.key];
+    if (typeof rawValue !== "string") return null;
+
+    const match = axis.values.find((value) => value.key === rawValue);
+    if (!match) return null;
+
+    axisValueIds.add(match.id);
+  }
+
+  return axisValueIds;
 }
 
 // הגנה בסיסית מפני שבירת attribute/HTML - שם המוצר מגיע מה-DB (Prisma),
@@ -120,17 +158,32 @@ export async function buildProductMetaValues(
     if (!title) return null;
 
     const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    // אם ה-query string מזהה קומבינציה מלאה ותקינה (?fit=...&colorway=...) -
+    // תמונת ה-flat התואמת בדיוק אליה (findFlatMediaUrl, אותה פונקציה
+    // שמשרתת גם thumbnail במייל אישור הזמנה). אחרת, או אם לא נמצאה התאמה -
     // "ברירת מחדל" משותפת עם הכרטיס בקטלוג (routes/products.ts, GET /) -
     // אותה פונקציה בדיוק, lib/media.ts - כדי שתמונת השיתוף וכרטיס הקטלוג
     // תמיד יציגו את אותו גוון/גזרה (docs/PRD.md סעיף 6, הוכרע 2026-09-09).
     // *לא* product.variants[0] (כפי שהיה כאן קודם) - לוריאנטים אין orderBy
     // מוגדר בכלל, אז "הראשון" היה בפועל שרירותי/לא-מוגדר, לא "ברירת מחדל"
     // אמיתית.
-    const relativeImageUrl = findDefaultFlatMediaUrl(product.media);
+    const selectedAxisValueIds = resolveSelectedAxisValueIds(product.axes, req.query);
+    const relativeImageUrl =
+      (selectedAxisValueIds &&
+        findFlatMediaUrl(
+          product.media,
+          [...selectedAxisValueIds].map((axisValueId) => ({ axisValueId })),
+        )) ||
+      findDefaultFlatMediaUrl(product.media);
 
     return {
       title,
-      pageUrl: `${baseUrl}/products/${product.slug}`,
+      // req.originalUrl (לא רק slug קבוע) - כך שכשיש קומבינציה ספציפית
+      // ב-query string, og:url משקף את הקישור המדויק ששותף (כולל ה-query),
+      // לא תמיד את כתובת המוצר הגנרית. במקרה הרגיל (בלי query) זה זהה
+      // למה שהיה קודם.
+      pageUrl: `${baseUrl}${req.originalUrl}`,
       imageUrl: relativeImageUrl ? new URL(relativeImageUrl, baseUrl).toString() : null,
     };
   } catch (err) {

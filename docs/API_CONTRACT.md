@@ -73,6 +73,8 @@
 - ניווט דפדפן ישיר / בוט תצוגה-מקדימה (WhatsApp/Slack/iMessage/Facebook/Twitter/Telegram/Discord/LinkedIn) מקבל את `index.html` הבנוי, עם `<title>`/`og:title`/`og:image`/`og:url`/`twitter:*` מוזרקים per-product בצד השרת (bots כאלה כמעט אף פעם לא מריצים JS).
 - ההבחנה מבוססת על `Accept` header (מי ששולח `text/html` מפורש מקבל HTML) + רשימת User-Agent ידועה כגיבוי. **אם אי-פעם תרצו לשנות את `client.ts` להוסיף `Accept: application/json` מפורש** - זה עדיין יעבוד נכון (JSON תמיד ינצח כשמבוקש מפורשות), אבל **לעולם אל תוסיפו `Accept: text/html`** לקריאות ה-API הפנימיות - זה ישבור את הזיהוי ויחזיר HTML במקום JSON.
 
+**חשוב (נוסף 2026-09-14, `docs/PRD.md` סעיף 13) - `?<axisKey>=<valueKey>` אופציונליים לתצוגה המקדימה בלבד:** כשהניווט/הבוט מקבל HTML (הסעיף למעלה), `GET /products/:slug?fit=<key>&colorway=<key>` (וכל ציר לא-Size נוסף שקיים למוצר, לפי `VariantAxis.key`/`VariantAxisValue.key` היציבים - **לא** ה-`id`) גורם ל-`og:image`/`twitter:image`/`og:url` המוזרקים לשקף את אותה קומבינציה ספציפית, במקום ברירת המחדל המדורגת (`backend/src/lib/metaInjection.ts`, `resolveSelectedAxisValueIds()`). **לא נוגע כלל בתגובת ה-JSON הרגילה** (הצורה המתועדת למעלה) - זו התנהגות של נתיב תצוגת ה-HTML/בוטים בלבד. "fail open": query חסר/חלקי/לא-תקין (ציר או ערך שלא קיימים) נופל בשקט לברירת המחדל, אף פעם לא שגיאה.
+
 ### `POST /auth/google`
 Body: `{ "credential": "<google id token>" }`. מגדיר session cookie. תגובה: `{ "user": { "id", "email", "name" } }`.
 
