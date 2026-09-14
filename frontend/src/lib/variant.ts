@@ -75,6 +75,30 @@ export function resolveSelection(product: Product, desired: AxisSelection): Reso
 }
 
 
+// עבור כל ערך מידה שזמין מבחינה מבנית (availableSizeValues, ראו
+// useVariantSelection.ts) - "האם הצירוף המלא (nonSizeSelectedIds + המידה
+// הזו) קיים כ-variant עם מלאי 0?" משמש לסמן מידות ספציפיות שאזלו בתוך
+// select המידה (docs/PRD.md סעיף 26, בקשת Oren - אין שום אינדיקציה כרגע
+// למה כפתור "הוסף לסל" לא זמין כשהמידה הנבחרת אזלה). שונה מ-
+// isCombinationSoldOut למטה (רמת Fit+Colorway *כולה*, בלי Size בכלל, ומחליף
+// את כל טופס הרכישה ב-SoldOutNotice) - כאן הבדיקה per-size, על וריאנט בודד,
+// והתוצאה היא רשימת מידות לסימון בתוך טופס שעדיין פעיל. כמו
+// isCombinationSoldOut, "אין וריאנט תואם בנתונים" לא נחשב "אזל" - לא טוענים
+// משהו בלי הוכחה.
+export function getSoldOutSizeIds(
+  variants: ProductVariant[],
+  nonSizeSelectedIds: ReadonlySet<string>,
+  sizeValues: AxisValue[],
+): Set<string> {
+  const soldOut = new Set<string>();
+  for (const value of sizeValues) {
+    const candidateIds = new Set([...nonSizeSelectedIds, value.id]);
+    const variant = findVariant(variants, candidateIds);
+    if (variant && variant.stockQty <= 0) soldOut.add(value.id);
+  }
+  return soldOut;
+}
+
 // "האם צירוף Fit+Colorway (בלי Size) אזל *לגמרי* - כל המידות בו במלאי 0?"
 // משמש להחלטה בין הצגת SoldOutNotice המלא (מחליף את כל בלוק הרכישה, ראו
 // docs/PRD.md סעיף 8א) לבין אזהרת מלאי נקודתית על מידה בודדת. `partialIds`

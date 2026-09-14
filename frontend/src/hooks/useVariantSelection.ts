@@ -12,6 +12,7 @@ import {
   deriveSelection,
   findVariant,
   getAvailableAxisValues,
+  getSoldOutSizeIds,
   isCombinationSoldOut,
   type AxisSelection,
 } from "@/lib/variant";
@@ -66,6 +67,14 @@ export function useVariantSelection(product: Product) {
     [product.variants, nonSizeSelectedIds],
   );
 
+  // docs/PRD.md סעיף 26 (בקשת Oren) - אילו מידות זמינות-מבנית (availableSizeValues)
+  // אזלו בפועל בצירוף Fit/Colorway הנבחר כרגע. משמש את VariantSelector לסמן
+  // מידות בתוך ה-select וגם להציג הודעה מתחתיו כשהמידה *הנבחרת* אזלה.
+  const soldOutSizeIds = useMemo(
+    () => (sizeAxis ? getSoldOutSizeIds(product.variants, nonSizeSelectedIds, availableSizeValues) : new Set<string>()),
+    [sizeAxis, product.variants, nonSizeSelectedIds, availableSizeValues],
+  );
+
   return {
     nonSizeAxes,
     sizeAxis,
@@ -73,6 +82,7 @@ export function useVariantSelection(product: Product) {
     selectedIds,
     nonSizeSelectedIds,
     availableSizeValues,
+    soldOutSizeIds,
     setAxisValue,
     variant,
     isColorwaySoldOut,

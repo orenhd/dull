@@ -26,6 +26,7 @@ export function AddToBagForm({ product, selection }: AddToBagFormProps) {
     selection: axisSelection,
     selectedIds,
     availableSizeValues,
+    soldOutSizeIds,
     setAxisValue,
     variant,
   } = selection;
@@ -99,6 +100,7 @@ export function AddToBagForm({ product, selection }: AddToBagFormProps) {
         selection={axisSelection}
         selectedIds={selectedIds}
         availableSizeValues={availableSizeValues}
+        soldOutSizeIds={soldOutSizeIds}
         onChange={handleAxisChange}
         sizeError={showSizeError}
       />

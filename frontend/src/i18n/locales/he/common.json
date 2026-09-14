@@ -22,7 +22,9 @@
     "colorway": "גוון",
     "size": "מידה",
     "selectSize": "בחר/י מידה",
-    "sizeRequired": "יש לבחור מידה."
+    "sizeRequired": "יש לבחור מידה.",
+    "sizeSoldOut": "המידה הזו אזלה מהמלאי.",
+    "sizeSoldOutOption": "{{size}} - אזל מהמלאי"
   },
   "sizeGuide": {
     "summary": "מדריך מידות",

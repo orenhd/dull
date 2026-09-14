@@ -22,7 +22,9 @@
     "colorway": "Colourway",
     "size": "Size",
     "selectSize": "Select size",
-    "sizeRequired": "Please select a size."
+    "sizeRequired": "Please select a size.",
+    "sizeSoldOut": "This size is sold out.",
+    "sizeSoldOutOption": "{{size}} - Sold out"
   },
   "sizeGuide": {
     "summary": "Size guide",

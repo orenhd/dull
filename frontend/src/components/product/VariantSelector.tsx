@@ -10,6 +10,7 @@ interface VariantSelectorProps {
   selection: AxisSelection;
   selectedIds: ReadonlySet<string>;
   availableSizeValues: AxisValue[];
+  soldOutSizeIds: ReadonlySet<string>;
   onChange: (axisKey: string, valueId: string) => void;
   sizeError: boolean;
 }
@@ -20,10 +21,18 @@ export function VariantSelector({
   selection,
   selectedIds,
   availableSizeValues,
+  soldOutSizeIds,
   onChange,
   sizeError,
 }: VariantSelectorProps) {
   const { t } = useTranslation();
+
+  // docs/PRD.md סעיף 26 (בקשת Oren) - "המידה שנבחרת *עכשיו* אזלה?" (לא כל
+  // מידה זמינה-מבנית - זה soldOutSizeIds עצמו, המשמש לסימון בתוך ה-<option>-ים
+  // למטה). קדימות ל-sizeError (לא נבחרה מידה בכלל) - שתי ההודעות חולקות את
+  // אותו <p> מתחת ל-select, בדיוק כבקשת Oren ("על אותו שטנץ").
+  const selectedSizeSoldOut = Boolean(selection.size) && soldOutSizeIds.has(selection.size);
+  const sizeMessageKey = sizeError ? "variant.sizeRequired" : selectedSizeSoldOut ? "variant.sizeSoldOut" : null;
 
   return (
     <>
@@ -57,25 +66,37 @@ export function VariantSelector({
             name="size"
             required
             aria-describedby="size-error"
-            aria-invalid={sizeError || undefined}
+            aria-invalid={sizeError || selectedSizeSoldOut || undefined}
             value={selection.size ?? ""}
             onChange={(event) => onChange("size", event.target.value)}
             className="select-caret w-full rounded-sm border border-border-base bg-surface-base px-md py-sm text-body text-text-base"
           >
             <option value="">{t("variant.selectSize")}</option>
-            {availableSizeValues.map((value) => (
-              <option key={value.id} value={value.id}>
-                {value.label}
-              </option>
-            ))}
+            {/* docs/PRD.md סעיף 26 - <option> תקני לא תומך בעיצוב פנימי (אין
+                span/בולד חלקי בתוך הטקסט, אין רכיבי ילד בכלל) - לכן "לייבל
+                בפונט קטן יותר אך בולט" (בקשת Oren, עדיפות 1) לא ניתן למימוש
+                אמין ב-<option> בין דפדפנים. כפיצוי חלקי - טקסט רגיל מצורף
+                לתווית עצמה ("- אזל מהמלאי"), בנוסף להודעה מתחת ל-select
+                (עדיפות 2 של Oren, המימוש המלא). */}
+            {availableSizeValues.map((value) => {
+              const isSoldOut = soldOutSizeIds.has(value.id);
+              return (
+                <option key={value.id} value={value.id}>
+                  {isSoldOut ? t("variant.sizeSoldOutOption", { size: value.label }) : value.label}
+                </option>
+              );
+            })}
           </select>
           {/* תוקן 2026-09-10 (docs/PRD.md סעיף 12.16, דיווח Oren) - היה margin
               עליון שלילי (mt-[calc(-1*var(--space-sm))]) שמשך את שורת השגיאה
               *מעלה*, לתוך גבול ה-select במקום ליצור רווח מתחתיו. mt-xs חיובי
               (--space-xs, 4px) - רווח צר וסביר מתחת לתיבה, לא נוגע ב-margin
               האופקי/RTL בכלל (margin-top לא תלוי כיוון כתיבה). */}
-          <p id="size-error" role="alert" hidden={!sizeError} className="mt-xs text-caption text-feedback-error">
-            {t("variant.sizeRequired")}
+          {/* docs/PRD.md סעיף 26 - אותו <p> בדיוק משרת שתי הודעות ("לא נבחרה
+              מידה" ו-"המידה הנבחרת אזלה"), לפי sizeMessageKey - אותו id/מבנה/
+              עיצוב שביקש Oren ("על אותו שטנץ"). */}
+          <p id="size-error" role="alert" hidden={!sizeMessageKey} className="mt-xs text-caption text-feedback-error">
+            {sizeMessageKey ? t(sizeMessageKey) : null}
           </p>
         </div>
       )}
