@@ -66,7 +66,10 @@ export function CartPage() {
                   params={{ slug: item.productSlug }}
                   className="text-body text-text-base [overflow-wrap:anywhere] hover:underline"
                 >
-                  {item.displayName}
+                  {/* <bdi> (2026-09-15, docs/PRD.md סעיף 28) - אותה מחלקת-באג
+                      bidi כמו ProductPage.tsx h1 (ראו הערה שם) - item.displayName
+                      יכול להיות שם-להקה שמתחיל בספרה. */}
+                  <bdi>{item.displayName}</bdi>
                 </Link>
                 <span className="text-caption text-text-muted">{item.displayLabel}</span>
                 <div className="flex items-center gap-sm">

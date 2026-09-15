@@ -45,8 +45,11 @@ export function ProductCard({ product }: { product: ProductListItem }) {
           />
         )}
       </div>
+      {/* <bdi> (2026-09-15, docs/PRD.md סעיף 28) - אותה מחלקת-באג bidi כמו
+          ProductPage.tsx h1 (ראו הערה שם) - שם-להקה שמתחיל בספרה ("45 Grave
+          Tee") מוצג הפוך ב-RTL בלי בידוד מפורש, גם בכרטיס-מוצר עצמאי בגריד. */}
       <span className="text-body text-text-base [overflow-wrap:anywhere] group-hover:underline">
-        {product.name}
+        <bdi>{product.name}</bdi>
       </span>
       {product.priceAgorot != null && (
         <span className="text-caption text-text-muted">{formatAgorot(product.priceAgorot)}</span>

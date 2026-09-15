@@ -300,8 +300,12 @@ export function CheckoutPage() {
               key={item.variantId}
               className="flex items-center justify-between gap-sm text-caption text-text-muted"
             >
+              {/* <bdi> רק סביב השם (לא סביב "× qty" - אומת ויזואלית שבידוד
+                  רק השם מספיק, docs/PRD.md סעיף 28) - אותה מחלקת-באג bidi
+                  כמו ProductPage.tsx h1 (ראו הערה שם), חמורה יותר כאן כי
+                  בלי בידוד גם ה-"×" והכמות מתערבבים לסדר שגוי לגמרי. */}
               <span className="min-w-0 [overflow-wrap:anywhere]">
-                {item.displayName} × {item.quantity}
+                <bdi>{item.displayName}</bdi> × {item.quantity}
               </span>
               <span className="flex-none text-text-base">{formatAgorot(item.priceAgorot * item.quantity)}</span>
             </li>

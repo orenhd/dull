@@ -37,9 +37,12 @@ export function OutOfStockNotice({ imageUrl, itemName, itemLabel, availableQty }
             ? t("checkout.outOfStockDetail.reduced", { count: availableQty })
             : t("checkout.outOfStockDetail.removed")}
         </p>
+        {/* <bdi> סביב itemName (2026-09-15, docs/PRD.md סעיף 28) - אותה
+            מחלקת-באג bidi כמו OrdersPage.tsx (ראו הערה שם): itemName צמוד
+            ישירות ל-itemLabel באותו text node בלי בידוד. */}
         {(itemName || itemLabel) && (
           <p className="m-0 text-caption text-text-muted [overflow-wrap:anywhere]">
-            {itemName}
+            <bdi>{itemName}</bdi>
             {itemName && itemLabel ? " · " : ""}
             {itemLabel}
           </p>

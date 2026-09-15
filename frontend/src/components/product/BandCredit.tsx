@@ -25,10 +25,17 @@ export function BandCredit({ bandCreditName, bandCreditUrl }: BandCreditProps) {
           כש-components גם מוגדר - components+values מספיקים לגמרי בלי
           children: components ממפה את התג <band> ב-`credit.print`
           (common.json) ל-<span lang="en">, values מזריק את הערך עצמו. */}
+      {/* dir="ltr" (2026-09-15, docs/PRD.md סעיף 28) - lang="en" לבדו לא
+          מבטיח בידוד כיווני בתוך משפט RTL: "45 Grave" (Trans מציג "45"
+          לפני "Grave") הופך ל"Grave" לפני "45" בלי dir מפורש, כי הדפדפן
+          עדיין קובע כיווניות-פנימית מספרים/טקסט לפי ה-Unicode Bidi
+          Algorithm וההקשר העברי מסביב, לא רק lang. no-op ויזואלי לכל
+          שם להקה שלא מתחיל בספרה (Darkthrone/Immortal) - רק "45 Grave"
+          מושפע בפועל כרגע, אבל התיקון כללי לכל bandCreditName עתידי. */}
       <Trans
         i18nKey="credit.print"
         values={{ band: bandCreditName }}
-        components={{ band: <span lang="en" /> }}
+        components={{ band: <span lang="en" dir="ltr" /> }}
       />{" "}
       {bandCreditUrl && (
         <a href={bandCreditUrl} target="_blank" rel="noopener" className="underline hover:text-text-base">

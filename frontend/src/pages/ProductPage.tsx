@@ -73,8 +73,15 @@ function ProductPageContent({ product }: { product: Product }) {
 
         <div className="flex min-w-0 flex-col gap-lg desktop:flex-1 desktop:basis-[400px]">
           <div className="flex flex-col gap-sm">
+            {/* <bdi> (2026-09-15, docs/PRD.md סעיף 28) - אומת ויזואלית
+                (Playwright) ש-h1 עצמאי (ללא dir), בלי שום Hebrew מעורב
+                באותו text node, עדיין מציג שם-להקה שמתחיל בספרה הפוך
+                ("Grave Tee 45" במקום "45 Grave Tee") ב-RTL - זה *לא* דרש
+                טקסט עברי סמוך, בניגוד להנחה הראשונית; אלמנט block לבדו
+                לא מבודד bidi paragraph כמצופה. אותה מחלקת-באג כמו
+                BandCredit.tsx/Breadcrumb.tsx (ראו הערה שם). */}
             <h1 className="m-0 [overflow-wrap:anywhere] font-headline text-h2 font-black text-text-base">
-              {product.name}
+              <bdi>{product.name}</bdi>
             </h1>
             {priceAgorot != null && (
               <p className="text-body-strong font-bold text-text-base">{formatAgorot(priceAgorot)}</p>

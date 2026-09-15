@@ -51,8 +51,13 @@ function OrderRow({ order }: { order: OrderRecord }) {
           <span className="text-caption text-text-muted">
             {t("orders.placedOn", { date: formatOrderDate(order.createdAt, locale) })}
           </span>
+          {/* <bdi> סביב firstItemName (2026-09-15, docs/PRD.md סעיף 28) -
+              אותה מחלקת-באג bidi בדיוק כמו ה-<bdi> ל-"#"+id למעלה (הערה
+              ב-2026-09-09) - כאן זה שם-מוצר שמתחיל בספרה ("45 Grave Tee")
+              צמוד ישירות לטקסט עברי ("· פריט אחד") באותו text node בלי שום
+              בידוד - היה מוצג הפוך ("Grave Tee 45"), אומת ויזואלית. */}
           <span className="text-caption text-text-muted [overflow-wrap:anywhere]">
-            {firstItemName}
+            <bdi>{firstItemName}</bdi>
             {" · "}
             {itemCount === 1 ? t("orders.itemsCountOne") : t("orders.itemsCountOther", { count: itemCount })}
           </span>

@@ -49,8 +49,11 @@ function OrderItemRow({ item, locale }: { item: OrderLineItem; locale: Locale })
         />
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-xs">
+        {/* <bdi> רק סביב השם (לא סביב "× qty") - אותה מחלקת-באג bidi כמו
+            ProductPage.tsx h1 / CheckoutPage.tsx (ראו הערה שם), docs/PRD.md
+            סעיף 28. */}
         <span className="min-w-0 [overflow-wrap:anywhere] text-body text-text-base">
-          {localizeText(item.productNameSnapshot, locale)} × {item.quantity}
+          <bdi>{localizeText(item.productNameSnapshot, locale)}</bdi> × {item.quantity}
         </span>
         {selectionLabel && <span className="text-caption text-text-muted">{selectionLabel}</span>}
       </div>
