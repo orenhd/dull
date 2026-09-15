@@ -99,7 +99,16 @@
   "about": {
     "title": "About",
     "imagePlaceholder": "Image placeholder",
-    "contentPlaceholder": "Copy coming soon."
+    "intro": "Somewhere between one winter and the next, we stopped needing the volume.",
+    "origin": "DULL began with a shape that had lived in us for longer than we could explain — a logo we knew by heart, built for cold rooms and colder music, worn by people who never asked to be understood. We didn't want to leave it behind. We wanted to see what it looked like grown up.",
+    "translation": "So we took it out of the dark and into the light. The same names, the same devotion — carried differently. Not softened. Translated.",
+    "heartLine": "DULL is a goodbye to an old world, and a hello to a new one.",
+    "craft": "Everything here was made slowly, and measured twice. The grid a Hebrew line sits on, the weight of a stitch, the reason a size guide tells the truth instead of a story — none of it happened by accident, and none of it happened alone.",
+    "credits": "Some of it began as a line drawn by hand. Almost everything after that — the thinking, the code, the hundreds of small decisions holding this together — came out of long conversation with Claude. The photographs are Nano Banana's alone: every face, every fabric, every fall of light.",
+    "loveLine": "Dull is a fruit of love.",
+    "writtenByClaude": "The words on this page were written by Claude.",
+    "quoteText": "He has realized at last that imaginary guitar notes and imaginary vocals exist only in the imagination of the imaginer.",
+    "quoteAttribution": "Frank Zappa, Joe's Garage"
   },
   "cart": {
     "navLabel": "Bag",
