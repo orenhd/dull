@@ -179,6 +179,16 @@
 
 @theme {
   --animate-pulse-soft: pulse-soft 1.4s var(--ease-standard) infinite;
+
+  /* דיזולב עדין בין באנר עמוד-הבית (light/dark) - docs/PRD.md סעיף 29,
+     בקשת Oren ("לא תדיר מדי", "בטעם טוב"). 20s למחזור מלא: 8s אחיזה על כל
+     תמונה + 2s דיזולב ביניהן (8+2+8+2) - אחיזה ארוכה יחסית לדיזולב קצר היא
+     מה שנותן את התחושה ה"רגועה"/לא-מוסחת, לא קרוסלה. var(--ease-standard)
+     (לא duration-fast/base מ-tokens.css, ראו ProductCard.tsx hover-swap -
+     אלה מכוונים לפידבק אינטראקטיבי מיידי, register שונה לגמרי ממה שצריך
+     כאן) - משתמש רק בעקומת ה-easing המשותפת לאתר, לא במשך שלה, לשמור על
+     אותה "אישיות תנועה" גם בקצב אחר. */
+  --animate-homepage-banner-crossfade: homepage-banner-crossfade 20s var(--ease-standard) infinite;
 }
 
 @keyframes pulse-soft {
@@ -188,6 +198,24 @@
   }
   50% {
     opacity: 0.55;
+  }
+}
+
+/* שכבת ה-dark מונפשת (opacity 0<->1); שכבת ה-light מתחתיה נשארת opacity-100
+   קבועה תמיד - "מציצה" דרך כל אימת ש-dark שקופה. ככה תמונה אחת בלבד צריכה
+   אנימציה (לא שתי אנימציות מסונכרנות-הפוך), וה-frame הראשון (0%) הוא תמיד
+   light - בדיוק כמבוקש כברירת המחדל/הראשון שמוצג. */
+@keyframes homepage-banner-crossfade {
+  0%,
+  40% {
+    opacity: 0;
+  }
+  50%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
