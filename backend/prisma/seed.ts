@@ -288,7 +288,7 @@ async function main() {
     ],
   });
 
-  console.log("Seeding Immortal Tee (flat only - campaign shoot in progress)...");
+  console.log("Seeding Immortal Tee (full assets: flat + campaign)...");
   await createShirtProduct({
     slug: "immortal-tee",
     name: { en: "Immortal Tee", he: "חולצת אימורטל" },
@@ -305,27 +305,48 @@ async function main() {
       { fit: "mens", colorway: "dark", role: "FLAT", file: "immortal-shirt-mens-dark" },
       { fit: "womens", colorway: "light", role: "FLAT", file: "immortal-shirt-womens-light" },
       { fit: "womens", colorway: "dark", role: "FLAT", file: "immortal-shirt-womens-dark" },
-      // אין עדיין CAMPAIGN - הפרונטאנד יצטרך fallback לעמוד פריט של המוצר הזה
+      // קמפיין נוסף 2026-09-15 (דוגמנות: איתן=גברים, נועה=נשים) - הצילומים
+      // הגיעו מ-hi-res/, ראו הודעת אורן באותו תאריך.
+      { fit: "mens", colorway: "light", role: "CAMPAIGN", file: "eitan-immortal-shirt-mens-light" },
+      { fit: "mens", colorway: "dark", role: "CAMPAIGN", file: "eitan-immortal-shirt-mens-dark" },
+      { fit: "womens", colorway: "light", role: "CAMPAIGN", file: "noa-immortal-shirt-womens-light" },
+      { fit: "womens", colorway: "dark", role: "CAMPAIGN", file: "noa-immortal-shirt-womens-dark" },
     ],
   });
 
-  console.log("Seeding 45 Grave Tee placeholder (no assets yet - inactive)...");
-  await prisma.product.create({
-    data: {
-      slug: "45-grave-tee",
-      category: ProductCategory.SHIRT,
-      name: { en: "45 Grave Tee", he: "חולצת 45 גרייב" },
-      // אותו מפרט בדיוק כמו Darkthrone/Immortal (אושר ע"י Oren, 2026-09) -
-      // אותה עובדת ייצור בפועל (כל החולצות מאותו קו ייצור), אין סיבה
-      // שהמפרט יהיה שונה רק כי אין עדיין נכסים חזותיים למוצר הזה.
-      description: {
-        en: "100% combed cotton, 180 gsm, pre-shrunk. Water-based ink print.",
-        he: "כותנה 100% מסורקת, 180 גרם, כביסה מוקדמת. הדפסה בדיו מבוססת מים.",
-      },
-      bandCreditName: "45 Grave",
-      bandCreditUrl: "https://en.wikipedia.org/wiki/45_Grave", // אין לייבל יציב/דיסקוגרפיה מרכזית - ויקיפדיה כמקור הכי יציב
-      isActive: false, // אין עדיין שום חומר חזותי - לא מוצג באתר עד שיהיה
+  console.log("Seeding 45 Grave Tee (full assets: flat + campaign)...");
+  await createShirtProduct({
+    slug: "45-grave-tee",
+    // name.he: "45 Grave" מוטבע ישירות באנגלית - *לא* תעתיק עברי ("45 גרייב",
+    // כפי שהיה כאן קודם, לפני שהיו נכסים חזותיים) - הנחיית אורן במפורש,
+    // 2026-09-15. לגבי הסדר ("45" חייב להופיע לפני "Grave"): זו ההתנהגות
+    // התקנית ממילא של אלגוריתם ה-bidi (UAX#9) לרצף ספרות+מילה לטינית בתוך
+    // משפט RTL - "45 Grave" נשאר run אחד רציף שמוצג משמאל-לימין פנימית,
+    // בלי תלות ב-lang/dir מיוחד; לא נדרש טיפול מיוחד ב-*שדה הזה*. יש נקודה
+    // נפרדת וקרובה יותר לסיכון אמיתי ב-bandCreditName (מוזרק inline לתוך
+    // משפט עברי דרך <Trans> ב-frontend/src/components/product/BandCredit.tsx,
+    // <span lang="en"> בלי dir="ltr" מפורש) - הועברה לאורן/לשיחת הפרונטאנד
+    // בנפרד, לא טופלה כאן (שינוי frontend, לא backend).
+    name: { en: "45 Grave Tee", he: "חולצת 45 Grave" },
+    description: {
+      en: "100% combed cotton, 180 gsm, pre-shrunk. Water-based ink print.",
+      he: "כותנה 100% מסורקת, 180 גרם, כביסה מוקדמת. הדפסה בדיו מבוססת מים.",
     },
+    bandCreditName: "45 Grave",
+    bandCreditUrl: "https://en.wikipedia.org/wiki/45_Grave", // אין לייבל יציב/דיסקוגרפיה מרכזית - ויקיפדיה כמקור הכי יציב
+    priceAgorot: 8900, // ₪89 - זהה ל-Darkthrone/Immortal (אותו קו ייצור/מפרט, לא צוין מחיר שונה)
+    isActive: true,
+    media: [
+      { fit: "mens", colorway: "light", role: "FLAT", file: "45_grave-shirt-mens-light" },
+      { fit: "mens", colorway: "dark", role: "FLAT", file: "45_grave-shirt-mens-dark" },
+      { fit: "womens", colorway: "light", role: "FLAT", file: "45_grave-shirt-womens-light" },
+      { fit: "womens", colorway: "dark", role: "FLAT", file: "45_grave-shirt-womens-dark" },
+      // קמפיין (דוגמנות: אלון=גברים, טליה=נשים)
+      { fit: "mens", colorway: "light", role: "CAMPAIGN", file: "alon-45_grave-shirt-mens-light" },
+      { fit: "mens", colorway: "dark", role: "CAMPAIGN", file: "alon-45_grave-shirt-mens-dark" },
+      { fit: "womens", colorway: "light", role: "CAMPAIGN", file: "talia-45_grave-shirt-womens-light" },
+      { fit: "womens", colorway: "dark", role: "CAMPAIGN", file: "talia-45_grave-shirt-womens-dark" },
+    ],
   });
 
   console.log("Seeding Dull Sandals (flat only, no campaign per PRD)...");
