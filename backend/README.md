@@ -111,15 +111,16 @@
 ## סטטוס
 קיים: סכימת DB מלאה, seed עם מוצרים אמיתיים, `/products` (קטלוג + פריט),
 `/auth/google` (login + session cookie), `/auth/me`, `/orders` (יצירה/
-רשימה/פריט, כולל snapshot של שם/בחירה/תמונה בזמן הרכישה), מייל תודה +
-מתנת PDF (Gmail SMTP דרך nodemailer + pdf-lib - עברנו מ-Resend ב-2026-09,
-ראו `src/lib/email.ts`; תוכן placeholder בכוונה - העיצוב/הקופי הסופיים
-עוד לא נקבעו), צינור תמונות web, ניהול מוצרים דרך Prisma Studio.
+רשימה/פריט, כולל snapshot של שם/בחירה/תמונה בזמן הרכישה), מייל תודה
+(Gmail SMTP דרך nodemailer - עברנו מ-Resend ב-2026-09, ראו `src/lib/
+email.ts`), צינור תמונות web, ניהול מוצרים דרך Prisma Studio.
 **מ-2026-09**: ה-frontend (React/Vite, בבנייה ע"י Oren בשיחה נפרדת -
 ראו `frontend/TECH_SPEC.md`) מאוחד לאותו Render service - נבנה ומוגש
 דרך `npm run frontend:build`/`express.static`, כולל meta-injection
 per-product (`og:title`/`og:image`) לתצוגות מקדימה בשיתוף קישור
 (`docs/PRD.md` סעיף 12.10). **השרת פרוס ורץ בפועל** ב-Render:
 https://dull.onrender.com (`/health`, `/products` נבדקו ועובדים).
-אין עדיין: תוכן סופי למייל/PDF המתנה, נכסי מוצר נוספים (Immortal, שאר
-Grave) לפי הזמינות.
+**הוסר 2026-09-16:** מתנת ה-PDF המצורפת למייל התודה (`pdf-lib`,
+`src/lib/giftPdf.ts`) - בקשת אורן, לא נחוצה. ראו `docs/PRD.md` להחלטה
+המתועדת; `src/lib/giftPdf.ts`/תלות `pdf-lib` עדיין לא הוסרו בפועל
+(ממתין לניקוי ידני של אורן - מחיקת קובץ + `npm uninstall pdf-lib`).

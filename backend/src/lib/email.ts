@@ -1,6 +1,12 @@
-// שליחת מייל התודה ההומוריסטי אחרי הזמנה, עם ה"מתנה" (PDF) מצורפת וטבלת
-// פריטים עם תמונת thumbnail. משתמש ב-Gmail SMTP (nodemailer) עם App
-// Password של Oren - לא Resend יותר.
+// שליחת מייל התודה ההומוריסטי אחרי הזמנה, עם טבלת פריטים ותמונת thumbnail
+// לכל פריט. משתמש ב-Gmail SMTP (nodemailer) עם App Password של Oren - לא
+// Resend יותר.
+//
+// עדכון 2026-09-16: הוסרה ה"מתנה" (PDF מצורף, `lib/giftPdf.ts`) לגמרי -
+// בקשת אורן, לא נחוצה. ראו docs/PRD.md להחלטה המתועדת. `lib/giftPdf.ts`
+// ותלות `pdf-lib` ב-package.json נשארו בינתיים (קובץ מת, לא מיובא משום
+// מקום) - אורן ימחק/יסיר בעצמו (מחיקת קובץ + `npm uninstall pdf-lib`,
+// לא פעולות שאני מבצע).
 //
 // **למה עברנו מ-Resend (2026-09)**: כל עוד אין דומיין אמיתי מאומת מול
 // Resend, ה-sandbox שלהם (onboarding@resend.dev) יכול לשלוח *רק* לכתובת
@@ -20,7 +26,6 @@ import path from "node:path";
 import { extensionToMimeType } from "./mime.js";
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
-import { generateGiftPdf } from "./giftPdf.js";
 import { formatAgorot } from "./money.js";
 import { PUBLIC_IMAGES_DIR } from "./paths.js";
 
@@ -71,7 +76,6 @@ const EMAIL_COPY = {
     project; no real payment was taken and nothing will actually ship.</p>
   `,
   outro: `
-    <p>We attached a small printable gift as a thank-you for playing along.</p>
     <p style="color:#888;font-size:12px;">Dull - an educational/demo project.</p>
   `,
 };
@@ -186,8 +190,6 @@ export async function sendThankYouEmail(params: {
    */
   shippingAddress: Record<string, unknown>;
 }): Promise<void> {
-  const giftPdf = await generateGiftPdf(params.recipientName);
-
   // רק לפריטים שבאמת יש להם תמונה זמינה על דיסק מקבלים contentId - כך
   // buildItemsTableHtml והאינדקסים ב-attachments תמיד מסונכרנים.
   const contentIdByIndex = (index: number) => `item-image-${index}`;
@@ -222,9 +224,6 @@ export async function sendThankYouEmail(params: {
         ${EMAIL_COPY.outro}
       </div>
     `,
-    attachments: [
-      { filename: "dull-gift.pdf", content: giftPdf },
-      ...imageAttachments.filter((a): a is NonNullable<typeof a> => a !== null),
-    ],
+    attachments: imageAttachments.filter((a): a is NonNullable<typeof a> => a !== null),
   });
 }
