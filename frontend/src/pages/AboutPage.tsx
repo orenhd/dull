@@ -12,21 +12,35 @@
 // שה-flex/inline-start-end ה"לוגיים" של הדפדפן קיימים; שמים את התמונה
 // ראשונה ב-DOM וזה מספיק, אין צורך ב-`ps-*`/`start-*` על מיקום התמונה.
 //
-// עדיין פלייסהולדר לתמונה בלבד - התמונה עצמה (Nano Banana) טרם הופקה,
-// יוחלף ב-<img> אמיתי כשהיא תהיה מוכנה (ראו הדרכת פרומפט שניתנה בנפרד).
+// התמונה (docs/PRD.md סעיף 35, 2026-09-16) - hi-res/sarah-about.jpg,
+// 2048x2048 בדיוק (ריבוע טבעי, לא בקירוב) - **בכוונה** לפי ההדרכה שניתנה
+// לאורן על תמונת ה"אודות" (ריבוע 1:1 בכל רוחב מסך, ראו aspect-square
+// למטה) - כדי שלא יידרש שום object-position/crop, בניגוד לכאב-הראש
+// שהיה עם יחס-הרוחב של באנר ההומפייג' (docs/PRD.md סעיפים 30-32). אין
+// endpoint/DB לתמונה הזו (בדיוק כמו תמונת הבאנר) - `object-cover` בכל
+// זאת נשאר על ה-<img> כרשת ביטחון בלבד (למקרה שהתמונה תוחלף עתידית
+// ביחס אחר), לא כי יש כרגע צורך אמיתי בחיתוך.
 import { useTranslation } from "react-i18next";
+import { resolveMediaUrl } from "@/lib/api/client";
+
+// ראו הערה מעל component-ה על docs/PRD.md סעיף 35 - אותה מוסכמת-מיקום/
+// מוסכמת-שם קובץ כמו HOMEPAGE_BANNER_*_URL ב-HomePage.tsx.
+const ABOUT_IMAGE_URL = "/images/sarah-about.webp";
 
 export function AboutPage() {
   const { t } = useTranslation();
 
   return (
     <div className="mx-auto flex max-w-[1200px] min-w-0 flex-col gap-lg px-md py-lg desktop:flex-row desktop:items-start desktop:gap-xl">
-      <div
-        aria-hidden="true"
-        className="flex aspect-square w-full flex-none items-center justify-center bg-surface-sunken desktop:w-[360px]"
-      >
-        <span className="px-md text-center text-caption text-text-muted">{t("about.imagePlaceholder")}</span>
-      </div>
+      {/* alt אמיתי ומתורגם, לא alt="" - בניגוד לתמונת הבאנר בהומפייג' (שם
+          aria-hidden כי היא רקע גרידא) - זו תמונה משמעותית (דיוקן+אמבלמה
+          מצוירת ביד, לא סתם רקע), אותה מוסכמה כמו modelShot/productShot
+          ב-ProductGallery.tsx (alt אמיתי כשיש מה לתאר, לא ריק כברירת מחדל). */}
+      <img
+        src={resolveMediaUrl(ABOUT_IMAGE_URL)}
+        alt={t("about.imageAlt")}
+        className="aspect-square w-full flex-none bg-surface-sunken object-cover desktop:w-[360px]"
+      />
 
       <div className="flex min-w-0 flex-1 flex-col gap-lg">
         <h1 className="m-0 font-headline text-h2 font-black text-text-base">{t("about.title")}</h1>
