@@ -5,3 +5,4 @@ dist/
 *.log
 backend/public/
 *.tsbuildinfo
+presentation-assets/
