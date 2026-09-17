@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dull · קייס סטאדי</title>
+<meta name="description" content="קייס סטאדי על Dull: חולצות ומוצרי דגל של להקות אקסטרים משנות ה-80 וה-90, לדור ה-X ולכל המתעניין בתקופה. פרויקט קפסטון, מחקר עד קוד חי.">
+<meta name="theme-color" content="#FFFFFF">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* 1. צבע - ישירות מ-frontend/tokens.css של המוצר */
+  --bg:#FFFFFF; --bg-soft:#F4F4F4; --card:#FFFFFF;
+  --fg:#2E2E2E; --fg-soft:#6E6E6E; --fg-faint:#767676;
+  --line:#D5D5D5; --accent:#1B1C77; --accent-fg:#FFFFFF; --accent-soft:#ECECF9;
+  --accent2:#E3FF2B; /* accent-lemon, לשימוש נקודתי בלבד */
+  --low:#B3261E;
+  /* 2. טיפוגרפיה - Rubik/Assistant, בדיוק כמו :root[lang="he"] במוצר */
+  --font-display:"Rubik", "Arial Black", sans-serif;
+  --font-body:"Assistant", Arial, sans-serif;
+  --w-display:900;
+  --t-hero:clamp(2.3rem,5.2vw,4rem);
+  --t-h2:clamp(1.6rem,3.1vw,2.3rem);
+  --t-h3:clamp(1.05rem,1.9vw,1.28rem);
+  --t-body:clamp(1.05rem,1.3vw,1.1rem);
+  --t-small:.875rem;
+  /* 3. פינות - radius-md/radius-lg מהמוצר, בדיוק */
+  --r:10px; --r-lg:16px; --r-pill:999px;
+  /* 4. צל - רך, לפי הכיוון של "בהירות ופשטות" שאורן תיאר */
+  --shadow:0 1px 2px rgba(46,46,46,.05), 0 10px 26px rgba(46,46,46,.07);
+  /* 5. קווים */
+  --line-w:1px;
+  /* 6. צפיפות */
+  --lh:1.6; --pad-sec:clamp(3.2rem,8vw,6rem); --gap:1rem;
+  --wrap:1240px; --measure:66ch;
+  /* 7. תמונות */
+  --img-filter:none;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14151F; --bg-soft:#1B1C2A; --card:#1B1C2A;
+    --fg:#EDEDED; --fg-soft:#B7B7C2; --fg-faint:#8B8B96;
+    --line:#31323F; --accent:#9293EA; --accent-fg:#14151F; --accent-soft:#262841;
+    --accent2:#E3FF2B;
+    --low:#E5847D;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 30px rgba(0,0,0,.45);
+  }
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:5.5rem}
+body{margin:0; background:var(--bg); color:var(--fg); font-family:var(--font-body);
+  font-size:var(--t-body); line-height:var(--lh); -webkit-font-smoothing:antialiased}
+img{max-width:100%; height:auto; display:block; filter:var(--img-filter)}
+a{color:var(--accent)}
+h1,h2,h3,h4{font-family:var(--font-display); line-height:1.2; margin:0 0 .55em; letter-spacing:-.01em}
+h1,h2{font-weight:var(--w-display)}
+h3{font-weight:700; font-size:var(--t-h3)}
+h2{font-size:var(--t-h2)}
+p{margin:0 0 1em; max-width:var(--measure)}
+ul{padding-inline-start:1.2em; max-width:var(--measure)}
+li{margin-bottom:.45em}
+
+.wrap{width:min(100% - 2.5rem, var(--wrap)); margin-inline:auto}
+section{padding-block:var(--pad-sec); border-top:var(--line-w) solid var(--line)}
+section:first-of-type{border-top:0}
+.soft{background:var(--bg-soft)}
+
+.eyebrow{font-size:var(--t-small); font-weight:700; letter-spacing:.09em; color:var(--accent); margin:0 0 .7rem}
+.lead{font-size:calc(var(--t-body)*1.2); color:var(--fg-soft)}
+.tiny{font-size:var(--t-small); color:var(--fg-faint)}
+
+.bar-track{position:fixed; inset-block-start:0; inset-inline:0; height:3px; z-index:60}
+.bar{height:100%; width:0; background:var(--accent2); transition:width .12s linear}
+
+.nav{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter:blur(12px); border-bottom:var(--line-w) solid var(--line)}
+.nav-in{width:min(100% - 2.5rem, var(--wrap)); margin-inline:auto; display:flex; align-items:center; gap:1rem; height:3.8rem}
+.nav-name{display:inline-flex; align-items:baseline; gap:.6rem; margin-inline-end:auto; white-space:nowrap}
+.nav-name b{font-family:var(--font-display); font-weight:900; font-size:1.4rem; letter-spacing:-.01em}
+.nav-name span{font-size:var(--t-small); font-weight:600; color:var(--fg-faint); letter-spacing:.05em;
+  padding-inline-start:.6rem; border-inline-start:var(--line-w) solid var(--line)}
+@media (max-width:480px){.nav-name span{display:none}}
+.nav-links{display:flex; gap:1.15rem; overflow-x:auto; scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{color:var(--fg-soft); text-decoration:none; font-size:var(--t-small); white-space:nowrap; padding-block:.4rem; border-bottom:2px solid transparent}
+.nav-links a:hover{color:var(--fg)}
+.nav-links a.on{color:var(--fg); border-bottom-color:var(--accent)}
+@media (max-width:960px){.nav-links{display:none}}
+
+.btn{display:inline-flex; align-items:center; gap:.5rem; min-height:44px; padding:.7rem 1.4rem; border-radius:var(--r-pill); text-decoration:none; font-weight:600; border:var(--line-w) solid transparent; transition:transform .15s ease}
+.btn:hover{transform:translateY(-2px)}
+.btn-1{background:var(--accent); color:var(--accent-fg)}
+.btn-2{background:transparent; color:var(--fg); border-color:var(--line)}
+.btn-row{display:flex; flex-wrap:wrap; gap:.7rem; margin-top:1.8rem}
+.chips{display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; list-style:none}
+.chip{font-size:var(--t-small); padding:.35rem .85rem; border-radius:var(--r-pill); background:var(--card); color:var(--fg-soft); border:var(--line-w) solid var(--line)}
+
+.grid{display:grid; gap:var(--gap)}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(19rem,100%),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(12rem,100%),1fr))}
+.card{background:var(--card); border:var(--line-w) solid var(--line); border-radius:var(--r-lg); padding:1.6rem; box-shadow:var(--shadow)}
+.card h3{margin-bottom:.4rem}
+.card p:last-child{margin-bottom:0}
+.card-num{font-family:var(--font-display); font-size:2.4rem; font-weight:var(--w-display); color:var(--accent); line-height:1; margin-bottom:.4rem}
+
+.quote{border-inline-start:4px solid var(--accent); padding-inline-start:1.3rem; font-size:calc(var(--t-body)*1.14); margin:1.6rem 0; max-width:var(--measure); color:var(--fg-soft)}
+.quote cite{display:block; font-size:var(--t-small); color:var(--fg-faint); font-style:normal; margin-top:.5rem}
+
+.claim{font-family:var(--font-display); font-weight:700; font-size:calc(var(--t-body)*1.38); line-height:1.4;
+  max-width:var(--measure); margin:0 0 1.1rem; padding-inline-start:1.1rem; border-inline-start:4px solid var(--accent)}
+
+.gallery{display:grid; gap:1rem; margin-block-start:1.5rem;
+  grid-template-columns:repeat(auto-fit,minmax(min(var(--col,20rem),100%),1fr))}
+.gallery--one{grid-template-columns:minmax(0,min(56rem,100%)); justify-content:start}
+.gallery button{
+  display:flex; flex-direction:column; width:100%; padding:0; text-align:start; font:inherit; color:inherit;
+  background:var(--card); border:var(--line-w) solid var(--line); border-radius:var(--r-lg);
+  overflow:hidden; cursor:zoom-in; box-shadow:var(--shadow); position:relative;
+  transition:border-color .15s ease, transform .15s ease}
+.gallery button:hover,.gallery button:focus-visible{border-color:var(--accent); transform:translateY(-2px)}
+.gallery button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.shot{aspect-ratio:var(--ar,16/10); display:grid; place-items:center; overflow:hidden; background:var(--bg-soft)}
+.shot img{max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain}
+.zoom{position:absolute; inset-block-start:.6rem; inset-inline-end:.6rem; width:34px; height:34px;
+  display:grid; place-items:center; border-radius:var(--r-pill); background:var(--card);
+  border:var(--line-w) solid var(--line); color:var(--fg-soft);
+  opacity:0; transform:scale(.9); transition:opacity .15s ease, transform .15s ease; pointer-events:none}
+.gallery button:hover .zoom,.gallery button:focus-visible .zoom{opacity:1; transform:none}
+.cap{display:block; padding:.7rem .85rem .85rem; font-size:var(--t-small); color:var(--fg-faint)}
+.cap b{display:block; color:var(--fg); font-weight:600; margin-block-end:.15rem}
+.role{display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.05em; padding:.1rem .55rem;
+  border-radius:var(--r-pill); background:var(--accent-soft); color:var(--accent); margin-block-end:.35rem}
+.role.ext{background:var(--bg-soft); color:var(--fg-soft); border:var(--line-w) solid var(--line)}
+.role.out{background:color-mix(in srgb, var(--accent2) 35%, var(--bg-soft)); color:var(--fg); border:var(--line-w) solid var(--line)}
+
+dialog.lightbox{border:0; padding:0; background:none; width:100%; height:100%; max-width:100vw; max-height:100vh; margin:0}
+dialog.lightbox::backdrop{background:rgb(11 13 20 / .88)}
+.lb-in{display:flex; flex-direction:column; height:100%; padding:1rem; gap:.75rem}
+.lb-in img{flex:1 1 auto; min-height:0; width:100%; object-fit:contain; border-radius:var(--r); background:#0f1219}
+.lb-bar{display:flex; align-items:center; justify-content:space-between; gap:1rem; color:#ECE7DD}
+.lb-bar p{margin:0; color:#B9B1A2; font-size:var(--t-small); max-width:none}
+.lb-close{min-height:44px; min-width:44px; border-radius:var(--r-pill); cursor:pointer;
+  border:1px solid rgb(236 231 221 / .35); background:none; color:#ECE7DD; font:inherit; font-size:1.1rem}
+
+.toc{border:var(--line-w) solid var(--line); border-radius:var(--r-lg); padding:1.6rem 1.8rem; background:var(--card); box-shadow:var(--shadow)}
+.toc h3{margin-bottom:.9rem}
+.toc ol{list-style:none; margin:0; padding:0; display:grid; gap:.1rem; grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr)); max-width:none}
+.toc li{margin:0}
+.toc a{display:flex; gap:.7rem; align-items:baseline; text-decoration:none; color:var(--fg-soft); padding:.5rem .6rem; border-radius:var(--r); min-height:44px}
+.toc a:hover{background:var(--bg-soft); color:var(--fg)}
+.toc a b{font-family:var(--font-display); color:var(--accent); font-size:var(--t-small); font-variant-numeric:tabular-nums}
+
+.gap{border:var(--line-w) dashed var(--line); border-inline-start:4px solid var(--fg-faint);
+  border-radius:var(--r); padding:1rem 1.25rem; margin:1.6rem 0; max-width:var(--measure)}
+.gap b{display:block; font-family:var(--font-display); margin-bottom:.3rem}
+.gap p{margin:0; font-size:var(--t-small); color:var(--fg-faint)}
+
+.scroll-x{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:1.5rem 0;
+  border:var(--line-w) solid var(--line); border-radius:var(--r-lg); background:var(--card)}
+table{border-collapse:collapse; width:100%; min-width:620px; font-size:var(--t-small)}
+th,td{text-align:start; padding:.9rem 1rem; border-bottom:var(--line-w) solid var(--line); vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-weight:700; background:var(--bg-soft); white-space:nowrap}
+.pill{font-size:.75rem; padding:.2rem .7rem; border-radius:var(--r-pill); white-space:nowrap; display:inline-block}
+.pill.done{background:var(--accent-soft); color:var(--accent)}
+.pill.next{background:var(--bg-soft); color:var(--fg-soft); border:var(--line-w) solid var(--line)}
+.pill.proc{background:color-mix(in srgb, var(--accent2) 35%, var(--bg-soft)); color:var(--fg); border:var(--line-w) solid var(--line)}
+
+.jmaps{display:grid; gap:1.25rem; margin-block-start:1.5rem;
+  grid-template-columns:repeat(auto-fit,minmax(min(26rem,100%),1fr))}
+.jmap{border:var(--line-w) solid var(--line); border-radius:var(--r-lg); background:var(--card);
+  padding:1.2rem 1.3rem 1.3rem; box-shadow:var(--shadow)}
+.jmap h4{margin:0 0 .5rem; font-size:1.05rem}
+.jscale{display:flex; gap:1.1rem; margin:0 0 .7rem; max-width:none; font-size:.8rem; color:var(--fg-faint)}
+.jscale span{display:inline-flex; align-items:center; gap:.35rem}
+.jchart{display:block; width:100%; height:auto; overflow:visible; min-height:170px}
+.jg{stroke:var(--line); stroke-width:1}
+.ja{fill:var(--accent); opacity:.10}
+.jl{fill:none; stroke:var(--accent); stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round}
+.jd{fill:var(--accent)}
+.jd--low{fill:var(--low)}
+.jt,.jn{fill:var(--fg-faint); font-size:11px; font-family:var(--font-body); text-anchor:middle}
+.jv{fill:var(--fg-soft); font-size:12px; font-weight:600; font-family:var(--font-body); text-anchor:middle}
+.jv--low{fill:var(--low)}
+.jlegend{list-style:none; margin:.9rem 0 0; padding:0; display:grid; gap:.35rem; max-width:none}
+.jlegend li{display:grid; grid-template-columns:1.2rem 1.15rem 1fr; gap:.5rem; align-items:start; margin:0}
+.jn-num{font-size:.75rem; font-weight:600; color:var(--fg-faint); text-align:center; line-height:1.5}
+.jn-body b{font-size:.88rem; color:var(--fg); font-weight:600; display:block}
+.jn-body span{display:block; font-size:.8rem; color:var(--fg-soft)}
+.jnote{margin:.9rem 0 0; padding-block-start:.75rem; border-block-start:var(--line-w) solid var(--line);
+  font-size:var(--t-small); color:var(--fg-soft); max-width:none}
+.ico{width:1.15rem; height:1.15rem; flex:0 0 auto; stroke:currentColor; fill:none; stroke-width:1.6;
+  stroke-linecap:round; stroke-linejoin:round}
+.ico--hi{color:var(--accent)}
+.ico--mid{color:var(--fg-faint)}
+.ico--lo{color:var(--low)}
+
+/* מסגרת דסקטופ, במקום טלפון: אורן קונה כך, והחליט שהדסקטופ "בכיר" בקייס הזה.
+   בלי iframe חי בכוונה - הוא לא רצה שהמבקר יגלוש מהעמוד. צילום מסך אמיתי בלבד. */
+.browser-frame{border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--shadow); border:var(--line-w) solid var(--line); background:var(--card)}
+.browser-bar{display:flex; align-items:center; gap:.6rem; padding:.55rem .75rem; background:var(--bg-soft); border-bottom:var(--line-w) solid var(--line)}
+.browser-dots{display:flex; gap:.4rem}
+.browser-dots span{width:9px; height:9px; border-radius:50%; background:var(--line)}
+.browser-url{flex:1; text-align:center; font-size:.72rem; color:var(--fg-faint); background:var(--card); border:var(--line-w) solid var(--line); border-radius:var(--r-pill); padding:.25rem .8rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; direction:ltr}
+.browser-frame img{display:block; width:100%; height:auto}
+
+.hero{display:grid; gap:clamp(1.5rem,4vw,3.5rem); align-items:center;
+  grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+@media (max-width:900px){ .hero{grid-template-columns:1fr} }
+
+footer{padding-block:var(--pad-sec) 3rem; border-top:var(--line-w) solid var(--line); text-align:center}
+footer p{margin-inline:auto}
+footer .btn-row{justify-content:center}
+
+.reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1; transform:none; transition:none}
+  .btn:hover,.gallery button:hover{transform:none}
+  *,*::before,*::after{transition-duration:.001ms !important; animation-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="f-hi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c.9 1.1 2.1 1.7 3.5 1.7s2.6-.6 3.5-1.7"/><path d="M9 9.5h.01M15 9.5h.01"/></symbol>
+  <symbol id="f-mid" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 15h7"/><path d="M9 9.5h.01M15 9.5h.01"/></symbol>
+  <symbol id="f-lo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 16.2c.9-1.1 2.1-1.7 3.5-1.7s2.6.6 3.5 1.7"/><path d="M9 9.5h.01M15 9.5h.01"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8 21 21"/><path d="M8.5 11h5M11 8.5v5"/></symbol>
+</svg>
+
+<div class="bar-track"><div class="bar" id="bar"></div></div>
+
+<nav class="nav">
+  <div class="nav-in">
+    <span class="nav-name"><b>Dull</b><span>קייס סטאדי</span></span>
+    <div class="nav-links">
+      <a href="#challenge">האתגר</a>
+      <a href="#research">המחקר</a>
+      <a href="#persona">הפרסונות</a>
+      <a href="#journey">המסע והמבנה</a>
+      <a href="#language">שפה עיצובית</a>
+      <a href="#screens">המסכים</a>
+      <a href="#ai">העבודה עם המודל</a>
+      <a href="#build">מעיצוב לקוד</a>
+      <a href="#beforeafter">לפני ואחרי</a>
+      <a href="#measure">מדידה</a>
+      <a href="#mistakes">מה נשבר</a>
+      <a href="#impact">סיכום</a>
+      <a href="#learned">מה למדתי</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ 1. היירו ═══════════ -->
+<section id="top">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <p class="eyebrow">קייס סטאדי · מסחר אלקטרוני · עיצוב UX/UI, מחקר ופיתוח מלא</p>
+        <h1 style="font-size:var(--t-hero)">Dull</h1>
+        <p class="lead">Dull מייצרת גרסה מעודנת וישראלית לחולצות של להקות אקסטרים משנות ה-80 וה-90, לדור ה-X ולכל המתעניין בתקופה.</p>
+
+        <ul class="chips" style="margin-top:1.6rem">
+          <li class="chip">עיצוב, מחקר ופיתוח (עם עבודה משותפת עם המודל)</li>
+          <li class="chip">פרויקט קפסטון · אב-טיפוס חי</li>
+          <li class="chip">11 מסכים מרכזיים</li>
+          <li class="chip">אתר דו-לשוני, RTL מלא</li>
+        </ul>
+
+        <div class="btn-row">
+          <a class="btn btn-1" href="https://dull.onrender.com" target="_blank" rel="noopener">לפתוח את המוצר</a>
+        </div>
+      </div>
+
+      <div class="browser-frame">
+        <div class="browser-bar">
+          <span class="browser-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="browser-url">dull.onrender.com</span>
+        </div>
+        <img src="assets/screen-home-banner.jpg" alt="דף הבית של Dull בעברית: חמש דמויות לובשות חולצות עם הדפסי להקות אקסטרים, על רקע מדברי, עם באנר הבהרת זכויות יוצרים מעל התוכן">
+      </div>
+    </div>
+
+    <div style="margin-top:3.2rem">
+      <nav class="toc" aria-label="פרקי הקייס סטאדי">
+        <h3>מה יש בעמוד הזה</h3>
+        <ol>
+          <li><a href="#challenge"><b>01</b> האתגר</a></li>
+          <li><a href="#research"><b>02</b> המחקר</a></li>
+          <li><a href="#persona"><b>03</b> הפרסונות</a></li>
+          <li><a href="#journey"><b>04</b> המסע והמבנה</a></li>
+          <li><a href="#language"><b>05</b> השפה העיצובית</a></li>
+          <li><a href="#screens"><b>06</b> המסכים</a></li>
+          <li><a href="#ai"><b>07</b> העבודה עם המודל</a></li>
+          <li><a href="#build"><b>08</b> מעיצוב לקוד</a></li>
+          <li><a href="#beforeafter"><b>09</b> לפני ואחרי</a></li>
+          <li><a href="#measure"><b>10</b> מדידה</a></li>
+          <li><a href="#mistakes"><b>11</b> מה נשבר</a></li>
+          <li><a href="#impact"><b>12</b> סיכום</a></li>
+          <li><a href="#learned"><b>13</b> מה למדתי</a></li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 2. האתגר ═══════════ -->
+<section id="challenge" class="soft">
+  <div class="wrap">
+    <p class="eyebrow">01 · האתגר</p>
+    <h2>הלוק התעדן, הזיכרון התרבותי לא</h2>
+    <p>גדלנו. חלקנו הפכו להורים. הלוק שלנו התעדן. אבל הזיכרון התרבותי משנות ה-80 וה-90 נשאר נוכח. במקום לבטא אותו, אני מוותר וקונה חולצה גנרית בלי הזהות הזאת - חולצה חלקה, בגוון לא צעקני.</p>
+    <div class="grid g3" style="margin-top:2.2rem">
+      <div class="card"><h3>למי זה כואב</h3><p>לבני דור ה-X, ולכל מי שתרבות שנות ה-80 וה-90 מעניינת אותו - מי שהלוק שלו התעדן אבל הזיכרון התרבותי נשאר.</p></div>
+      <div class="card"><h3>מה קורה היום</h3><p>ויתור על ביטוי, ובחירה בחולצה גנרית בלי הזהות הזאת - בעיקר חולצות חלקות, בגוונים לא צעקניים.</p></div>
+      <div class="card"><h3>המטרה שלי</h3><p>לתת דרך לבטא את הזיכרון התרבותי הזה, בטייק שמתאים לשלב החיים הנוכחי - לא ילדותי ולא מתנער ממה שהיה.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 3. המחקר ═══════════ -->
+<section id="research">
+  <div class="wrap">
+    <p class="eyebrow">02 · המחקר</p>
+    <h2>8 ראיונות, 4 מהם אמיתיים</h2>
+    <p>8 ראיונות בסך הכל: 4 טלפוניים אותנטיים (הדר, דנה, אריק, ריקי), ו-4 נוספים מפוברקים לפי הנחות הבריף. שלוש תובנות עלו מהם, וכל אחת קיבלה השלכה עיצובית ישירה.</p>
+
+    <div class="grid g3" style="margin-top:2.2rem">
+      <div class="card"><div class="card-num">01</div><h3>ודאות במידה</h3><p>הצורך בוודאות לגבי מידת הבגד, ככל האפשר. הובילה למדריכי מידות ייעודיים לחולצות ולסנדלים, בהתאמה למידות לפי מין וגזרה.</p></div>
+      <div class="card"><div class="card-num">02</div><h3>שקיפות בחומר</h3><p>הצורך בשקיפות לגבי איכות החומרים שמהם עשוי הבגד. הובילה לפריים בעמוד הפריט שמפרט את החומרים ואת איכותם.</p></div>
+      <div class="card"><div class="card-num">03</div><h3>המקום של דור ה-X</h3><p>מציאת המקום של דור ה-X בתוך היצע שנע בין "צעיר מדי" ל"מבוגר מדי". הובילה לתמה עצמה: לוגואים של להקות אקסטרים, בהגשה בגוונים מעודנים.</p></div>
+    </div>
+
+    <p style="margin-top:1.8rem">התובנות האלה התמזגו לשלוש פרסונות: יובל שגיא, שני אזולאי, ודנה אהרון.</p>
+
+    <div class="gap">
+      <b>פער מסומן</b>
+      <p>4 מתוך 8 ראיונות המחקר מפוברקים לפי הנחות הבריף, לא תמלול אמיתי - הם מסומנים ככאלה, ולא מוצגים כמחקר אותנטי מלא.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 4. הפרסונות ═══════════ -->
+<section id="persona" class="soft">
+  <div class="wrap">
+    <p class="eyebrow">03 · הפרסונות</p>
+    <h2>שלושה פרופילים, משלוש קבוצות מחקר</h2>
+    <p class="claim">הבעיה המשותפת לשלוש הפרסונות היא לא "אהבת סטייל" - היא שלב חיים שאין לו עדיין שפה עיצובית משלו.</p>
+    <p>הקיבוץ נעשה לפי גודל קבוצת המחקר (יובל, 4 מתוך 8 מרואיינים), לפי צורך באימות חיצוני (שני), ולפי חיפוש זהות שלא "צעירה מדי" ולא "מבוגרת מדי" (דנה).</p>
+
+    <div class="grid g3" style="margin-top:2rem">
+      <div class="card">
+        <h3>יובל שגיא</h3>
+        <p class="tiny">פרסונה ראשית · 48-70, תפקיד טכני-מעשי · "אני לא מבין אנשים שהופכים את זה לפרויקט"</p>
+        <p>רוצה לסגור קנייה מהר ובלי מאמץ, ולדעת בוודאות שהמוצר יתאים לפני הרכישה. מותג לא מוכר נתפס כסיכון מיותר, ותוכן שיווקי-נרטיבי כבזבוז זמן.</p>
+      </div>
+      <div class="card">
+        <h3>שני אזולאי</h3>
+        <p class="tiny">פרסונה נוספת · 37-52, הייטק/ניהול קליניקה · "אני צריכה משהו שנמצא מחוץ לאתר"</p>
+        <p>מוכנה לנסות מותג לא מוכר רק כשהאמון מגיע ממקור עצמאי מחוץ לאתר. תסכול מרכזי: פער שכבר קרה בין תיאור המוצר למה שהתקבל, וחוסר אמון בביקורות שהאתר עצמו מציג.</p>
+      </div>
+      <div class="card">
+        <h3>דנה אהרון</h3>
+        <p class="tiny">פרסונה נוספת · 43-49, שחקנית/מנהלת בית ספר · "אני רק יודעת שני המקומות שלא מתאימים לי"</p>
+        <p>בררנית מתוך זהות: הבגד הוא הצהרה על מי שהיא היום, לא הרגל. תסכול מרכזי: קושי למצוא שפה עיצובית שלא "צעירה מדי" ולא "מבוגרת מדי".</p>
+      </div>
+    </div>
+
+    <div class="gallery" style="--col:22rem;--ar:21/10">
+      <button type="button" data-full="assets/persona-yuval.jpg" data-cap="מפת אמפתיה של יובל שגיא: אומר, חושב, עושה, מרגיש, כאבים ורווחים, מתוך ראיונות אמיתיים ומפוברקים כאחד.">
+        <span class="shot"><img src="assets/persona-yuval-thumb.jpg" alt="מפת אמפתיה וכרטיס פרסונה של יובל שגיא, מלוח FigJam" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role ext">הרחבה</span><b>יובל שגיא · מפת אמפתיה</b>אומר/חושב/עושה/מרגיש, וכאבים ורווחים - מעבר לשני המניעים והתסכולים שכתובים בכרטיס מעליה.</span>
+      </button>
+      <button type="button" data-full="assets/persona-shani.jpg" data-cap="מפת אמפתיה של שני אזולאי.">
+        <span class="shot"><img src="assets/persona-shani-thumb.jpg" alt="מפת אמפתיה וכרטיס פרסונה של שני אזולאי, מלוח FigJam" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role ext">הרחבה</span><b>שני אזולאי · מפת אמפתיה</b>כאן רואים את החשד המובנה כלפי תוכן שהמותג כותב על עצמו, שהוביל בהמשך להחלטה על שיתוף חיצוני ברשתות.</span>
+      </button>
+      <button type="button" data-full="assets/persona-dana.jpg" data-cap="מפת אמפתיה של דנה אהרון.">
+        <span class="shot"><img src="assets/persona-dana-thumb.jpg" alt="מפת אמפתיה וכרטיס פרסונה של דנה אהרון, מלוח FigJam" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role ext">הרחבה</span><b>דנה אהרון · מפת אמפתיה</b>הקושי הרגשי להיפרד מבגדים ישנים מסביר גם למה ה-Wishlist ירד בלי החלפה: לשמור בלי לחץ לקנות, לא למכור מהר יותר.</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 5. המסע והמבנה ═══════════ -->
+<section id="journey">
+  <div class="wrap">
+    <p class="eyebrow">04 · המסע והמבנה</p>
+    <h2>איפה המסע נשבר</h2>
+    <p class="claim">שלושת המסעות נשברים באותו סוג של מקום: לא בממשק, אלא בהיעדר וודאות שאין לממשק לפתור לבד.</p>
+    <p>שלוש מפות, לפי שלוש קבוצות המחקר. הסולם באותו עמוד לכל מפה: 5 מוטיבציה, 1 תסכול, והנקודה האדומה היא השפל.</p>
+
+    <div class="jmaps">
+<article class="jmap"><h4>יובל שגיא · הזמנת בגדי בייסיקס, מותג לא מוכר</h4><p class="jscale"><span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg> 5 מוטיבציה</span><span><svg class="ico ico--lo" aria-hidden="true"><use href="#f-lo"/></svg> 1 תסכול</span></p><svg viewBox="0 0 560 265" class="jchart" role="img" aria-label="יובל שגיא · הזמנת בגדי בייסיקס, מותג לא מוכר"><line x1="34.0" y1="211.0" x2="526.0" y2="211.0" class="jg"/><text x="534" y="215.0" class="jt">1</text><line x1="34.0" y1="120.5" x2="526.0" y2="120.5" class="jg"/><text x="534" y="124.5" class="jt">3</text><line x1="34.0" y1="30.0" x2="526.0" y2="30.0" class="jg"/><text x="534" y="34.0" class="jt">5</text><path d="M526.0,143.1 L444.0,120.5 L362.0,120.5 L280.0,188.4 L198.0,75.2 L116.0,120.5 L34.0,52.6 L34.0,211.0 L526.0,211.0 Z" class="ja"/><path d="M526.0,143.1 L444.0,120.5 L362.0,120.5 L280.0,188.4 L198.0,75.2 L116.0,120.5 L34.0,52.6" class="jl"/><circle cx="526.0" cy="143.1" r="5" class="jd"/><text x="526.0" y="130.1" class="jv">2.5</text><text x="526.0" y="237" class="jn">1</text><circle cx="444.0" cy="120.5" r="5" class="jd"/><text x="444.0" y="107.5" class="jv">3</text><text x="444.0" y="237" class="jn">2</text><circle cx="362.0" cy="120.5" r="5" class="jd"/><text x="362.0" y="107.5" class="jv">3</text><text x="362.0" y="237" class="jn">3</text><circle cx="280.0" cy="188.4" r="6" class="jd jd--low"/><text x="280.0" y="175.4" class="jv jv--low">1.5</text><text x="280.0" y="237" class="jn">4</text><circle cx="198.0" cy="75.2" r="5" class="jd"/><text x="198.0" y="62.2" class="jv">4</text><text x="198.0" y="237" class="jn">5</text><circle cx="116.0" cy="120.5" r="5" class="jd"/><text x="116.0" y="107.5" class="jv">3</text><text x="116.0" y="237" class="jn">6</text><circle cx="34.0" cy="52.6" r="5" class="jd"/><text x="34.0" y="39.6" class="jv">4.5</text><text x="34.0" y="237" class="jn">7</text></svg><ol class="jlegend"><li><span class="jn-num">1</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>כניסה לאתר</b><span>ספקנות ותשישות מראש · 2.5</span></span></li><li><span class="jn-num">2</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>ניווט לקטגוריה</b><span>פוקוס ענייני · 3</span></span></li><li><span class="jn-num">3</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>עמוד פריט</b><span>אדישות שקטה · 3</span></span></li><li><span class="jn-num">4</span><svg class="ico ico--lo" aria-hidden="true"><use href="#f-lo"/></svg><span class="jn-body"><b>בדיקת מידה</b><span>חוסר ודאות מהוסס · 1.5</span></span></li><li><span class="jn-num">5</span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg><span class="jn-body"><b>הוספה לסל</b><span>יעילות מרוצה · 4</span></span></li><li><span class="jn-num">6</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>אישור הזמנה</b><span>ביטחון מסויג · 3</span></span></li><li><span class="jn-num">7</span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg><span class="jn-body"><b>קבלת המשלוח</b><span>הקלה ונאמנות · 4.5</span></span></li></ol><p class="jnote">השפל בבדיקת המידה הוא בדיוק המקום שמדריך המידות המשולב נועד לתפוס. הנקודה האחרונה מציגה את מסלול ההצלחה (4.5) - יש גם מסלול אכזבה (2) אם המידה לא תתאים בפועל.</p><div class="gallery gallery--one" style="--ar:16/9;margin-block-start:1rem"><button type="button" data-full="assets/jmap-yuval-board.jpg" data-cap="הלוח המקורי. נקודות המגע, הכאבים וההזדמנויות שמאחורי הגרף - כולל השערת התיקוף על היעדר היסטוריית הזמנות."><span class="shot"><img src="assets/jmap-yuval-board-thumb.jpg" alt="לוח מפת המסע של יובל שגיא מתוך FigJam, עם נקודות מגע וסטיקי-נוטים של כאב והזדמנות" loading="lazy"></span><span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span><span class="cap"><span class="role">ראיה</span><b>הלוח המקורי</b>נקודות המגע, הכאבים וההזדמנויות שמאחורי הגרף - כולל השערת התיקוף על היעדר היסטוריית הזמנות..</span></button></div></article>
+<article class="jmap"><h4>שני אזולאי · גילוי מותג לא מוכר, והחלטה אם לסמוך עליו</h4><p class="jscale"><span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg> 5 מוטיבציה</span><span><svg class="ico ico--lo" aria-hidden="true"><use href="#f-lo"/></svg> 1 תסכול</span></p><svg viewBox="0 0 560 265" class="jchart" role="img" aria-label="שני אזולאי · גילוי מותג לא מוכר, והחלטה אם לסמוך עליו"><line x1="34.0" y1="211.0" x2="526.0" y2="211.0" class="jg"/><text x="534" y="215.0" class="jt">1</text><line x1="34.0" y1="120.5" x2="526.0" y2="120.5" class="jg"/><text x="534" y="124.5" class="jt">3</text><line x1="34.0" y1="30.0" x2="526.0" y2="30.0" class="jg"/><text x="534" y="34.0" class="jt">5</text><path d="M526.0,120.5 L444.0,165.8 L362.0,143.1 L280.0,188.4 L198.0,97.9 L116.0,97.9 L34.0,52.6 L34.0,211.0 L526.0,211.0 Z" class="ja"/><path d="M526.0,120.5 L444.0,165.8 L362.0,143.1 L280.0,188.4 L198.0,97.9 L116.0,97.9 L34.0,52.6" class="jl"/><circle cx="526.0" cy="120.5" r="5" class="jd"/><text x="526.0" y="107.5" class="jv">3</text><text x="526.0" y="237" class="jn">1</text><circle cx="444.0" cy="165.8" r="5" class="jd"/><text x="444.0" y="152.8" class="jv">2</text><text x="444.0" y="237" class="jn">2</text><circle cx="362.0" cy="143.1" r="5" class="jd"/><text x="362.0" y="130.1" class="jv">2.5</text><text x="362.0" y="237" class="jn">3</text><circle cx="280.0" cy="188.4" r="6" class="jd jd--low"/><text x="280.0" y="175.4" class="jv jv--low">1.5</text><text x="280.0" y="237" class="jn">4</text><circle cx="198.0" cy="97.9" r="5" class="jd"/><text x="198.0" y="84.9" class="jv">3.5</text><text x="198.0" y="237" class="jn">5</text><circle cx="116.0" cy="97.9" r="5" class="jd"/><text x="116.0" y="84.9" class="jv">3.5</text><text x="116.0" y="237" class="jn">6</text><circle cx="34.0" cy="52.6" r="5" class="jd"/><text x="34.0" y="39.6" class="jv">4.5</text><text x="34.0" y="237" class="jn">7</text></svg><ol class="jlegend"><li><span class="jn-num">1</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>גילוי המותג</b><span>סקרנות זהירה · 3</span></span></li><li><span class="jn-num">2</span><svg class="ico ico--lo" aria-hidden="true"><use href="#f-lo"/></svg><span class="jn-body"><b>כניסה לאתר</b><span>חשד ראשוני · 2</span></span></li><li><span class="jn-num">3</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>עמוד פריט</b><span>ספקנות ממוקדת · 2.5</span></span></li><li><span class="jn-num">4</span><svg class="ico ico--lo" aria-hidden="true"><use href="#f-lo"/></svg><span class="jn-body"><b>אימות חיצוני</b><span>מאמץ וחוסר ודאות · 1.5</span></span></li><li><span class="jn-num">5</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>הוספה לסל ואישור</b><span>הקלה זהירה · 3.5</span></span></li><li><span class="jn-num">6</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>תשלום</b><span>מחויבות זהירה · 3.5</span></span></li><li><span class="jn-num">7</span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg><span class="jn-body"><b>קבלת המוצר</b><span>אמון מתחזק · 4.5</span></span></li></ol><p class="jnote">השפל באימות חיצוני הוא הטיעון המרכזי לבלוק 5: הצורך באימות שהמותג לא שולט עליו. הנקודה האחרונה מציגה את מסלול ההצלחה (4.5) - יש גם מסלול אכזבה מפער ישן (2).</p><div class="gallery gallery--one" style="--ar:16/9;margin-block-start:1rem"><button type="button" data-full="assets/jmap-shani-board.jpg" data-cap="הלוח המקורי. כאן מופיע הכאב שהוביל להחלטה על שיתוף דינאמי ברשתות: ״אני צריכה משהו שנמצא מחוץ לאתר, שהמותג לא שולט עליו.״"><span class="shot"><img src="assets/jmap-shani-board-thumb.jpg" alt="לוח מפת המסע של שני אזולאי מתוך FigJam" loading="lazy"></span><span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span><span class="cap"><span class="role">ראיה</span><b>הלוח המקורי</b>כאן מופיע הכאב שהוביל להחלטה על שיתוף דינאמי ברשתות: ״אני צריכה משהו שנמצא מחוץ לאתר, שהמותג לא שולט עליו.״.</span></button></div></article>
+<article class="jmap"><h4>דנה אהרון · בדיקת התאמת זהות לפני רכישה מכוונת</h4><p class="jscale"><span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg> 5 מוטיבציה</span><span><svg class="ico ico--lo" aria-hidden="true"><use href="#f-lo"/></svg> 1 תסכול</span></p><svg viewBox="0 0 560 265" class="jchart" role="img" aria-label="דנה אהרון · בדיקת התאמת זהות לפני רכישה מכוונת"><line x1="34.0" y1="211.0" x2="526.0" y2="211.0" class="jg"/><text x="534" y="215.0" class="jt">1</text><line x1="34.0" y1="120.5" x2="526.0" y2="120.5" class="jg"/><text x="534" y="124.5" class="jt">3</text><line x1="34.0" y1="30.0" x2="526.0" y2="30.0" class="jg"/><text x="534" y="34.0" class="jt">5</text><path d="M526.0,120.5 L444.0,120.5 L362.0,97.9 L280.0,188.4 L198.0,75.2 L116.0,75.2 L34.0,52.6 L34.0,211.0 L526.0,211.0 Z" class="ja"/><path d="M526.0,120.5 L444.0,120.5 L362.0,97.9 L280.0,188.4 L198.0,75.2 L116.0,75.2 L34.0,52.6" class="jl"/><circle cx="526.0" cy="120.5" r="5" class="jd"/><text x="526.0" y="107.5" class="jv">3</text><text x="526.0" y="237" class="jn">1</text><circle cx="444.0" cy="120.5" r="5" class="jd"/><text x="444.0" y="107.5" class="jv">3</text><text x="444.0" y="237" class="jn">2</text><circle cx="362.0" cy="97.9" r="5" class="jd"/><text x="362.0" y="84.9" class="jv">3.5</text><text x="362.0" y="237" class="jn">3</text><circle cx="280.0" cy="188.4" r="6" class="jd jd--low"/><text x="280.0" y="175.4" class="jv jv--low">1.5</text><text x="280.0" y="237" class="jn">4</text><circle cx="198.0" cy="75.2" r="5" class="jd"/><text x="198.0" y="62.2" class="jv">4</text><text x="198.0" y="237" class="jn">5</text><circle cx="116.0" cy="75.2" r="5" class="jd"/><text x="116.0" y="62.2" class="jv">4</text><text x="116.0" y="237" class="jn">6</text><circle cx="34.0" cy="52.6" r="5" class="jd"/><text x="34.0" y="39.6" class="jv">4.5</text><text x="34.0" y="237" class="jn">7</text></svg><ol class="jlegend"><li><span class="jn-num">1</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>כניסה למחלקה</b><span>ציפייה זהירה · 3</span></span></li><li><span class="jn-num">2</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>עיון בפריט</b><span>בדיקת התאמה עצמית · 3</span></span></li><li><span class="jn-num">3</span><svg class="ico ico--mid" aria-hidden="true"><use href="#f-mid"/></svg><span class="jn-body"><b>עמוד מעצב</b><span>עניין מסויג · 3.5</span></span></li><li><span class="jn-num">4</span><svg class="ico ico--lo" aria-hidden="true"><use href="#f-lo"/></svg><span class="jn-body"><b>התלבטות</b><span>התלבטות ואשמה קלה · 1.5</span></span></li><li><span class="jn-num">5</span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg><span class="jn-body"><b>החלטה לקנות</b><span>החלטה בטוחה · 4</span></span></li><li><span class="jn-num">6</span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg><span class="jn-body"><b>אישור הזמנה</b><span>שביעות רצון מהבחירה · 4</span></span></li><li><span class="jn-num">7</span><svg class="ico ico--hi" aria-hidden="true"><use href="#f-hi"/></svg><span class="jn-body"><b>קבלת הפריט</b><span>"זה אני" · 4.5</span></span></li></ol><p class="jnote">השפל הוא בהתלבטות עצמה, לא בשלב טכני באתר - התלבטות זהותית, לא חיכוך בממשק. הנקודה האחרונה מציגה את מסלול ההצלחה ("זה אני", 4.5) - יש גם מסלול תחושת פשרה (2).</p><div class="gallery gallery--one" style="--ar:16/9;margin-block-start:1rem"><button type="button" data-full="assets/jmap-dana-board.jpg" data-cap="הלוח המקורי. השערת התיקוף כאן: תהליך checkout גנרי לא משדר בחזרה שזו קנייה שקולה, לא אימפולסיבית."><span class="shot"><img src="assets/jmap-dana-board-thumb.jpg" alt="לוח מפת המסע של דנה אהרון מתוך FigJam" loading="lazy"></span><span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span><span class="cap"><span class="role">ראיה</span><b>הלוח המקורי</b>השערת התיקוף כאן: תהליך checkout גנרי לא משדר בחזרה שזו קנייה שקולה, לא אימפולסיבית..</span></button></div></article>
+    </div>
+
+    <h3 style="margin-top:3rem">ארכיטקטורת מידע</h3>
+    <p class="claim">גם בגרסה הממוקדת של הסייטמאפ, שכבר ויתרה על רוסטר מעצבים ועל אזור ביקורות, המבחן מול שני אזולאי נכשל.</p>
+    <p>בלי רוסטר ובלי ביקורות, אין שום אימות חיצוני באתר עצמו - הפער גדל, לא הצטמצם. זה מה שהוביל להחלטה בפועל: להשקיע בתמיכה טובה בשיתוף פריטים ברשתות החברתיות (הגשה דינאמית של ה-HTML הראשי מהבקאנד, שמאפשרת שיתוף של גזרה וגוון ספציפיים עם תמונה) - אימות חיצוני אמיתי, לא תחליף בתוך האתר. מכל שלוש הפרסונות יחד, רוסטר המעצבים התגלה כלא מעניין באופן חד-משמעי. וקטגוריית הילדים ירדה מסיבה נפרדת: ברגע שהקונספט השתנה, לא נראה צורך בגרסאות ילדים לבגדים של להקות שלא קשורות לעולם הילדים - המיקוד עבר למבוגרים, עד רמת הסנדלים הנלווים ל"לוק".</p>
+
+    <div class="gallery gallery--one" style="--ar:16/9">
+      <button type="button" data-full="assets/sitemap.jpg" data-cap="Sitemap V1, הגרסה הממוקדת-מחדש: בלי רוסטר מעצבים, בלי אזור ביקורות, בלי קטגוריית ילדים - עם ניתוח מבחן לכל פרסונה.">
+        <span class="shot"><img src="assets/sitemap-thumb.jpg" alt="עץ הסייטמאפ V1 של Dull, עם ענפי בית/קולקציה/אודות/אזור אישי/עגלה, וכרטיסי מבחן פרסונה בצד" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role">ראיה</span><b>Sitemap V1</b>הכרטיס הכתום מראה במפורש: "מבחן שני אזולאי: נכשל, ואף מוחרף" - הראיה הישירה לטענה שלמעלה.</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 6. השפה העיצובית ═══════════ -->
+<section id="language" class="soft">
+  <div class="wrap">
+    <p class="eyebrow">05 · השפה העיצובית</p>
+    <h2>מהתחושה לשפה חזותית</h2>
+    <p class="claim">רציתי להגיע לרמת הבהירות והפשטות של האתר של Next, שנראה מופתי.</p>
+    <p>הבחירה בכחול ובצהוב נועדה להעשיר את גווני האפור בנגיעות עדינות של צבעים סימבוליים בתולדות האמנות - כחול לקדושה, צהוב לנשגב. בפועל, זה לא מצא ביטוי באתר עצמו.</p>
+
+    <div class="gallery" style="--col:13rem;margin-block-start:1.6rem">
+      <button type="button" data-full="assets/moodboard-palette.jpg" data-cap="לוח הפלטה הבסיסית של Dull: Primary, Primary Light, שני צהובים (Lemon/Sun), וסולם אפורים - ההערה בתחתית: הבד יכלול הרבה חום, אבל הצבע לא יככב בגוף האתר.">
+        <span class="shot" style="aspect-ratio:.64"><img src="assets/moodboard-palette-thumb.jpg" alt="לוח פלטת הצבעים הבסיסית של Dull" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role ext">הרחבה</span><b>לוח הפלטה</b>אותם הצבעים בדיוק שנכנסו בסוף ל-tokens.css - primary, שני צהובים, וסולם אפורים.</span>
+      </button>
+      <button type="button" data-full="assets/moodboard-mondrian.jpg" data-cap="רפרנס אמנותי: פיט מונדריאן, Windmill in Twilight (כ-1907-1908) - שמיים כחולים ואור שקיעה צהוב-זהב, לפני המעבר של מונדריאן לאבסטרקט.">
+        <span class="shot" style="aspect-ratio:1.735"><img src="assets/moodboard-mondrian-thumb.jpg" alt="ציור טרום-אבסטרקטי של פיט מונדריאן, טחנת רוח בשעת בין ערביים" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role ext">הרחבה</span><b>מונדריאן · Windmill in Twilight</b>הגרסה הציורית של הצמד כחול-צהוב, לפני שמונדריאן עבר לרשתות הצבע האבסטרקטיות שהוא מזוהה איתן.</span>
+      </button>
+      <button type="button" data-full="assets/moodboard-raphael.jpg" data-cap="רפרנס אמנותי: רפאל, Saint Catherine of Alexandria - גלימה כחולה וצעיף צהוב-זהב.">
+        <span class="shot" style="aspect-ratio:.768"><img src="assets/moodboard-raphael-thumb.jpg" alt="ציור רנסנס של רפאל, דמות בגלימה כחולה וצעיף צהוב" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role ext">הרחבה</span><b>רפאל · Saint Catherine of Alexandria</b>הגלימה הכחולה והצעיף הצהוב-זהב - הצמד הסימבולי בלבוש דתי-קדוש, ולא רק בנוף.</span>
+      </button>
+      <button type="button" data-full="assets/moodboard-nickcave.jpg" data-cap="רפרנס נוסף מהמוד-בורד: Nick Cave & the Bad Seeds, The Mercy Seat - פוסטר סינגל, לבן/אדום-על-שחור. זה הרפרנס לסקאלה שנפסלה.">
+        <span class="shot" style="aspect-ratio:.675"><img src="assets/moodboard-nickcave-thumb.jpg" alt="פוסטר הסינגל The Mercy Seat של Nick Cave and the Bad Seeds, בלבן ואדום על שחור" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role ext">הרחבה</span><b>Nick Cave & the Bad Seeds · The Mercy Seat</b>הרפרנס לסקאלה הבוטה שהייתה על השולחן, ונפסלה - הטבלה מטה מסבירה למה.</span>
+      </button>
+    </div>
+
+    <div class="grid g4" style="margin-top:2rem">
+      <div class="card"><h3>בהירות</h3><p class="tiny">גוונים בהירים בהשראת בטיק, או עמוקים בהשראת טבע - לא הסקאלה הבוטה של לבן/אדום-על-שחור המזוהה עם הז'אנר</p></div>
+      <div class="card"><h3>עדינות</h3><p class="tiny">לוגואים של להקות אקסטרים, בהגשה בגוונים מעודנים - לא הגרסה הצעקנית שלהם</p></div>
+      <div class="card"><h3>עובדתיות</h3><p class="tiny">פסקת חומרים וייצור עובדתית, לא ביוגרפיית מעצב</p></div>
+      <div class="card"><h3>מיעוט</h3><p class="tiny">ויתור מכוון על קרוסלות, מעצבים ותוכן שיווקי-נרטיבי שאינו נחוץ לקבלת החלטה</p></div>
+    </div>
+
+    <p style="margin-top:1.8rem">מה שנפסל בגלל השפה הזו, לפני שמישהו עיצב אותו:</p>
+
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>הרפרנס שנשקל</th><th>מה קרה לו בפועל</th></tr></thead>
+        <tbody>
+          <tr><td>הסקאלה הבוטה של לבן/אדום-על-שחור, מוכרת מהז'אנר</td><td>נפסלה. במקומה: גוונים בהירים בהשראת בטיק, או עמוקים בהשראת טבע</td></tr>
+          <tr><td>רוסטר מעצבים ואזור ביקורות, כפי שהופיעו בסייטמאפ המוקדם</td><td>ירדו - התגלו כלא מעניינים לשלוש הפרסונות, ולא פתרו את הצורך באימות חיצוני</td></tr>
+          <tr><td>קטגוריית ילדים</td><td>ירדה - הלהקות לא קשורות לעולם הילדים, המיקוד עבר למבוגרים</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="gap">
+      <b>פער מסומן</b>
+      <p>בחירת הצבעים הסימבולית (כחול/צהוב) לא מצאה ביטוי בפועל באתר המוצר. ייתכן שתבוא לידי ביטוי בדף הנחיתה של הפרויקט - לא מובטח.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 7. המסכים ═══════════ -->
+<section id="screens">
+  <div class="wrap">
+    <p class="eyebrow">06 · המסכים</p>
+    <h2>לכל מסך, ההחלטה המעניינת שבו</h2>
+    <p>לא תיאור של מה רואים. אלה 11 המסכים המרכזיים, מהדסקטופ - כי כך אורן עצמו קונה, ולכן הדסקטופ "בכיר" יותר בקייס הזה. מסך אחד גם במובייל, כדי להראות שהמערכת מגיבה.</p>
+
+    <div class="gallery" style="--col:19rem;--ar:1917/1032">
+      <button type="button" data-full="assets/screen-home-banner.jpg" data-cap="בית: ויתור מוחלט על קרוסלת פריטים מומלצים.">
+        <span class="shot"><img src="assets/screen-home-banner-thumb.jpg" alt="דף הבית של Dull בעברית, עם באנר הבהרת זכויות יוצרים" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>בית</b>ויתור מוחלט על קרוסלת "פריטים מומלצים" - אף אחת משלוש מפות המסע לא דרשה אותה, אז המסך מציג רק את הקטלוג.</span>
+      </button>
+      <button type="button" data-full="assets/screen-shirts.jpg" data-cap="הקולקציה, טי-שירטס.">
+        <span class="shot"><img src="assets/screen-shirts-thumb.jpg" alt="עמוד הקולקציה של חולצות ה-Dull, רשת מוצרים" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>הקולקציה · טי-שירטס</b>גוונים בהירים בהשראת בטיק או עמוקים בהשראת טבע - במפורש לא הסקאלה הבוטה שמזוהה עם הז'אנר.</span>
+      </button>
+      <button type="button" data-full="assets/screen-shoes.jpg" data-cap="הקולקציה, נעליים.">
+        <span class="shot"><img src="assets/screen-shoes-thumb.jpg" alt="עמוד קולקציית הסנדלים של Dull" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>הקולקציה · נעליים</b>הקטגוריה תוקנה מ"פריטי הלבשה קלילים נוספים" ל"נעליים" - סתירת תיעוד מול הקוד, לא שינוי סקופ. גם ההוכחה שהמערכת לא נעולה על חולצות בלבד.</span>
+      </button>
+      <button type="button" data-full="assets/screen-item-shirt.jpg" data-cap="עמוד פריט, חולצה.">
+        <span class="shot"><img src="assets/screen-item-shirt-thumb.jpg" alt="עמוד פריט של חולצת Immortal, עם גלריה כפולה ובורר גזרה וגוון" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>עמוד פריט</b>גלריה כפולה קבועה (דוגמנ/ית + מוצר על אפור, שניהם גלויים יחד) במקום סוויפ - בדיוק בנקודת השפל המשותפת לשלוש הפרסונות.</span>
+      </button>
+      <button type="button" data-full="assets/screen-item-sandals.jpg" data-cap="עמוד פריט, סנדלים.">
+        <span class="shot"><img src="assets/screen-item-sandals-thumb.jpg" alt="עמוד פריט של סנדלים, עם מדריך מידות" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>עמוד פריט · סנדלים</b>אותו מדריך מידות משולב, מותאם לפריט אחר לגמרי - עקביות המערכת מעבר לחולצות.</span>
+      </button>
+      <button type="button" data-full="assets/screen-bag.jpg" data-cap="עגלת קניות.">
+        <span class="shot"><img src="assets/screen-bag-thumb.jpg" alt="עגלת הקניות של Dull עם פריט בפנים" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>עגלת קניות</b>לא מסך המרה עם CTA שדורש עמודת סיכום קבועה - עודכן רק בהמשך, כשעגלה ותשלום התמזגו.</span>
+      </button>
+      <button type="button" data-full="assets/screen-login.jpg" data-cap="התחברות, Google OAuth.">
+        <span class="shot"><img src="assets/screen-login-thumb.jpg" alt="כפתור Sign in with Google בתוך מסך הצ'קאאוט" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>התחברות</b>לא מסך נפרד - כפתור בתוך ה-checkout עצמו, עם סנכרון מול השרת כדי לא "להבהב" מסך התחברות למשתמש שכבר מחובר.</span>
+      </button>
+      <button type="button" data-full="assets/screen-checkout.jpg" data-cap="Checkout מאוחד.">
+        <span class="shot"><img src="assets/screen-checkout-thumb.jpg" alt="מסך הצ'קאאוט המאוחד של Dull, עם פרטי משלוח וסיכום הזמנה" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>עגלה ותשלום, מאוחדים</b>ויתור מודע על טופס תשלום מדומה - טופס כרטיס-אשראי מזויף היה נראה כמו תשלום אמיתי בלי לגבות בפועל, אז נשאר כפתור "בצע הזמנה" יחיד.</span>
+      </button>
+      <button type="button" data-full="assets/screen-order-confirmation.jpg" data-cap="אישור הזמנה.">
+        <span class="shot"><img src="assets/screen-order-confirmation-thumb.jpg" alt="מסך אישור ההזמנה של Dull" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>אישור הזמנה</b>מקשר עכשיו גם לפירוט ההזמנה שזה עתה בוצעה, לא רק מודיע שהיא בוצעה.</span>
+      </button>
+      <button type="button" data-full="assets/screen-orders-history.jpg" data-cap="היסטוריית הזמנות.">
+        <span class="shot"><img src="assets/screen-orders-history-thumb.jpg" alt="עמוד היסטוריית ההזמנות של Dull" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>היסטוריית הזמנות</b>שודרג מ"שלב ב'" ל-MVP גבוהה באמצע הפרויקט; משתמש באותה קומפוננטת Google Sign-In כמו ב-checkout.</span>
+      </button>
+    </div>
+
+    <h3 style="margin-top:3rem">ואחרי אישור ההזמנה, גם מייל</h3>
+    <p>לא מסך באתר - זה מה שמגיע בפועל לתיבת הדואר. הכי חשוב בו: ההבהרה שזו הזמנה מדומה לגמרי, בלי שום גבייה אמיתית.</p>
+    <div class="gallery gallery--one" style="--col:26rem;--ar:1533/702">
+      <button type="button" data-full="assets/screen-order-email.jpg" data-cap="מייל אישור ההזמנה שהתקבל בפועל: 'Your (very fake) Dull order confirmation' - עם פירוט המוצרים וסכום ההזמנה. שדה השולח וכתובת המשלוח נחתכו/טושטשו לפני הפרסום.">
+        <span class="shot"><img src="assets/screen-order-email-thumb.jpg" alt="מייל אישור הזמנה מ-Dull, עם כותרת שמבהירה שההזמנה מדומה ופירוט המוצרים" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>מייל אישור הזמנה</b>הכותרת עצמה כתובה כ"very fake" - ההבהרה שזו הזמנה מדומה מגיעה גם לתיבת הדואר, לא רק לאתר.</span>
+      </button>
+    </div>
+
+    <h3 style="margin-top:3rem">אותו עמוד פריט, במובייל</h3>
+    <p>הדסקטופ בכיר בקייס הזה, אבל המערכת מגיבה - אותה גלריה כפולה ואותו בורר, במסך צר.</p>
+    <div class="gallery gallery--one" style="--col:20rem;--ar:340/753">
+      <button type="button" data-full="assets/screen-item-mobile.jpg" data-cap="עמוד פריט של חולצה, במובייל.">
+        <span class="shot"><img src="assets/screen-item-mobile-thumb.jpg" alt="עמוד פריט של חולצה בתצוגת מובייל, עם שני הדימויים מוערמים אחד מעל השני" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>עמוד פריט · מובייל</b>שני הדימויים מוערמים (המצולם מעל, המוצר מתחתיו) במקום זה-לצד-זה, ומדריך המידות עובר להרחבה (accordion) כדי לא להעמיס גלילה.</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 8. העבודה עם המודל ═══════════ -->
+<section id="ai" class="soft">
+  <div class="wrap">
+    <p class="eyebrow">07 · העבודה עם המודל</p>
+    <h2>איפה הוא עזר, ואיפה הייתי צריך לעצור אותו</h2>
+    <p class="claim">המודל הציע עיצוב שנשמע גמור, ותועד כמגבלה קבועה - ודחיתי אותו לפני שנכתב קוד על בסיסו.</p>
+    <p>עבדתי עם שתי שיחות מודל נפרדות, אחת על הבקאנד ואחת על הפרונטאנד, כשקבצי md משותפים היו הזיכרון בין השתיים.</p>
+
+    <div class="grid g3" style="margin-top:1.8rem">
+      <div class="card"><h3>מה הוא עשה טוב</h3><p>בחירת Prisma Studio כ-CMS מוכן במקום פיתוח ממשק ניהול ייעודי. גזירה אלגברית, לא ניחוש חזותי, של line-height עברי מול לטיני מתוך מדידת פיקסלים בפועל. ותהליך רענון-לפני-עריכה שתפס התנגשות מספור סעיפים בין שתי השיחות לפני שנכתב דבר.</p></div>
+      <div class="card"><h3>איפה הוא טעה</h3><p>בעבודה על תכונת שיתוף-קישור לקומבינציית גזרה+גוון, הציע בהתחלה עיצוב סנכרון חד-כיווני בלבד בין ה-URL למצב הבחירה, ותיעד את זה כ"מגבלה ידועה" של הפיצ'ר.</p></div>
+      <div class="card"><h3>איך תיקנתי</h3><p>דחיתי את המגבלה ברגע שראיתי אותה, לפני שנכתב קוד פרונטאנד על בסיס העיצוב השגוי.</p></div>
+    </div>
+
+    <h3 style="margin-top:2.4rem">הפרומפט שהכי שינה את התוצאה</h3>
+    <blockquote class="quote">"הי סורי, אני לא יכול להסכים עם המגבלה שתיארת - הפרונט אנד לא יכול כ-SPA לדאוג שללינק הבסיסי תמיד תתוסף הבחירה הדיפולטיבית, וה-url יעודכן בהתאם לשינויי הבחירה של המשתמש בעמוד?"<cite>אורן, בשיחת הבקאנד</cite></blockquote>
+    <p>המשפט הזה הפך עיצוב שכבר הוצג כ"גמור" עם מגבלה מתועדת, לסנכרון רציף ואוטומטי בשני הכיוונים - לפני שנכתב קוד frontend על העיצוב השגוי. זה מנע עבודה מיותרת, לא רק תיקן בדיעבד.</p>
+  </div>
+</section>
+
+<!-- ═══════════ 9. מעיצוב לקוד ═══════════ -->
+<section id="build">
+  <div class="wrap">
+    <p class="eyebrow">08 · מעיצוב לקוד</p>
+    <h2>הבעיה הקשה באמת לא הייתה טכנית</h2>
+    <p class="claim">המעבר מעיצוב לקוד עבר חלק, אבל רק אחרי שינוי תפיסתי בדרך שבה עבדתי מול המודל.</p>
+    <p>במקום לנסות "להכריח" שיחה ארעית בכלי כמו Cursor או Windsurf לכתוב בלוקים של קוד "אנושי" בלי הערות או תיעוד, עברתי לעבוד מתוך הקשר אמיתי של הבנת המוצר, עם תיעוד נשמר בקבצי md - מאמץ משותף של כל השיחות המעורבות בפרויקט.</p>
+
+    <div class="grid g3" style="margin-top:2.2rem">
+      <div class="card"><h3>מה עבד</h3><p>העבודה מתוך md משותף בין שיחת הבקאנד לשיחת הפרונטאנד, במקום קוד בלי הקשר.</p></div>
+      <div class="card"><h3>מה נשבר</h3><p>רגרסיית חיתוך הראשים בבאנר ההומפייג' - ערך object-position 85% ביחס 3:1 דרש חיתוך גדול יותר מהתקציב הבטוח בתמונות בפועל. הפתרון חייב גם שינוי ביחס הרוחב-גובה עצמו (ל-2.8:1), לא רק כיוונון המיקום.</p></div>
+      <div class="card"><h3>מה הייתי עושה אחרת</h3><p>חושב יותר לעומק מראש על הפלטה - הכחולים כ-primary והצהובים כ-secondary - שבסוף לא הגיעה לידי ביטוי באתר עצמו.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 10. לפני ואחרי ═══════════ -->
+<section id="beforeafter" class="soft">
+  <div class="wrap">
+    <p class="eyebrow">09 · לפני ואחרי</p>
+    <h2>מה שיניתי, ולמה</h2>
+    <p class="claim">קוד "אנושי" בלי תיעוד היה בעצם הכבדה, לא קלילות.</p>
+    <p>מה שהניע את השינוי: ההבנה שהתקבלה מהקורס, כמה קריטיים מסמכי ה-md לפיתוח המוצר בפועל. ולצד זה - החזרה, אחרי הפסקה ארוכה, לעבודה בעברית, שבה יש לניסוחים יותר עומק, מעבר לפשטות הטכנית-לוגית שרגילים אליה באנגלית.</p>
+
+    <div class="grid g2" style="margin-top:2.2rem">
+      <div class="card">
+        <p class="eyebrow">לפני</p>
+        <h3>קוד בלי הקשר</h3>
+        <p>לנסות "להכריח" שיחה ארעית בכלי כמו Cursor או Windsurf לכתוב בלוקים של קוד "אנושי", בלי הערות או תיעוד.</p>
+      </div>
+      <div class="card">
+        <p class="eyebrow">אחרי</p>
+        <h3>הקשר משותף, מתועד</h3>
+        <p>עבודה מתוך הקשר אמיתי של הבנת המוצר, עם תיעוד נשמר בקבצי md - מאמץ משותף של כל השיחות המעורבות בפרויקט.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2.8rem">וגם באתר עצמו</h3>
+    <p>השינוי הזה ניכר גם חזותית: מדמו סטטי באנגלית, עם כלי דיבאג פנימי חשוף למצבי מסך, לעמוד עברי מלא שמוזן דינאמית מהבקאנד.</p>
+
+    <div class="grid g2" style="margin-top:1.2rem">
+      <div>
+        <p class="eyebrow">לפני</p>
+        <div class="gallery gallery--one" style="--ar:1917/1030">
+          <button type="button" data-full="assets/demo-static-before.jpg" data-cap="דמו סטטי מוקדם של עמוד הפריט, באנגלית - עם כלי דיבאג גלוי למצבי מסך (מלא / בטעינה / ריק).">
+            <span class="shot"><img src="assets/demo-static-before-thumb.jpg" alt="דמו סטטי מוקדם של עמוד הפריט של Dull, באנגלית, עם כלי דיבאג למצבי מסך" loading="lazy"></span>
+            <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+            <span class="cap"><span class="role">ראיה</span><b>דמו מוקדם</b>באנגלית, עם כלי דיבאג פנימי גלוי למצבי מסך - מלא / בטעינה / ריק.</span>
+          </button>
+        </div>
+      </div>
+      <div>
+        <p class="eyebrow">אחרי</p>
+        <div class="gallery gallery--one" style="--ar:1917/1035">
+          <button type="button" data-full="assets/screen-item-shirt.jpg" data-cap="עמוד הפריט באתר החי, בעברית מלאה.">
+            <span class="shot"><img src="assets/screen-item-shirt-thumb.jpg" alt="עמוד הפריט של Dull באתר החי, בעברית" loading="lazy"></span>
+            <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+            <span class="cap"><span class="role out">תוצר</span><b>האתר החי</b>עברית מלאה, בלי כלי דיבאג, עם תוכן אמיתי - חומרים, מדריך מידות, גלריה כפולה.</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 11. מדידה ═══════════ -->
+<section id="measure">
+  <div class="wrap">
+    <p class="eyebrow">10 · מדידה</p>
+    <h2>מה שהתגלה בתכנון, לא בדאטה עדיין</h2>
+    <p>הכלי: Mixpanel. מספר משתמשים אמיתי: משתמש אחד - אני עצמי, ב-identity merge בין מעמד אורח למשתמש רשום.</p>
+
+    <div class="gallery gallery--one" style="--ar:1917/1036;margin-block-start:1.4rem">
+      <button type="button" data-full="assets/mixpanel-card.jpg" data-cap="עמוד המשתמש האישי שלי ב-Mixpanel: identity merge בין אורח למשתמש רשום, ואירועים מרכזיים בלבד. האימייל בכרטיס טושטש לפני הפרסום.">
+        <span class="shot"><img src="assets/mixpanel-card-thumb.jpg" alt="כרטיס המשתמש האישי של אורן במיקספאנל, עם רשימת אירועים מרכזיים" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role">ראיה</span><b>Mixpanel · המשתמש שלי</b>Product Viewed, Added to Bag, Sign In Completed, Checkout Started, Order Placed - לא כל קליק, רק הצעדים שמספרים את הסיפור.</span>
+      </button>
+    </div>
+
+    <div class="grid g2" style="margin-top:1.8rem">
+      <div class="card"><h3>מה היה חדש בתכנון</h3><p>זו הפעם הראשונה שנדרש תכנון אנליטיקה ל-flow שכולל מעבר בתוך הסשן ממעמד "אורח" למעמד "משתמש רשום". בעבר עבדתי על מוצרים שהיו תמיד באחד מהמעמדים, לא flow שדורש מעבר בין השניים באותו סשן.</p></div>
+      <div class="card"><h3>המשמעת שנלמדה</h3><p>לא להעמיס יתר על המידה על האנליטיקה - לשמור רק אירועים מרכזיים שמייצרים סיפור נהיר. בניגוד להטמעות קודמות שדרשו לשדר כל אירוע שהמשתמש ביצע, עד רמת גלילה.</p></div>
+    </div>
+
+    <p class="claim" style="margin-top:2.2rem">את הצורך ב-flow של אורח שקונה לפני הזדהות למדתי מהמרצה בקורס, מדוגמת Amazon - החברה הראשונה שפיתחה זאת.</p>
+    <p>לוגין נדרש רק ממש לפני ה-checkout, לא לפני. את זה תכננתי מראש, לא תיקנתי בעקבות מדידה.</p>
+
+    <div class="gap">
+      <b>פער מסומן</b>
+      <p>אין עדיין דאטה אמיתית מעבר למשתמש בודד. "מה הפתיע אותי בנתונים" הוא שאלה שעדיין אי אפשר לענות עליה בכנות.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 12. מה נשבר ═══════════ -->
+<section id="mistakes" class="soft">
+  <div class="wrap">
+    <p class="eyebrow">11 · מה נשבר</p>
+    <h2>ארבע תקלות, שתיים במוצר ושתיים בתהליך העבודה</h2>
+    <p>אלה לא תקלות מקריות - אלה החלטות או הרגלים שהתבררו כשגויים, כל אחד עם סיבה שורשית אמיתית.</p>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>מה קרה</th><th>הסיבה השורשית</th><th>איך נפתר</th></tr></thead>
+        <tbody>
+          <tr><td>מחיקת תוכן ממשי מ-PRD.md (21 סעיפים נדרסו)</td><td>עריכה מול עותק מקומי-מטמון ישן של קובץ משותף, בלי לשלוף מחדש מהדיסק - קובץ ששיחת מודל נפרדת גם עורכת במקביל</td><td>זוהה על ידי לפני דיפלוי, דרך git diff גולמי; שוחזר במלואו מ-git, והתוספת האמיתית נכתבה כסעיף חדש בסוף בלבד, עם אימות בייט-לבייט</td></tr>
+          <tr><td>הכלי שמעביר קבצים בין המחשב לשיחה דיווח "נשמר בהצלחה" לפחות פעמיים, בלי שהתוכן נשמר בפועל</td><td>תקלה ברמת הכלי/הגישור למכשיר עצמו - לא אובחנה במלואה</td><td>לא תוקן הגורם - הותאם תהליך: שמירה לקובץ ביניים, שמירה עם force, שליפה חוזרת והשוואה בייט-לבייט אחרי כל עריכה</td></tr>
+          <tr><td>בדיקת "האם הקובץ השתנה מבחוץ" בוצעה, כמה פעמים, אחרי עריכה מקומית במקום לפניה</td><td>סדר פעולות הפוך למוסכמת העבודה שנקבעה</td><td>תוקן לתבנית קבועה - בדיקה תמיד לפני עריכה. ואישית - נמנע לחלוטין משינויים ידניים בקוד או בתוכן, כדי לא להיתקע בבלבול המוכר מעבודה כמפתח</td></tr>
+          <tr><td>תצוגה הפוכה של "45 Grave" בעברית (bidi) בפרודקשן</td><td>לא הוטמע טיפול/בידוד כיווני (Unicode isolate) כשטקסט לטיני הוכנס לתוך שדה עברי</td><td>זוהה חזותית באתר החי אחרי דיפלוי; תוקן ברמת הדאטה עצמה (seed.ts) כך שהתיקון נוסע עם הנתון לכל מקום שהוא מוצג</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 13. סיכום ═══════════ -->
+<section id="impact">
+  <div class="wrap">
+    <p class="eyebrow">12 · סיכום</p>
+    <h2>מה נעשה, ומה עוד פתוח</h2>
+    <p>שורה בלי ראיה לא נכנסה.</p>
+    <div class="scroll-x">
+      <table>
+        <thead><tr><th>הבעיה</th><th>ההחלטה</th><th>הראיה</th><th>סטטוס</th></tr></thead>
+        <tbody>
+          <tr><td>בשלב הדמו לא היה מקור אמת יחיד לסטייל-גייד</td><td>במעבר לפיתוח, חילוץ כל החומרים מפיגמה ומעבר לעבוד עם tokens.css כמקור האמת היחיד</td><td>frontend/tokens.css, עם אכיפה מתועדת בקוד שאין ערך צבע/מרווח/גופן שלא מגיע מטוקן</td><td><span class="pill done">בוצע</span></td></tr>
+          <tr><td>שילוב Midjourney (יצירה) עם ננו בננה (הלבשה) בדימויי הדוגמנות יצר ארטיפקטים חזותיים חוזרים</td><td>מעבר לעבודה בלעדית עם ננו בננה: פרומפטים קצרים, ריבוי חומרי גלם חזותיים, שיחה ייעודית לכל תוצר</td><td>תמונות המוצר בפועל, נטולות הארטיפקט</td><td><span class="pill done">בוצע</span></td></tr>
+          <tr><td>צריך להוכיח שארכיטקטורת הווריאנטים לא נעולה על חולצות בלבד</td><td>הוספת קטגוריית סנדלים כקטגוריית מוצר שנייה, על אותה ארכיטקטורה</td><td>enum ProductCategory { SHIRT, FOOTWEAR } ב-schema.prisma, מסך הנעליים באתר החי</td><td><span class="pill done">בוצע</span></td></tr>
+          <tr><td>בחירת הצבעים הסימבולית (כחול/צהוב) לא מצאה ביטוי באתר</td><td>ייתכן שתבוא לידי ביטוי בדף הנחיתה של הפרויקט</td><td>אין עדיין - זה בדיוק הפער</td><td><span class="pill next">בהמשך</span></td></tr>
+          <tr><td>סקריפט ה-seed מאפס את מסד הנתונים כולו (כולל היסטוריית הזמנות) בכל שינוי במערך המוצרים עצמו</td><td>במערכת אמיתית וגדולה יותר צריך דרך פחות הרסנית לדאטה של production</td><td>עדיין לא נפתר - חוב טכני מתועד</td><td><span class="pill next">בהמשך</span></td></tr>
+          <tr><td>אין דאטה אמיתית מעבר למשתמש בודד ב-Mixpanel</td><td>לאסוף דאטה רב-משתמשים כשיהיו מבקרים אמיתיים</td><td>עמוד המשתמש האישי (identity merge) - קיים, מדגם יחיד</td><td><span class="pill next">בהמשך</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ מה למדתי ═══════════ -->
+<section id="learned" class="soft">
+  <div class="wrap">
+    <div class="grid g2" style="align-items:start">
+      <div>
+        <p class="eyebrow">13 · מה למדתי</p>
+        <h2>שלושה דברים</h2>
+        <ul>
+          <li>שתעדוף הבנת המוצר על פני קוד "אנושי" חף מתיעוד היה השינוי שבזכותו המעבר מעיצוב לקוד עבד.</li>
+          <li>שחשוב לא להעמיס יתר על המידה על אנליטיקה - לשמור רק אירועים מרכזיים שמייצרים סיפור נהיר.</li>
+          <li>ששילוב בין כמה מודלים ליצירת תמונה יוצר ארטיפקטים לא-צפויים, ושמודל בודד עם פרומפטים קצרים וריבוי רפרנסים אמין יותר.</li>
+        </ul>
+      </div>
+      <div>
+        <p class="eyebrow">מה הייתי עושה אחרת</p>
+        <h2>הגרסה הבאה</h2>
+        <ul>
+          <li>לחשוב מעמיק יותר על הפלטה (כחול/צהוב) כדי שתמצא ביטוי בפועל - לפחות בדף הנחיתה.</li>
+          <li>לפתור מראש את חוב ה-seed שמאפס מסד נתונים אמיתי בכל שינוי במערך המוצרים.</li>
+          <li>לאסוף דאטה אמיתית מרובת-משתמשים ב-Mixpanel, מעבר למדגם היחיד שקיים כרגע.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <h2>אורן הדר</h2>
+    <p class="lead">פרויקט קפסטון, קורס 45900.2 · AI Product Design &amp; UX/UI, ג'ון ברייס.</p>
+    <div class="btn-row">
+      <a class="btn btn-1" href="https://dull.onrender.com" target="_blank" rel="noopener">לפתוח את המוצר</a>
+    </div>
+    <p class="tiny" style="margin-top:2.2rem">אורן הדר · 2026</p>
+  </div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="תצוגה מוגדלת">
+  <div class="lb-in">
+    <div class="lb-bar">
+      <p id="lb-cap"></p>
+      <button type="button" class="lb-close" id="lb-close" aria-label="סגירה">✕</button>
+    </div>
+    <img id="lb-img" alt="">
+  </div>
+</dialog>
+
+<script>
+var bar=document.getElementById('bar');
+function progress(){var h=document.documentElement;var p=h.scrollTop/((h.scrollHeight-h.clientHeight)||1)*100;bar.style.width=Math.min(100,p)+'%';}
+addEventListener('scroll',progress,{passive:true});progress();
+
+document.querySelectorAll('section > .wrap').forEach(function(el){el.classList.add('reveal');});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.05});
+document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+var links=[].slice.call(document.querySelectorAll('.nav-links a'));
+var spy=new IntersectionObserver(function(es){es.forEach(function(e){
+  if(!e.isIntersecting)return;
+  links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id);});
+});},{rootMargin:'-45% 0px -50% 0px'});
+links.forEach(function(a){var t=document.querySelector(a.getAttribute('href'));if(t)spy.observe(t);});
+
+(function(){
+  var box=document.getElementById('lightbox');
+  if(!box||typeof box.showModal!=='function')return;
+  var img=document.getElementById('lb-img'), cap=document.getElementById('lb-cap');
+  document.querySelectorAll('.gallery button').forEach(function(b){
+    b.addEventListener('click',function(){
+      img.src=b.dataset.full; img.alt=b.querySelector('img').alt;
+      cap.textContent=b.dataset.cap||''; box.showModal();
+    });
+  });
+  document.getElementById('lb-close').addEventListener('click',function(){box.close();});
+  box.addEventListener('click',function(e){if(e.target===box)box.close();});
+  box.addEventListener('close',function(){img.removeAttribute('src');});
+})();
+</script>
+</body>
+</html>
