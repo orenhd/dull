@@ -7,7 +7,7 @@ import { env } from "./config/env.js";
 import { productsRouter } from "./routes/products.js";
 import { authRouter } from "./routes/auth.js";
 import { ordersRouter } from "./routes/orders.js";
-import { PUBLIC_IMAGES_DIR, PUBLIC_WEB_DIR, WEB_INDEX_HTML_PATH } from "./lib/paths.js";
+import { PUBLIC_IMAGES_DIR, PUBLIC_WEB_DIR, WEB_INDEX_HTML_PATH, PUBLIC_CASE_STUDY_DIR } from "./lib/paths.js";
 import { buildProductMetaValues, injectProductMeta, wantsHtmlPreview } from "./lib/metaInjection.js";
 
 const app = express();
@@ -43,6 +43,12 @@ app.use(cookieParser());
 
 // תמונות מוצר מוגשות סטטית מ-public/images (ראו scripts/generate-web-images.ts)
 app.use("/images", express.static(PUBLIC_IMAGES_DIR));
+
+// קייס סטאדי סטטי לקורס (docs/PRD.md סעיף 36) - מוגש מ-public/case-study
+// (ראו scripts/copy-case-study.ts). ממוקם כאן, *לפני* ה-SPA fallback למטה -
+// אחרת ה-catch-all היה תופס את הבקשה קודם ומחזיר את ה-frontend Bundle
+// במקום את דף הקייס סטאדי.
+app.use("/case-study", express.static(PUBLIC_CASE_STUDY_DIR));
 
 app.get("/health", (_req, res) => {
   res.json({ ok: true });

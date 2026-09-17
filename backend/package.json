@@ -12,6 +12,7 @@
     "prisma:studio": "prisma studio",
     "images:generate": "tsx scripts/generate-web-images.ts",
     "frontend:build": "tsx scripts/render-build.ts",
+    "case-study:copy": "tsx scripts/copy-case-study.ts",
     "seed": "tsx prisma/seed.ts",
     "oauth-logo:generate": "tsx scripts/generate-oauth-logo.ts",
     "stock:reset": "tsx scripts/reset-stock.ts",

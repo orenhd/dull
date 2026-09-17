@@ -46,10 +46,10 @@
   הישנים) - בטוח להריץ נגד DB עם הזמנות אמיתיות.
 
 ## פריסה (Render)
-- **Root Directory**: `backend` (המונורפו כולל גם docs/hi-res/db - Render צריך לדעת שהאפליקציה חיה בתת-תיקייה).
+- **Root Directory**: `backend` (המונורפו כולל גם docs/hi-res/db/case-study - Render צריך לדעת שהאפליקציה חיה בתת-תיקייה).
 - **Language**: Node (לא Docker - אין Dockerfile בפרויקט, במכוון).
 - **Region**: Frankfurt - קרוב ביותר ל-Neon (גם הוא Frankfurt) ולקהל היעד בישראל.
-- **Build Command**: `npm install --include=dev && npm run frontend:build && npm run build && npm run images:generate`
+- **Build Command**: `npm install --include=dev && npm run frontend:build && npm run build && npm run images:generate && npm run case-study:copy`
   - `--include=dev` **קריטי ולא קוסמטי**: מכיוון ש-`NODE_ENV=production` מוגדר
     כמשתנה סביבה (ראו למטה), ו-Render מזריק את משתני הסביבה גם לשלב ה-Build
     ולא רק ל-runtime - וההתנהגות המתועדת של npm היא לדלג על `devDependencies`
@@ -68,6 +68,13 @@
     עצמו** (הסדר בפקודה למעלה) - לא תלות טכנית, אבל שומר על סדר הגיוני אחד.
   - `images:generate` חובה - תיקיית `public/images` היא build artifact
     ולא נשמרת ב-git, אז בלי זה השרת החי לא יגיש שום תמונה.
+  - `case-study:copy` (נוסף 2026-09-17, `docs/PRD.md` סעיף 36) - מריץ
+    `scripts/copy-case-study.ts`: מעתיק את `case-study/` (בשורש המונורפו,
+    קייס סטאדי סטטי לקורס UX/UI - `.html` + `assets/` תמונות, בלי המרה/
+    דחיסה) ל-`backend/public/case-study`, אותה שיטה בדיוק כמו `frontend:build`
+    למעלה. מוגש דרך `express.static("/case-study", ...)` ב-`src/index.ts`,
+    ב-`https://dull.onrender.com/case-study/`. בלי הצעד הזה בכלל ה-build
+    יעבור בהצלחה, אבל `/case-study` יחזיר 404 - השרת החי לא יידע להגיש אותו.
 - **Pre-Deploy Command**: `npx prisma migrate deploy` (מריץ מיגרציות ממתינות
   לפני שהגרסה החדשה מקבלת תנועה - לא `migrate dev`, זה אינטראקטיבי ולא מתאים
   ל-CI/deploy).
@@ -122,5 +129,8 @@ per-product (`og:title`/`og:image`) לתצוגות מקדימה בשיתוף ק�
 https://dull.onrender.com (`/health`, `/products` נבדקו ועובדים).
 **הוסר 2026-09-16:** מתנת ה-PDF המצורפת למייל התודה (`pdf-lib`,
 `src/lib/giftPdf.ts`) - בקשת אורן, לא נחוצה. ראו `docs/PRD.md` להחלטה
-המתועדת; `src/lib/giftPdf.ts`/תלות `pdf-lib` עדיין לא הוסרו בפועל
-(ממתין לניקוי ידני של אורן - מחיקת קובץ + `npm uninstall pdf-lib`).
+המתועדת; הניקוי הידני (מחיקת `src/lib/giftPdf.ts` + `npm uninstall pdf-lib`)
+בוצע בפועל ע"י אורן - שניהם לא קיימים יותר בפרויקט.
+**נוסף 2026-09-17:** קייס סטאדי סטטי לקורס UX/UI, מוגש תחת
+`https://dull.onrender.com/case-study/` - ראו "פריסה" למעלה ו-`docs/PRD.md`
+סעיף 36.
