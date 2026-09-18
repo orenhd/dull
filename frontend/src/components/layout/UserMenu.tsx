@@ -85,7 +85,18 @@ export function UserMenu() {
       {open && (
         <div
           id="user-menu-panel"
-          className="absolute end-0 top-full z-10 mt-xs flex min-w-[160px] flex-col border border-border-base bg-surface-base py-xs"
+          // תוקן 2026-09-18 (docs/PRD.md, דיווח Oren - סעיף ד.1): היה z-10,
+          // אותו ערך בדיוק כמו הפריים הדביק של סיכום ההזמנה ב-CheckoutPage.tsx/
+          // CartPage.tsx (וגם הוא z-10). כששני אלמנטים חולקים z-index זהה
+          // וללא stacking context מבודד ביניהם (ראו RootLayout.tsx - ה-<main>
+          // הממוקם אחרי ה-<header> ב-DOM, בלי isolation), סדר הציור נקבע
+          // לפי סדר ה-DOM - ותוכן העמוד המנווט-אליו (בתוך <main>) מגיע אחרי
+          // ה-<header> וזוכה בעדיפות ציור, ולכן "מכסה" את תפריט המשתמש.
+          // z-20 - מפורשות מעל שני האתרים ה-z-10 (checkout+cart), כבקשת Oren
+          // ("צריך לדאוג שתפריט המשתמש תמיד יהיה מעל הכל"). אין עדיין סולם
+          // z-index מתועד ב-tokens.css (רק 4 שימושי z-* בכל הפרויקט -
+          // אומת ב-grep) - זה עדיין ערך אד-הוק כמו קודם, לא token חדש.
+          className="absolute end-0 top-full z-20 mt-xs flex min-w-[160px] flex-col border border-border-base bg-surface-base py-xs"
         >
           <Link
             to="/orders"

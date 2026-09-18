@@ -150,30 +150,42 @@
 }
 
 /* ==========================================================================
-   Components - כמה חתיכות CSS ממש בספוקות שדמו קידוד גם ב-CSS "רגיל" ולא
-   ביוטיליטיז (למשל חץ ה-select המצויר ב-gradient) - נשמרות כאן, עדיין דרך
-   var(--token) ולא ערך מוחלט.
+   Components
    ========================================================================== */
 @layer components {
-  .select-caret {
-    appearance: none;
-    background-image:
-      linear-gradient(45deg, transparent 50%, var(--color-text-muted) 50%),
-      linear-gradient(135deg, var(--color-text-muted) 50%, transparent 50%);
-    background-position:
-      calc(100% - 20px) center,
-      calc(100% - 15px) center;
-    background-size: 5px 5px, 5px 5px;
-    background-repeat: no-repeat;
-  }
-
-  /* RTL: החץ המצויר צריך לשבת בצד ה"סוף" הלוגי (ימין ב-LTR, שמאל ב-RTL),
-     לא צמוד ל-inset הפיזי. Tailwind לא נותן utility לזוגות רקע-gradient
-     כאלה, אז המיקום מתהפך ידנית לפי [dir="rtl"]. */
-  [dir="rtl"] .select-caret {
-    background-position:
-      20px center,
-      15px center;
+  /* תוקן 2026-09-18 (docs/PRD.md, דיווח Oren - סעיף ד.5): הוסר .select-caret
+     הישן (חץ מצויר ב-2 קווי gradient של 5x5px). האבחון: הוא הגדיר רק
+     `appearance: none` בלי `-moz-appearance`/`-webkit-appearance` - בפיירפוקס
+     זה לא מספיק כדי להעלים את חץ ה-<select> המובנה של הדפדפן, אז בפועל
+     היו *שני* חצים מוצגים זה על זה (המצויר + המקורי של הדפדפן) - זה ה"שבור"
+     שדיווח אורן. גם בלי הבאג הזה, 5px זה קטן/דק מדי לצד ה"+" הגדול (text-h3)
+     של מדריך המידות - לא "אותה שפה חזותית" כמו שביקש אורן.
+     הפתרון החדש (ב-VariantSelector.tsx): <select> מקבל appearance-none של
+     Tailwind עצמו (מכסה את שלושת ה-prefixes, כולל -moz-, אז אין יותר חץ
+     כפול בשום דפדפן) + span דקורטיבי נפרד שמצויר עם mask-image על תו SVG
+     "chevron" ומקבל את הצבע שלו מ-background-color: currentColor (לכן
+     text-text-muted עליו - אותו טוקן/מנגנון צבע בדיוק כמו ה-"+" הטקסטואלי,
+     לא ערך צבוע-קשיח חדש). Vector אמיתי (לא gradient מפוקסל) - חד גם
+     בזום/מסכי רזולוציה גבוהה.
+     עודכן 2026-09-18 (המשך, בקשת אורן): נוסה קודם size-5 (20px, כמו
+     text-h3) + stroke-width 2.5 - אורן דיווח שזה "מאוד שונה" מה-"+", יותר
+     מדי דומיננטי לתפקידו כאייקון-עזר קטן בתוך שדה קומפקטי. תוקן חזרה:
+     size-3.5 (14px, ב-VariantSelector.tsx) ו-stroke-width 2 כאן - קרוב
+     בהרבה לגודל/משקל המקורי שלפני הניסוי, ועדיין וקטור נקי בלי הבאג
+     המקורי (חץ כפול בפיירפוקס). "פאדינג נאה" - הבקשה השנייה - מומש דרך
+     המיקום (end-md ולא end-sm) ב-VariantSelector.tsx, כדי שיהיה לאייקון
+     אותו מרווח בדיוק (16px, --space-md) מקצה השדה כמו שיש ל-"+" עצמו
+     מקצה הכפתור שלו (p-md). */
+  .select-chevron {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    background-color: currentColor;
   }
 }
 

@@ -71,32 +71,59 @@ export function VariantSelector({
           <label htmlFor="size" className="mb-sm block text-body text-text-muted">
             {sizeAxis.label}
           </label>
-          <select
-            id="size"
-            name="size"
-            required
-            aria-describedby="size-error"
-            aria-invalid={sizeError || selectedSizeSoldOut || undefined}
-            value={selection.size ?? ""}
-            onChange={(event) => onChange("size", event.target.value)}
-            className="select-caret w-full rounded-sm border border-border-base bg-surface-base px-md py-sm text-body text-text-base"
-          >
-            <option value="">{t("variant.selectSize")}</option>
-            {/* docs/PRD.md סעיף 26 - <option> תקני לא תומך בעיצוב פנימי (אין
-                span/בולד חלקי בתוך הטקסט, אין רכיבי ילד בכלל) - לכן "לייבל
-                בפונט קטן יותר אך בולט" (בקשת Oren, עדיפות 1) לא ניתן למימוש
-                אמין ב-<option> בין דפדפנים. כפיצוי חלקי - טקסט רגיל מצורף
-                לתווית עצמה ("- אזל מהמלאי"), בנוסף להודעה מתחת ל-select
-                (עדיפות 2 של Oren, המימוש המלא). */}
-            {availableSizeValues.map((value) => {
-              const isSoldOut = soldOutSizeIds.has(value.id);
-              return (
-                <option key={value.id} value={value.id}>
-                  {isSoldOut ? t("variant.sizeSoldOutOption", { size: value.label }) : value.label}
-                </option>
-              );
-            })}
-          </select>
+          {/* תוקן 2026-09-18 (docs/PRD.md, דיווח Oren - סעיף ד.5) - עטיפה
+              relative חדשה, נדרשת כדי למקם את ה-chevron הדקורטיבי (span
+              נפרד, ראו הערה ב-index.css) מעל ה-<select>. appearance-none
+              (יוטיליטי של Tailwind, לא .select-caret הישן) מכבה את חץ
+              ברירת המחדל של הדפדפן בכל שלושת ה-prefixes - כולל -moz-,
+              שהיה חסר קודם וגרם לחץ כפול בפיירפוקס. pe-xl כדי שטקסט
+              המידה הארוך ביותר לא ייגע ב-chevron. */}
+          <div className="relative">
+            <select
+              id="size"
+              name="size"
+              required
+              aria-describedby="size-error"
+              aria-invalid={sizeError || selectedSizeSoldOut || undefined}
+              value={selection.size ?? ""}
+              onChange={(event) => onChange("size", event.target.value)}
+              className="w-full appearance-none rounded-sm border border-border-base bg-surface-base px-md py-sm pe-xl text-body text-text-base"
+            >
+              <option value="">{t("variant.selectSize")}</option>
+              {/* docs/PRD.md סעיף 26 - <option> תקני לא תומך בעיצוב פנימי (אין
+                  span/בולד חלקי בתוך הטקסט, אין רכיבי ילד בכלל) - לכן "לייבל
+                  בפונט קטן יותר אך בולט" (בקשת Oren, עדיפות 1) לא ניתן למימוש
+                  אמין ב-<option> בין דפדפנים. כפיצוי חלקי - טקסט רגיל מצורף
+                  לתווית עצמה ("- אזל מהמלאי"), בנוסף להודעה מתחת ל-select
+                  (עדיפות 2 של Oren, המימוש המלא). */}
+              {availableSizeValues.map((value) => {
+                const isSoldOut = soldOutSizeIds.has(value.id);
+                return (
+                  <option key={value.id} value={value.id}>
+                    {isSoldOut ? t("variant.sizeSoldOutOption", { size: value.label }) : value.label}
+                  </option>
+                );
+              })}
+            </select>
+            {/* span דקורטיבי (לא בתוך ה-<select>, שלא תומך ברכיבי ילד) -
+                ממוקם מעל ה-select בצד ה"סוף" הלוגי (end-md - הופך אוטומטית
+                ב-RTL, בלי [dir="rtl"] ידני כמו הגישה הישנה). pointer-events-none
+                כדי שהקליק "יעבור מבעד" לתיבה האמיתית מתחתיו.
+                עודכן 2026-09-18 (בקשת אורן, המשך ד.5, ניסיון שני) - size-5
+                (20px) הועבר חזרה ל-size-3.5 (14px, בין 12px המקורי ל-20px
+                שנוסה) - אורן דיווח שה-20px "מאוד שונה" מה-"+", דומיננטי
+                מדי לתפקיד-עזר בתוך שדה קומפקטי. "פאדינג נאה" (הבקשה
+                השנייה) - הועבר מ-end-sm ל-end-md: אותו מרווח בדיוק
+                (16px, --space-md) שיש ל-"+" עצמו מקצה הכפתור שלו
+                (p-md ב-SizeGuideAccordion.tsx), לא רק אותו גודל/צבע.
+                נבדק: ה-span (16px..30px ממקצה ה-select) עדיין לא נוגע
+                בגבול תוכן הטקסט (32px, pe-xl) גם בתווית הכי ארוכה
+                ("XL - אזל מהמלאי"). */}
+            <span
+              aria-hidden="true"
+              className="select-chevron pointer-events-none absolute end-md top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
+            />
+          </div>
           {/* תוקן 2026-09-10 (docs/PRD.md סעיף 12.16, דיווח Oren) - היה margin
               עליון שלילי (mt-[calc(-1*var(--space-sm))]) שמשך את שורת השגיאה
               *מעלה*, לתוך גבול ה-select במקום ליצור רווח מתחתיו. mt-xs חיובי

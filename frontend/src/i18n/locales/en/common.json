@@ -171,7 +171,7 @@
     "signInBody": "Your order history is tied to your account — sign in with Google to view it.",
     "checkingSession": "Checking your sign-in status…",
     "orderIdLabel": "Order",
-    "placedOn": "Placed on {{date}}",
+    "placedOn": "Ordered on {{date}}",
     "itemsCountOne": "1 item",
     "itemsCountOther": "{{count}} items",
     "viewDetails": "View details",

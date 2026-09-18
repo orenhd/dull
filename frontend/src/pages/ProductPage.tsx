@@ -28,6 +28,15 @@ function categoryLabel(category: Product["category"], t: (key: string) => string
   return category === PRODUCT_CATEGORY.footwear ? t("nav.footwear") : t("nav.shirts");
 }
 
+// תוקן 2026-09-18 (docs/PRD.md, דיווח Oren - סעיף ד.2): פריט הקטגוריה
+// ב-breadcrumb הוצג בלי href בכלל (Breadcrumb.tsx מרנדר <span> ולא <Link>
+// כשלא מועבר `to` - זה הרכיב עצמו עבד נכון, החוסר היה כאן בקריאה לו).
+// אותם שני נתיבים בדיוק כמו ב-NAV_ITEMS (SiteHeader.tsx) - "/shirts"/
+// "/footwear" - לא ערך חדש, רק ממופה לפי אותה קטגוריה כמו categoryLabel למעלה.
+function categoryHref(category: Product["category"]): string {
+  return category === PRODUCT_CATEGORY.footwear ? "/footwear" : "/shirts";
+}
+
 function ProductPageContent({ product }: { product: Product }) {
   const { t } = useTranslation();
   const navigate = productRoute.useNavigate();
@@ -50,7 +59,15 @@ function ProductPageContent({ product }: { product: Product }) {
   // (לא ב-search כלל) - כדי לא ליצור לולאה מול הכיוון ההפוך למעלה.
   useEffect(() => {
     const nextSearch = buildSearchFromSelection(product.axes, selection.selection);
-    void navigate({ search: nextSearch, replace: true });
+    // תוקן 2026-09-18 (docs/PRD.md, דיווח Oren - סעיף ד.3): resetScroll:false
+    // נוסף. ברירת המחדל של TanStack Router ל-navigate() היא resetScroll:true -
+    // מיועדת לניווט "אמיתי" בין עמודים (שם רצוי לחזור לראש העמוד), אבל
+    // כאן ה-navigate הזה הוא רק סנכרון state->URL של אותו עמוד עצמו (בחירת
+    // גיזרה/גוון/מידה, ראו הערה למעלה) - כל שינוי בחירה גרר גם איפוס
+    // גלילה לא-רצוי, בדסקטופ ובמובייל כאחד (בדיוק כפי שדיווח אורן). אין
+    // סיכון ל-replace:true עצמו (עדיין חובה, ראו הערה למעלה) - שני
+    // האופציות עצמאיות זו מזו ב-API של TanStack Router.
+    void navigate({ search: nextSearch, replace: true, resetScroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- product.axes קבוע לכל חיי הקומפוננטה; navigate יציב (route-scoped)
   }, [selection.selection]);
 
@@ -63,7 +80,7 @@ function ProductPageContent({ product }: { product: Product }) {
       <Breadcrumb
         items={[
           { label: t("breadcrumb.home"), to: "/" },
-          { label: categoryLabel(product.category, t) },
+          { label: categoryLabel(product.category, t), to: categoryHref(product.category) },
           { label: product.name },
         ]}
       />
