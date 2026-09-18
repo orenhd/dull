@@ -1,13 +1,15 @@
 # Dull
 
-Dull מייצרת גרסה מעודנת וישראלית לחולצות של להקות אקסטרים משנות ה-80 וה-90, לדור ה-X ולכל המתעניין בתקופה. פרויקט קפסטון, קורס 45900.2 · AI Product Design & UX/UI, ג'ון ברייס.
+Dull makes a refined, Israeli take on extreme-metal band T-shirts from the 80s and 90s, for Gen X and anyone interested in the era. Capstone project, course 45900.2 · AI Product Design & UX/UI, John Bryce.
 
-## קישורים
+## Links
 
-- **המוצר** - https://dull.onrender.com/
-- **קייס סטאדי** - https://dull.onrender.com/case-study/ (עולה לאוויר לאחר שילוב שלב ה-build המתואר ב-backend/README.md)
-- **מצגת** - https://docs.google.com/presentation/d/1RBvEmXR9PjiKB5_0EHey9iEXW26yIcNl/edit?usp=sharing&ouid=113052457340020895504&rtpof=true&sd=true - מומלץ לפתוח מ-Google Drive ולא מ-PowerPoint. מ-PowerPoint, חלק ממעברי השפה בין עברית לאנגלית לא מוצגים נכון. הקובץ נבנה בעזרת Claude ישירות כ-OOXML (לא באמצעות LibreOffice - זה שימש רק לרינדור תמונות לבדיקת תקינות בזמן הבנייה, לא ליצירת הקובץ עצמו). ההשערה הסבירה לפער: קידוד תכונות הכיווניות (RTL) בטקסט המשולב עברית/אנגלית לא מלא לגמרי ב-XML, ו-Google Slides מרנדר את זה בסלחנות רבה יותר מ-PowerPoint.
+- **[Live product](https://dull.onrender.com/)**
+- **[Case study](https://dull.onrender.com/case-study/)** - goes live once the build step described in [backend/README.md](backend/README.md) is wired in
+- **[Presentation](https://docs.google.com/presentation/d/1RBvEmXR9PjiKB5_0EHey9iEXW26yIcNl/edit?usp=sharing&ouid=113052457340020895504&rtpof=true&sd=true)** - best opened from Google Drive rather than PowerPoint
 
-## פיתוח ופריסה
+  In PowerPoint, some of the Hebrew/English language transitions don't render correctly. The file was built by Claude directly as OOXML (not via LibreOffice - LibreOffice was only used to render QA screenshots during the build, not to generate the file itself). The likely cause of the gap: the RTL/bidi attributes for the mixed Hebrew/English text weren't fully encoded in the XML, and Google Slides renders that more leniently than PowerPoint does.
 
-לפרטים טכניים על הרצה מקומית ופריסה ב-Render, ראו backend/README.md.
+## Development and deployment
+
+For technical details on running locally and deploying on Render, see [backend/README.md](backend/README.md).
