@@ -4,6 +4,14 @@
 //
 // אין כיתובים מתחת לדימויים (הוסר בכוונה, 2026-09-08) - alt text עדיין
 // מתאר כל תמונה במלואו לצורכי נגישות, רק לא מוצג ויזואלית.
+//
+// תוקן 2026-09-19 (Marketing feedback - PDP buy box A1): במובייל הזוג
+// הזה כבר לא מוצג יחד - הוא מתפצל סביב ה-buy box (image1 מעל, image2
+// מתחת לכפתור Add to Bag), כדי שהכפתור ייכנס ל-~1.3 מסכים במקום 2.6.
+// הרכיב הזה עצמו הפך ל-**דסקטופ-בלבד** (hidden כברירת מחדל, desktop:grid) -
+// שני העותקים המובייליים נבנים מ-GalleryShot (מיוצא עכשיו) ישירות
+// ב-ProductPage.tsx, במיקומים הנכונים בזרימת ה-DOM. שתי התמונות עדיין
+// "תמיד גלויות" (החלטת PRD, ראו למעלה) - רק במקום-אחר, לא הוסרו.
 import { useEffect } from "react";
 import { resolveMediaUrl } from "@/lib/api/client";
 import { findMedia } from "@/lib/variant";
@@ -17,7 +25,7 @@ interface ProductGalleryProps {
   dimmed?: boolean; // מצב "אזל מהמלאי" - התמונות מוצגות מעומעמות/גרייסקייל
 }
 
-function GalleryShot({
+export function GalleryShot({
   url,
   alt,
   dimmed,
@@ -72,7 +80,7 @@ export function ProductGallery({ media, selectedIds, dimmed }: ProductGalleryPro
   }, [media]);
 
   return (
-    <div className="grid w-full min-w-0 grid-cols-1 items-start gap-md desktop:grid-cols-2 desktop:flex-none desktop:basis-[620px]">
+    <div className="hidden w-full min-w-0 items-start gap-md desktop:grid desktop:grid-cols-2 desktop:flex-none desktop:basis-[620px]">
       {modelShot && (
         <GalleryShot
           url={resolveMediaUrl(modelShot.url)}

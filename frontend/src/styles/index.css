@@ -135,8 +135,13 @@
      מחשיב אותם כזקוקים לאינדיקציה תמיד, גם בפוקוס-עכבר - לא באג בכלל שלנו,
      ואי אפשר "לתקן" ב-CSS טהור בלי JS נוסף (פוליפיל למודליות קלט). הסרה
      מוחלטת הייתה שוברת WCAG 2.1 SC 2.4.7 (Focus Visible, AA) - חייב להיות
-     אינדיקטור פוקוס גלוי כלשהו למשתמש מקלדת, במיוחד ב-<select> של המידה
-     שיושב בדיוק בנקודה הקריטית של תהליך הרכישה. עידון (הבקשה השנייה): לא
+     אינדיקטור פוקוס גלוי כלשהו למשתמש מקלדת, במיוחד בבורר המידה (צ'יפים,
+     ראו VariantSelector.tsx) שיושב בדיוק בנקודה הקריטית של תהליך הרכישה.
+     עודכן 2026-09-19 (Marketing feedback - PDP buy box A3): בורר המידה
+     עבר מ-<select> לצ'יפים (fieldset+radiogroup, כמו Fit/Colorway) - ה-Chip
+     כבר עוצב עם peer-focus-visible:outline משלו (Chip.tsx), אז הכלל הכללי
+     כאן ממשיך לשרת את שאר הטופס (קישור "מדריך מידות", כפתורים) בלי צורך
+     בשינוי. עידון (הבקשה השנייה): לא
      הוחלף הצבע ל-`--color-brand-primary-light` כמו שאולי היה מתבקש - בדקתי
      ניגודיות בפועל: 2.77:1 על רקע לבן, מתחת ל-3:1 המינימלי הנדרש ל-focus
      indicators לפי WCAG 1.4.11 (Non-text Contrast, AA) - זו הייתה רגרסיה
@@ -146,46 +151,6 @@
   :focus-visible {
     outline: 2px solid var(--color-brand-primary);
     outline-offset: 1px;
-  }
-}
-
-/* ==========================================================================
-   Components
-   ========================================================================== */
-@layer components {
-  /* תוקן 2026-09-18 (docs/PRD.md, דיווח Oren - סעיף ד.5): הוסר .select-caret
-     הישן (חץ מצויר ב-2 קווי gradient של 5x5px). האבחון: הוא הגדיר רק
-     `appearance: none` בלי `-moz-appearance`/`-webkit-appearance` - בפיירפוקס
-     זה לא מספיק כדי להעלים את חץ ה-<select> המובנה של הדפדפן, אז בפועל
-     היו *שני* חצים מוצגים זה על זה (המצויר + המקורי של הדפדפן) - זה ה"שבור"
-     שדיווח אורן. גם בלי הבאג הזה, 5px זה קטן/דק מדי לצד ה"+" הגדול (text-h3)
-     של מדריך המידות - לא "אותה שפה חזותית" כמו שביקש אורן.
-     הפתרון החדש (ב-VariantSelector.tsx): <select> מקבל appearance-none של
-     Tailwind עצמו (מכסה את שלושת ה-prefixes, כולל -moz-, אז אין יותר חץ
-     כפול בשום דפדפן) + span דקורטיבי נפרד שמצויר עם mask-image על תו SVG
-     "chevron" ומקבל את הצבע שלו מ-background-color: currentColor (לכן
-     text-text-muted עליו - אותו טוקן/מנגנון צבע בדיוק כמו ה-"+" הטקסטואלי,
-     לא ערך צבוע-קשיח חדש). Vector אמיתי (לא gradient מפוקסל) - חד גם
-     בזום/מסכי רזולוציה גבוהה.
-     עודכן 2026-09-18 (המשך, בקשת אורן): נוסה קודם size-5 (20px, כמו
-     text-h3) + stroke-width 2.5 - אורן דיווח שזה "מאוד שונה" מה-"+", יותר
-     מדי דומיננטי לתפקידו כאייקון-עזר קטן בתוך שדה קומפקטי. תוקן חזרה:
-     size-3.5 (14px, ב-VariantSelector.tsx) ו-stroke-width 2 כאן - קרוב
-     בהרבה לגודל/משקל המקורי שלפני הניסוי, ועדיין וקטור נקי בלי הבאג
-     המקורי (חץ כפול בפיירפוקס). "פאדינג נאה" - הבקשה השנייה - מומש דרך
-     המיקום (end-md ולא end-sm) ב-VariantSelector.tsx, כדי שיהיה לאייקון
-     אותו מרווח בדיוק (16px, --space-md) מקצה השדה כמו שיש ל-"+" עצמו
-     מקצה הכפתור שלו (p-md). */
-  .select-chevron {
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-    -webkit-mask-repeat: no-repeat;
-    mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    mask-position: center;
-    -webkit-mask-size: contain;
-    mask-size: contain;
-    background-color: currentColor;
   }
 }
 

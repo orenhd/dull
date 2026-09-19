@@ -203,3 +203,9 @@
 הערה: בדיוק כמו מסך 7 (Disclaimer) - זהו מסך MVP-גבוה שאינו נגזר מצורך פרסונה, אלא מדרישה חיצונית: כאן דרישת פלטפורמה (Google Cloud Console, תנאי סף ל"Publish" של ה-OAuth consent screen, לא רק 100 test users רשומים ידנית) ולא דרישה משפטית כמו שם - אבל אותה מוסכמת תוכן: לא מסמך מחייב, אבל אמיתי ומדויק למה שהאתר עושה בפועל.
 
 **מימוש חי (`docs/PRD.md` סעיף 12.13, נבנה 2026-09-09):** `frontend/src/pages/PrivacyPage.tsx` (`/privacy`) ו-`frontend/src/pages/TermsPage.tsx` (`/terms`), שניהם ללא auth/params. כתובת יצירת קשר (`CONTACT_EMAIL` ב-`constants/index.ts`, `orenhd123@gmail.com`) מוזרקת באינטרפולציה לשני העמודים. קישורים אליהם: שורה חדשה ב-`Footer.tsx` ("Privacy Policy | Terms of Service", נפרדת מפסקת ה-disclaimer הקיימת), וטקסט הסכמה קצר עם קישורים inline מתחת לכפתור ב-`GoogleSignInButton.tsx` ("By continuing, you agree to our Terms of Service and Privacy Policy") - ממוקם בקומפוננטה המשותפת כדי שיופיע בכל מקום שהכפתור מוצג (checkout, היסטוריית הזמנות) בלי כפילות. אין שינוי backend - ה-SPA fallback הקיים מגיש את שני הנתיבים אוטומטית.
+
+## 17. עדכוני Scope — עמוד פריט, buy box A1-A3 (עדכון 2026-09-19)
+
+ראו `docs/PRD.md` סעיף 44 לנימוקים המלאים. עדכון למסך קיים:
+
+- **מסך 5 (עמוד פריט):** סדר ה-buy box השתנה - כפתור "Add to Bag" עולה מיד אחרי בורר הווריאנט (Fit/Colorway/Size), לפני Size guide/Materials (היה אחריהם). בורר המידה עצמו הוא צ'יפים בלבד כעת (לא `<select>`) - מידה שאזלה מוצגת כצ'יפ בלתי-לחיץ עם קו חוצה, לא כאופציה נבחרת עם הודעת שגיאה. במובייל בלבד: שתי תמונות הגלריה מפוצלות סביב ה-buy box (לא צמודות זו לזו), ומופיע פס "Add to Bag" דביק בתחתית המסך כשהכפתור המקורי לא בתצוגה.

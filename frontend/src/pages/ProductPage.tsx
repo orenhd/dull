@@ -3,25 +3,29 @@
 // למצבי הקצה (טעינה/ריק/שגיאה). מבוסס ישירות על github.com/orenhd/dull-demo
 // (index.html + style.css + script.js) - ראו הערות בקומפוננטות הבנות
 // לכל מקום שבו המימוש האמיתי (מול API אמיתי) חייב לסטות מהדמו הסטטי.
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { productRoute } from "@/router";
 import { getProduct } from "@/lib/api/products";
-import { ApiError } from "@/lib/api/client";
-import { buildSearchFromSelection, deriveDesiredFromSearch, getStartingPriceAgorot } from "@/lib/variant";
+import { ApiError, resolveMediaUrl } from "@/lib/api/client";
+import { buildSearchFromSelection, deriveDesiredFromSearch, findMedia, getStartingPriceAgorot } from "@/lib/variant";
+import { scrollIntoViewRespectingMotion } from "@/lib/scroll";
 import { useVariantSelection } from "@/hooks/useVariantSelection";
 import { useApiLocale } from "@/hooks/useApiLocale";
 import { Breadcrumb } from "@/components/layout/Breadcrumb";
-import { ProductGallery } from "@/components/product/ProductGallery";
-import { AddToBagForm } from "@/components/product/AddToBagForm";
+import { ProductGallery, GalleryShot } from "@/components/product/ProductGallery";
+import { AddToBagForm, ADD_TO_BAG_FORM_ID } from "@/components/product/AddToBagForm";
+import { StickyAddToBagBar } from "@/components/product/StickyAddToBagBar";
+import { SizeGuideAccordion } from "@/components/product/SizeGuideAccordion";
+import { MaterialsCard } from "@/components/product/MaterialsCard";
 import { BandCredit } from "@/components/product/BandCredit";
 import { SoldOutNotice } from "@/components/product/SoldOutNotice";
 import { GallerySkeleton, ProductContentSkeleton } from "@/components/feedback/Skeletons";
 import { formatAgorot } from "@/lib/money";
 import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
-import { PRODUCT_CATEGORY } from "@/constants";
+import { PRODUCT_CATEGORY, MEDIA_ROLE } from "@/constants";
 import type { Product } from "@/types/product";
 
 function categoryLabel(category: Product["category"], t: (key: string) => string): string {
@@ -49,7 +53,39 @@ function ProductPageContent({ product }: { product: Product }) {
   const search = productRoute.useSearch();
   const initialDesired = deriveDesiredFromSearch(product.axes, search);
   const selection = useVariantSelection(product, initialDesired);
-  const { variant, selectedIds, isColorwaySoldOut } = selection;
+  const { variant, selectedIds, isColorwaySoldOut, nonSizeAxes, selection: axisSelection } = selection;
+
+  // תוקן 2026-09-19 (Marketing feedback - PDP buy box A1): מצב הפתיחה של
+  // SizeGuideAccordion.tsx עבר להיות controlled מכאן (לא internal state
+  // ברכיב עצמו) - כדי שקישור "מדריך מידות" ב-VariantSelector.tsx (רחוק
+  // פיזית מהמגירה עצמה, שעברה למתחת לכפתור) יוכל גם לפתוח אותה וגם לגלול
+  // אליה (sizeGuideRef, ref כ-prop רגיל - React 19, בלי forwardRef).
+  const [sizeGuideOpen, setSizeGuideOpen] = useState(false);
+  const sizeGuideRef = useRef<HTMLDivElement>(null);
+  function handleOpenSizeGuide() {
+    setSizeGuideOpen(true);
+    scrollIntoViewRespectingMotion(sizeGuideRef.current, { block: "start" });
+  }
+
+  // target ל-IntersectionObserver של StickyAddToBagBar.tsx - div שעוטף
+  // את כפתור ה-Add to Bag ב-AddToBagForm.tsx (ראו הערה שם).
+  const addToBagButtonRef = useRef<HTMLDivElement>(null);
+
+  // הועבר לכאן מ-AddToBagForm.tsx (Marketing feedback - PDP buy box A1) -
+  // גם SizeGuideAccordion (עבר לכאן) וגם StickyAddToBagBar צריכים אותם.
+  const fitAxis = nonSizeAxes.find((axis) => axis.key === "fit");
+  const fitValueKey = fitAxis?.values.find((v) => v.id === axisSelection[fitAxis.key])?.key;
+  const outOfStock = variant != null && variant.stockQty <= 0;
+
+  // תוקן 2026-09-19 (Marketing feedback - PDP buy box A1): שתי התמונות
+  // (ModelShot=CAMPAIGN, ProductShot=FLAT) עדיין "תמיד גלויות" (docs/PRD.md
+  // סעיף 8א) - רק שבמובייל הן כבר לא מוצגות יחד (ProductGallery.tsx הפך
+  // לדסקטופ-בלבד): מחושבות כאן כדי לבנות שני עותקים עצמאיים (GalleryShot,
+  // מיוצא עכשיו) שממוקמים בזרימת ה-DOM לפני/אחרי ה-buy box, ומוסתרים
+  // ב-desktop:hidden (הגרסה הדסקטופית, יחד, ממשיכה לבוא מ-ProductGallery
+  // עצמו - אין שכפול לוגיקה, רק שכפול-רינדור זול של אותם URL-ים).
+  const modelShot = findMedia(product.media, MEDIA_ROLE.campaign, selectedIds);
+  const productShot = findMedia(product.media, MEDIA_ROLE.flat, selectedIds);
 
   // כיוון ההפוך state->URL: כתיבה רציפה של הבחירה החיה לשורת הכתובת בכל
   // שינוי (כולל מיד ב-mount, עם ברירת המחדל/מה-URL שנקלט - כך שהכתובת
@@ -86,9 +122,33 @@ function ProductPageContent({ product }: { product: Product }) {
       />
 
       <section aria-busy="false" className="mx-auto flex max-w-[1200px] min-w-0 flex-col gap-lg px-md pb-xl desktop:flex-row desktop:items-start desktop:gap-xl desktop:pt-md">
+        {/* תוקן 2026-09-19 (Marketing feedback - PDP buy box A1, "סדר בעמוד"
+            במובייל): image1 (המודל/ית) מעל שם/מחיר/הבורר/הכפתור - עותק
+            מובייל-בלבד (desktop:hidden), הגרסה הדסקטופית באה מ-ProductGallery
+            למטה (שהפך לדסקטופ-בלבד בעצמו). ~55vh (בקשת הבריף) דרך
+            mobileAspectClassName="h-[55vh]" - אותו prop בדיוק שה-GalleryShot
+            כבר תומך בו, רק ערך גובה במקום aspect-ratio. */}
+        {modelShot && (
+          <div className="desktop:hidden">
+            <GalleryShot
+              url={resolveMediaUrl(modelShot.url)}
+              alt={modelShot.altText ?? ""}
+              dimmed={isColorwaySoldOut}
+              mobileAspectClassName="h-[55vh]"
+            />
+          </div>
+        )}
+
         <ProductGallery media={product.media} selectedIds={selectedIds} dimmed={isColorwaySoldOut} />
 
-        <div className="flex min-w-0 flex-col gap-lg desktop:flex-1 desktop:basis-[400px]">
+        {/* תוקן 2026-09-19 (Marketing feedback - PDP buy box A1): desktop:sticky
+            desktop:top-lg - אותה מוסכמה בדיוק כמו עמודת הסיכום ב-
+            CheckoutPage.tsx/CartPage.tsx (desktop:sticky desktop:top-lg) -
+            לא ערך-offset חדש. לא נדרש חישוב מול גובה ה-header: ה-header
+            (SiteHeader.tsx) יושב *מחוץ* ל-<main> הגולל (RootLayout.tsx) -
+            אף פעם לא נכנס לאזור הגלילה מלכתחילה, אז אין "התנגשות" שדורשת
+            offset מבוסס-גובה. */}
+        <div className="flex min-w-0 flex-col gap-lg desktop:sticky desktop:top-lg desktop:flex-1 desktop:basis-[400px]">
           <div className="flex flex-col gap-sm">
             {/* <bdi> (2026-09-15, docs/PRD.md סעיף 28) - אומת ויזואלית
                 (Playwright) ש-h1 עצמאי (ללא dir), בלי שום Hebrew מעורב
@@ -106,9 +166,60 @@ function ProductPageContent({ product }: { product: Product }) {
             <BandCredit bandCreditName={product.bandCreditName} bandCreditUrl={product.bandCreditUrl} />
           </div>
 
-          {isColorwaySoldOut ? <SoldOutNotice /> : <AddToBagForm product={product} selection={selection} />}
+          {/* תוקן 2026-09-19 (Marketing feedback - PDP buy box A1): הכפתור
+              עובר להיות מיד אחרי הבוררים (בתוך AddToBagForm.tsx עצמו),
+              והמשני - image2 (במובייל בלבד), מדריך מידות, חומרים - כולו
+              עכשיו *מתחת* לכפתור, לא בתוכו. */}
+          {isColorwaySoldOut ? (
+            <SoldOutNotice />
+          ) : (
+            <AddToBagForm
+              product={product}
+              selection={selection}
+              onOpenSizeGuide={handleOpenSizeGuide}
+              buttonRef={addToBagButtonRef}
+            />
+          )}
+
+          {/* image2 (צילום flat) - "תמיד גלוי" (docs/PRD.md סעיף 8א) גם
+              כשה-colorway אזל לגמרי (SoldOutNotice מציג במקום AddToBagForm,
+              אבל לא במקום התמונה) - לכן *מחוץ* לתנאי isColorwaySoldOut
+              למעלה, עם אותו dimmed logic בדיוק כמו ProductGallery.tsx. */}
+          {productShot && (
+            <div className="desktop:hidden">
+              <GalleryShot
+                url={resolveMediaUrl(productShot.url)}
+                alt={productShot.altText ?? ""}
+                dimmed={isColorwaySoldOut}
+                mobileAspectClassName="aspect-[5/4]"
+              />
+            </div>
+          )}
+
+          {!isColorwaySoldOut && (
+            <>
+              <SizeGuideAccordion
+                ref={sizeGuideRef}
+                category={product.category}
+                fitKey={fitValueKey}
+                open={sizeGuideOpen}
+                onOpenChange={setSizeGuideOpen}
+              />
+              <MaterialsCard description={product.description} />
+            </>
+          )}
         </div>
       </section>
+
+      {!isColorwaySoldOut && (
+        <StickyAddToBagBar
+          product={product}
+          selection={selection}
+          anchorRef={addToBagButtonRef}
+          formId={ADD_TO_BAG_FORM_ID}
+          outOfStock={outOfStock}
+        />
+      )}
     </>
   );
 }

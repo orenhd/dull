@@ -13,6 +13,12 @@ interface VariantSelectorProps {
   soldOutSizeIds: ReadonlySet<string>;
   onChange: (axisKey: string, valueId: string) => void;
   sizeError: boolean;
+  // תוקן 2026-09-19 (Marketing feedback - PDP buy box A1): קישור טקסט קטן
+  // ליד תווית "מידה" שפותח (ולא רק מציג) את SizeGuideAccordion, שעבר
+  // למתחת לכפתור Add to Bag - רחוק פיזית משורת הבחירה. אופציונלי בכוונה
+  // (undefined = אין קישור מוצג) - אם בעתיד ייקרא רכיב הזה מהקשר בלי
+  // מדריך מידות זמין בכלל.
+  onOpenSizeGuide?: () => void;
 }
 
 export function VariantSelector({
@@ -24,13 +30,14 @@ export function VariantSelector({
   soldOutSizeIds,
   onChange,
   sizeError,
+  onOpenSizeGuide,
 }: VariantSelectorProps) {
   const { t } = useTranslation();
 
   // docs/PRD.md סעיף 26 (בקשת Oren) - "המידה שנבחרת *עכשיו* אזלה?" (לא כל
-  // מידה זמינה-מבנית - זה soldOutSizeIds עצמו, המשמש לסימון בתוך ה-<option>-ים
+  // מידה זמינה-מבנית - זה soldOutSizeIds עצמו, המשמש לסימון הצ'יפים
   // למטה). קדימות ל-sizeError (לא נבחרה מידה בכלל) - שתי ההודעות חולקות את
-  // אותו <p> מתחת ל-select, בדיוק כבקשת Oren ("על אותו שטנץ").
+  // אותו <p> מתחת לצ'יפים, בדיוק כבקשת Oren ("על אותו שטנץ").
   //
   // תוקן 2026-09-14 (דיווח Oren, build שבר): AxisSelection הוא Record<string,
   // string> - selection.size מוקלד string|undefined (noUncheckedIndexedAccess
@@ -66,76 +73,64 @@ export function VariantSelector({
         </fieldset>
       ))}
 
+      {/* תוקן 2026-09-19 (Marketing feedback - PDP buy box A3: מידה ככפתורים
+          גלויים במקום <select> נייטיב) - אותו מבנה fieldset+legend+chips
+          בדיוק כמו Fit/Colorway למעלה ("אותה שפה חזותית", בקשת הבריף
+          מפורשת), לא רכיב נפרד. המלאי-לפי-מידה (soldOutSizeIds) הוא נתון
+          אמיתי שכבר היה קיים ומחושב (lib/variant.ts getSoldOutSizeIds,
+          variant.stockQty) - רק המשיך לזרום ל-Chip.disabled החדש במקום
+          לטקסט "- אזל מהמלאי" בתוך <option>. id="size-group" משמש target
+          ל-focus/scroll כשנשלחת הטופס בלי מידה נבחרת (AddToBagForm.tsx). */}
       {sizeAxis && (
-        <div>
-          <label htmlFor="size" className="mb-sm block text-body text-text-muted">
-            {sizeAxis.label}
-          </label>
-          {/* תוקן 2026-09-18 (docs/PRD.md, דיווח Oren - סעיף ד.5) - עטיפה
-              relative חדשה, נדרשת כדי למקם את ה-chevron הדקורטיבי (span
-              נפרד, ראו הערה ב-index.css) מעל ה-<select>. appearance-none
-              (יוטיליטי של Tailwind, לא .select-caret הישן) מכבה את חץ
-              ברירת המחדל של הדפדפן בכל שלושת ה-prefixes - כולל -moz-,
-              שהיה חסר קודם וגרם לחץ כפול בפיירפוקס. pe-xl כדי שטקסט
-              המידה הארוך ביותר לא ייגע ב-chevron. */}
-          <div className="relative">
-            <select
-              id="size"
-              name="size"
-              required
-              aria-describedby="size-error"
-              aria-invalid={sizeError || selectedSizeSoldOut || undefined}
-              value={selection.size ?? ""}
-              onChange={(event) => onChange("size", event.target.value)}
-              className="w-full appearance-none rounded-sm border border-border-base bg-surface-base px-md py-sm pe-xl text-body text-text-base"
-            >
-              <option value="">{t("variant.selectSize")}</option>
-              {/* docs/PRD.md סעיף 26 - <option> תקני לא תומך בעיצוב פנימי (אין
-                  span/בולד חלקי בתוך הטקסט, אין רכיבי ילד בכלל) - לכן "לייבל
-                  בפונט קטן יותר אך בולט" (בקשת Oren, עדיפות 1) לא ניתן למימוש
-                  אמין ב-<option> בין דפדפנים. כפיצוי חלקי - טקסט רגיל מצורף
-                  לתווית עצמה ("- אזל מהמלאי"), בנוסף להודעה מתחת ל-select
-                  (עדיפות 2 של Oren, המימוש המלא). */}
-              {availableSizeValues.map((value) => {
-                const isSoldOut = soldOutSizeIds.has(value.id);
-                return (
-                  <option key={value.id} value={value.id}>
-                    {isSoldOut ? t("variant.sizeSoldOutOption", { size: value.label }) : value.label}
-                  </option>
-                );
-              })}
-            </select>
-            {/* span דקורטיבי (לא בתוך ה-<select>, שלא תומך ברכיבי ילד) -
-                ממוקם מעל ה-select בצד ה"סוף" הלוגי (end-md - הופך אוטומטית
-                ב-RTL, בלי [dir="rtl"] ידני כמו הגישה הישנה). pointer-events-none
-                כדי שהקליק "יעבור מבעד" לתיבה האמיתית מתחתיו.
-                עודכן 2026-09-18 (בקשת אורן, המשך ד.5, ניסיון שני) - size-5
-                (20px) הועבר חזרה ל-size-3.5 (14px, בין 12px המקורי ל-20px
-                שנוסה) - אורן דיווח שה-20px "מאוד שונה" מה-"+", דומיננטי
-                מדי לתפקיד-עזר בתוך שדה קומפקטי. "פאדינג נאה" (הבקשה
-                השנייה) - הועבר מ-end-sm ל-end-md: אותו מרווח בדיוק
-                (16px, --space-md) שיש ל-"+" עצמו מקצה הכפתור שלו
-                (p-md ב-SizeGuideAccordion.tsx), לא רק אותו גודל/צבע.
-                נבדק: ה-span (16px..30px ממקצה ה-select) עדיין לא נוגע
-                בגבול תוכן הטקסט (32px, pe-xl) גם בתווית הכי ארוכה
-                ("XL - אזל מהמלאי"). */}
-            <span
-              aria-hidden="true"
-              className="select-chevron pointer-events-none absolute end-md top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
-            />
+        <fieldset id="size-group" className="m-0 flex flex-col gap-sm border-0 p-0">
+          {/* legend מכיל גם את הכותרת וגם את קישור "מדריך מידות" - שניהם
+              phrasing content תקין בתוך <legend> (כולל <button>), כך
+              שה-legend נשאר הילד-הראשון-האמיתי של ה-fieldset (חובה לרינדור
+              UA תקין ולשם הנגיש שנגזר ממנו), בזמן שה-flex הפנימי מיישר את
+              שני החלקים לשני קצוות השורה - מתהפך אוטומטית ב-RTL (הקישור
+              יושב בצד הנגדי בעברית, בדיוק כבקשת הבריף, בלי קוד ייעודי
+              לכיוון). */}
+          <legend className="flex w-full items-baseline justify-between gap-sm p-0 text-caption font-bold tracking-[0.08em] text-text-muted uppercase">
+            <span>{sizeAxis.label}</span>
+            {onOpenSizeGuide && (
+              <button
+                type="button"
+                onClick={onOpenSizeGuide}
+                className="-my-xs px-xs py-xs text-caption font-normal normal-case tracking-normal text-text-muted underline hover:text-text-base"
+              >
+                {t("sizeGuide.summary")}
+              </button>
+            )}
+          </legend>
+          <div role="radiogroup" aria-label={sizeAxis.label} aria-describedby="size-error" className="flex flex-wrap gap-sm">
+            {availableSizeValues.map((value) => {
+              const isSoldOut = soldOutSizeIds.has(value.id);
+              return (
+                <Chip
+                  key={value.id}
+                  name="size"
+                  value={value.id}
+                  label={value.label}
+                  checked={selection.size === value.id}
+                  onChange={(valueId) => onChange("size", valueId)}
+                  disabled={isSoldOut}
+                  title={isSoldOut ? t("variant.sizeSoldOutOption", { size: value.label }) : undefined}
+                />
+              );
+            })}
           </div>
           {/* תוקן 2026-09-10 (docs/PRD.md סעיף 12.16, דיווח Oren) - היה margin
               עליון שלילי (mt-[calc(-1*var(--space-sm))]) שמשך את שורת השגיאה
               *מעלה*, לתוך גבול ה-select במקום ליצור רווח מתחתיו. mt-xs חיובי
               (--space-xs, 4px) - רווח צר וסביר מתחת לתיבה, לא נוגע ב-margin
-              האופקי/RTL בכלל (margin-top לא תלוי כיוון כתיבה). */}
-          {/* docs/PRD.md סעיף 26 - אותו <p> בדיוק משרת שתי הודעות ("לא נבחרה
+              האופקי/RTL בכלל (margin-top לא תלוי כיוון כתיבה).
+              docs/PRD.md סעיף 26 - אותו <p> בדיוק משרת שתי הודעות ("לא נבחרה
               מידה" ו-"המידה הנבחרת אזלה"), לפי sizeMessageKey - אותו id/מבנה/
               עיצוב שביקש Oren ("על אותו שטנץ"). */}
           <p id="size-error" role="alert" hidden={!sizeMessageKey} className="mt-xs text-caption text-feedback-error">
             {sizeMessageKey ? t(sizeMessageKey) : null}
           </p>
-        </div>
+        </fieldset>
       )}
     </>
   );

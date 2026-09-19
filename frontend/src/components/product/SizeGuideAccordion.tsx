@@ -21,7 +21,15 @@
 // (aria-expanded/aria-controls על <button>, בלי role="menu") עוקב אחרי
 // אותה מוסכמה כבר קיימת ב-UserMenu.tsx/SiteHeader.tsx (hamburger) - לא
 // role חדש, לא ניווט חצים במקלדת.
-import { useEffect, useRef, useState } from "react";
+//
+// תוקן 2026-09-19 (Marketing feedback - PDP buy box A1): ה-state (open)
+// עבר מ-internal ל-controlled (props open/onOpenChange) - הרכיב עצמו עבר
+// למתחת לכפתור Add to Bag, רחוק מקישור "מדריך מידות" החדש ליד תווית
+// "מידה" (VariantSelector.tsx). כך הקישור יכול גם לפתוח את המגירה וגם
+// (דרך ref, React 19 - ref כ-prop רגיל בלי forwardRef) לגלול אליה, בזמן
+// שהכותרת של המגירה עצמה עדיין מתפקדת כ-toggle עצמאי (שני נתיבים, אותו
+// state יחיד - לא לוגיקה כפולה).
+import { useEffect, useRef, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 import { getSizeChartForFitKey, getSandalsSizeChartForFitKey } from "@/content/sizeCharts";
 import { PRODUCT_CATEGORY } from "@/constants";
@@ -30,11 +38,13 @@ import type { ProductCategory } from "@/types/product";
 interface SizeGuideAccordionProps {
   category: ProductCategory;
   fitKey: string | undefined;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  ref?: Ref<HTMLDivElement>;
 }
 
-export function SizeGuideAccordion({ category, fitKey }: SizeGuideAccordionProps) {
+export function SizeGuideAccordion({ category, fitKey, open, onOpenChange, ref }: SizeGuideAccordionProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isFootwear = category === PRODUCT_CATEGORY.footwear;
 
@@ -47,11 +57,11 @@ export function SizeGuideAccordion({ category, fitKey }: SizeGuideAccordionProps
   useEffect(() => {
     if (!open) return;
     function onPointerDown(event: PointerEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+      if (!containerRef.current?.contains(event.target as Node)) onOpenChange(false);
     }
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
-      setOpen(false);
+      onOpenChange(false);
     }
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -59,15 +69,22 @@ export function SizeGuideAccordion({ category, fitKey }: SizeGuideAccordionProps
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, onOpenChange]);
 
   return (
-    <div ref={containerRef} className="rounded-md border border-border-base bg-surface-base">
+    <div
+      ref={(node) => {
+        containerRef.current = node;
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      }}
+      className="rounded-md border border-border-base bg-surface-base"
+    >
       <button
         type="button"
         aria-expanded={open}
         aria-controls="size-guide-panel"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => onOpenChange(!open)}
         className="flex w-full cursor-pointer items-center justify-between gap-sm p-md text-start text-body-strong font-bold"
       >
         <span>{t("sizeGuide.summary")}</span>
