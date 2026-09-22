@@ -45,7 +45,7 @@ export function ConsentBanner() {
   // בקשה נוספת כרגע להוסיף גם שם.
   function handleDecline() {
     decline();
-    showToast(t("consent.declineConfirmation"));
+    showToast(t("consent.declineConfirmation"), "subtle");
   }
 
   return (

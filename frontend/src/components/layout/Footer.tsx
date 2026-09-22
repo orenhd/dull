@@ -22,6 +22,15 @@
 // אותן *גם* קבוע בכל עמוד נחלשה, ואילו הנטל על גלילה במובייל (הדיווח כאן)
 // היה אמיתי. Privacy/Terms נשארים כאן (ראו הערה למעלה - תנאי-סף חיצוני,
 // לא רק החלטת UX), וכך גם "Cookie preferences" (בקשה נפרדת, לא כפולה).
+//
+// תוקן 2026-09-22 (דיווח Oren, סבב שני): הכיווץ למעלה הסיר גם את קישור
+// "Learn more" מהפוטר לגמרי (עבר ל-AboutPage.tsx/ConsentBanner.tsx בלבד) -
+// אורן ביקש נקודת-גישה קבועה גם כאן, לא רק דרך About/הבאנר החד-פעמי.
+// נוספה שורה אחת קצרה (`footer.tagline`, לא שחזור של הפסקאות המלאות
+// שהוסרו) + קישור - עדיין שורה שנייה בלבד (לא חזרה לשלוש פסקאות), אבל עם
+// גישה מיידית לעמוד הדיסקליימר מכל עמוד. `legal.learnMore` (לא מפתח חדש) -
+// אותה תווית "Learn more"/"לפרטים נוספים" בדיוק כמו ב-AboutPage.tsx/
+// ConsentBanner.tsx, לאותו יעד (/disclaimer) - לא כפילות ניסוח.
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useConsentStore } from "@/stores/consentStore";
@@ -31,7 +40,13 @@ export function Footer() {
   const reopenConsent = useConsentStore((s) => s.reopen);
   return (
     <footer className="shrink-0 border-t border-border-base px-md py-sm">
-      <div className="mx-auto max-w-[1200px] text-caption text-text-muted">
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-xs text-caption text-text-muted">
+        <p className="m-0">
+          {t("footer.tagline")}{" "}
+          <Link to="/disclaimer" className="underline hover:text-text-base">
+            {t("legal.learnMore")}
+          </Link>
+        </p>
         <p className="m-0">
           <Link to="/privacy" className="underline hover:text-text-base">
             {t("footer.privacyLink")}

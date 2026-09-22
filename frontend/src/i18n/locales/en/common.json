@@ -69,6 +69,7 @@
     "nonCommercialNote": "Non-commercial homage. Artwork rights belong to the band."
   },
   "footer": {
+    "tagline": "Dull is an educational demo project, not a real store.",
     "privacyLink": "Privacy Policy",
     "termsLink": "Terms of Service",
     "cookiePreferences": "Cookie preferences"
