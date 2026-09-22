@@ -69,12 +69,14 @@
     "nonCommercialNote": "Non-commercial homage. Artwork rights belong to the band."
   },
   "footer": {
-    "disclaimer": "This is an educational/demo project. No real purchase or payment takes place.",
-    "rightsNote": "Band logos and names belong to their respective owners and are shown as a non-commercial homage.",
-    "readMore": "Learn more",
     "privacyLink": "Privacy Policy",
     "termsLink": "Terms of Service",
     "cookiePreferences": "Cookie preferences"
+  },
+  "legal": {
+    "rightsNote": "Band logos and names belong to their respective owners and are shown as a non-commercial homage.",
+    "disclaimer": "This is an educational/demo project. No real purchase or payment takes place.",
+    "learnMore": "Learn more"
   },
   "disclaimer": {
     "title": "Disclaimer",
@@ -87,7 +89,8 @@
     "body": "This site is an educational demo — band logos are shown as non-commercial homage. We use analytics (Mixpanel) to understand how visitors use the site.",
     "learnMore": "Learn more",
     "accept": "Accept",
-    "decline": "Decline"
+    "decline": "Decline",
+    "declineConfirmation": "Got it — analytics are now off. You can change this anytime via \"Cookie preferences\" in the footer."
   },
   "home": {
     "title": "Dull"

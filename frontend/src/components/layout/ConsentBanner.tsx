@@ -6,9 +6,12 @@
 // הודעת ה"הומאז'/הדגמה" המקורית וגם consent אמיתי - accept()/decline()
 // (useConsentStore, stores/consentStore.ts) קוראות בפועל ל-
 // opt_in_tracking()/opt_out_tracking() של Mixpanel (lib/analytics.ts),
-// לא רק כותבות דגל UI. שלוש ההפניות הקבועות כבר קיימות תמיד ב-Footer.tsx
-// (Learn more/Privacy Policy/Terms of Service) - לא נדרש להוסיף אותן
-// במקום נוסף (נבדק מול אורן, ראו PRD).
+// לא רק כותבות דגל UI. שלוש ההפניות (Learn more/Privacy Policy/Terms of
+// Service) מוצגות כאן, בתוך הבאנר עצמו - עדכון 2026-09-22 (דיווח Oren
+// [2a]): Privacy/Terms עדיין קבועים גם ב-Footer.tsx (תנאי-סף חיצוני,
+// ראו הערה שם), אבל "Learn more" עצמו עבר משם ל-AboutPage.tsx בלבד - כאן
+// בבאנר זו עדיין נקודת-הגישה הראשונה/המרכזית אליו לפני שהמשתמש בכלל
+// מחליט (לא תלויה בעמוד About).
 //
 // position:fixed (לא flex-item כמו DisclaimerBanner.tsx הישן) - חייב
 // להופיע מעל **כל** עמוד באתר עם אותה עקביות, לא רק כשה-<main> גולל
@@ -18,14 +21,32 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useConsentStore } from "@/stores/consentStore";
+import { useToastStore } from "@/stores/toastStore";
 
 export function ConsentBanner() {
   const { t } = useTranslation();
   const visible = useConsentStore((s) => s.visible);
   const accept = useConsentStore((s) => s.accept);
   const decline = useConsentStore((s) => s.decline);
+  const showToast = useToastStore((s) => s.show);
 
   if (!visible) return null;
+
+  // תוקן 2026-09-22 (דיווח Oren [2b]): decline() (stores/consentStore.ts)
+  // עוצרת בפועל את האנליטיקה (מאומת - ראו הערת Oren), אבל לא הייתה שום
+  // אינדיקציה חזותית לכך - הבאנר פשוט נעלם, בדיוק כמו ב-Accept, ואין הבדל
+  // נראה-לעין בין "אישרת" ל"סירבת". toast קצר (אותה מוסכמה בדיוק כמו
+  // showToast ב-AddToBagForm.tsx - נקרא מהקומפוננטה עצמה, לא מתוך ה-store,
+  // כדי להישאר עקבי עם המוסכמה הקיימת: אפקטי UI נשארים בשכבת הקומפוננטה,
+  // ה-store מטפל רק ב-state+side-effect האנליטיקה עצמו) מאשר במפורש
+  // שהאיסוף כבוי, ומזכיר את "Cookie preferences" כדרך לשנות דעה. **בכוונה
+  // לא סימטרי ל-Accept** - Oren דיווח על Decline בלבד כחסר; Accept כבר
+  // "מרגיש" כמו אישור (הבאנר נעלם אחרי לחיצה על כפתור accent/כהה), ואין
+  // בקשה נוספת כרגע להוסיף גם שם.
+  function handleDecline() {
+    decline();
+    showToast(t("consent.declineConfirmation"));
+  }
 
   return (
     <div
@@ -57,7 +78,7 @@ export function ConsentBanner() {
         <div className="flex flex-none items-center gap-sm">
           <button
             type="button"
-            onClick={decline}
+            onClick={handleDecline}
             className="px-sm py-xs text-caption text-text-muted underline hover:text-text-base"
           >
             {t("consent.decline")}

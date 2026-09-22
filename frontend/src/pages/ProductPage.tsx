@@ -22,7 +22,7 @@ import { SizeGuideAccordion } from "@/components/product/SizeGuideAccordion";
 import { MaterialsCard } from "@/components/product/MaterialsCard";
 import { BandCredit } from "@/components/product/BandCredit";
 import { SoldOutNotice } from "@/components/product/SoldOutNotice";
-import { GallerySkeleton, ProductContentSkeleton } from "@/components/feedback/Skeletons";
+import { GallerySkeleton, MobileModelShotSkeleton, ProductContentSkeleton } from "@/components/feedback/Skeletons";
 import { formatAgorot } from "@/lib/money";
 import { trackEvent, ANALYTICS_EVENTS } from "@/lib/analytics";
 import { PRODUCT_CATEGORY, MEDIA_ROLE } from "@/constants";
@@ -252,16 +252,36 @@ export function ProductPage() {
     // ריפוד עליון רק בדסקטופ (desktop:pt-md). במובייל זה גרם ל-16px קפיצה
     // כלפי מעלה כשהתוכן האמיתי נטען - עכשיו זהה בדיוק לשורת ה-className
     // של ה-section האמיתי.
+    //
+    // תוקן 2026-09-22 (דיווח Oren [1a] - "כל התצוגה של ה-Loader קופצת למטה
+    // כשה-Breadcrumbs מעל מוכן לתצוגה"): הענף הזה לא כלל בכלל <Breadcrumb> -
+    // ברגע שה-query הסתיים, ProductPageContent מרנדרת אותו כ-sibling *מעל*
+    // ה-<section>, ודוחפת את כל התוכן שמתחתיו למטה בגובה שורת ה-breadcrumb
+    // (שלא היה "שמור" קודם). הפיתרון: לרנדר כאן את אותו <Breadcrumb> ממש -
+    // לא placeholder בגובה משוער - עם הפריט היחיד שכן ידוע לפני שהנתונים
+    // חוזרים ("Home"/breadcrumb.home). זה מבטיח גובה זהה-לפיקסל (אותו
+    // קומפוננטה/DOM בדיוק, <nav><ol><li> שורה אחת) בלי לנחש/לשכפל מידות -
+    // ברגע שהמוצר נטען, ProductPageContent מחליפה אותו ב-Breadcrumb המלא
+    // (Home / קטגוריה / שם-המוצר) *באותו* גובה בדיוק (עדיין שורה אחת), אז
+    // אין שום קפיצה גם במעבר הזה.
     return (
-      <section aria-busy="true" className="mx-auto flex max-w-[1200px] min-w-0 flex-col gap-lg px-md pb-xl desktop:flex-row desktop:items-start desktop:gap-xl desktop:pt-md">
-        <p role="status" aria-live="polite" className="sr-only">
-          {t("states.loading")}
-        </p>
-        <GallerySkeleton />
-        <div aria-hidden="true" className="flex min-w-0 flex-col gap-lg desktop:flex-1 desktop:basis-[400px]">
-          <ProductContentSkeleton />
-        </div>
-      </section>
+      <>
+        <Breadcrumb items={[{ label: t("breadcrumb.home"), to: "/" }]} />
+        <section aria-busy="true" className="mx-auto flex max-w-[1200px] min-w-0 flex-col gap-lg px-md pb-xl desktop:flex-row desktop:items-start desktop:gap-xl desktop:pt-md">
+          <p role="status" aria-live="polite" className="sr-only">
+            {t("states.loading")}
+          </p>
+          {/* image1 (מודל/ית, מובייל-בלבד) - תוקן 2026-09-22 (דיווח Oren
+              [1b]): מקבילה ישירה ל-modelShot האמיתי, שמרונדר *מחוץ* ל-
+              ProductGallery.tsx (שהפך דסקטופ-בלבד ב-A1) - ראו הערה מלאה
+              ב-Skeletons.tsx. */}
+          <MobileModelShotSkeleton />
+          <GallerySkeleton />
+          <div aria-hidden="true" className="flex min-w-0 flex-col gap-lg desktop:flex-1 desktop:basis-[400px]">
+            <ProductContentSkeleton />
+          </div>
+        </section>
+      </>
     );
   }
 

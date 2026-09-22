@@ -21,6 +21,7 @@
 // זאת נשאר על ה-<img> כרשת ביטחון בלבד (למקרה שהתמונה תוחלף עתידית
 // ביחס אחר), לא כי יש כרגע צורך אמיתי בחיתוך.
 import { useTranslation } from "react-i18next";
+import { Link } from "@tanstack/react-router";
 import { resolveMediaUrl } from "@/lib/api/client";
 
 // ראו הערה מעל component-ה על docs/PRD.md סעיף 35 - אותה מוסכמת-מיקום/
@@ -57,6 +58,25 @@ export function AboutPage() {
 
           <p className="m-0">{t("about.craft")}</p>
           <p className="m-0">{t("about.credits")}</p>
+        </div>
+
+        {/* תוקן 2026-09-22 (דיווח Oren [2a] - איחוד הפוטר הקבוע עם ה-Consent):
+            שתי הפסקאות ש"עברו דירה" מ-Footer.tsx (ראו הערה שם) - זכויות
+            הלוגואים (i18n: legal.rightsNote) והבהרה שאין רכישה/תשלום
+            אמיתיים (legal.disclaimer), עם קישור "לפרטים נוספים" לעמוד
+            הדיסקליימר המלא (DisclaimerPage.tsx) - בדיוק אותו יעד שהיה
+            בפוטר. ממוקם כאן, לפני "loveLine"/"writtenByClaude" - כהערה
+            מעשית/משפטית אחרונה על הפרויקט, לפני שתי השורות האישיות-יותר
+            שסוגרות את העמוד. מפתחות i18n חדשים תחת "legal" (לא "footer") -
+            אותו טקסט מילה-במילה בשתי השפות, רק הועתק/הוזז, לא נוסח מחדש. */}
+        <div className="flex flex-col gap-xs text-body text-text-muted">
+          <p className="m-0">{t("legal.rightsNote")}</p>
+          <p className="m-0">
+            {t("legal.disclaimer")}{" "}
+            <Link to="/disclaimer" className="underline hover:text-text-base">
+              {t("legal.learnMore")}
+            </Link>
+          </p>
         </div>
 
         {/* שתי שורות עצמאיות קטנות (לא המשך פסקה) - בדיוק כמו שההערה הטכנית

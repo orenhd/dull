@@ -36,21 +36,45 @@ const BOX_PY_MD_BODY_STRONG =
 export const PULSE = "animate-pulse-soft rounded-sm bg-surface-sunken";
 
 export function GallerySkeleton() {
-  // מעטפת זהה ל-ProductGallery.tsx (min-w-0/items-start/flex-none+basis-[620px]
-  // כדי שברוחב הדסקטופ הגלריה תתפוס בדיוק את אותו רוחב-flex כמו במצב טעון,
-  // לא תתכווץ/תתרחב אחרת ותזיז את עמודת התוכן לצידה). שני התאים: התמונה
-  // הראשונה (צילום דוגמנות) ריבועית במובייל בפועל, לא 5:4 כמו השנייה
-  // (צילום flat) - ProductGallery.tsx GalleryShot: mobileAspectClassName
-  // שונה בין השתיים - היה זהה בטעות בגרסה הקודמת של השלד הזה.
+  // תוקן 2026-09-22 (דיווח Oren, [1b] - "תצוגת ה-Loader משקפת את העימוד
+  // הישן, עם שני הדימויים אחד מעל השני"): עד עכשיו השלד הזה הציג את שתי
+  // התמונות יחד גם במובייל (grid-cols-1, ממוקם אחד-מעל-השני) - נכון לפני
+  // A1, אבל ProductGallery.tsx האמיתי הפך מאז ל**דסקטופ-בלבד** (hidden
+  // כברירת מחדל, desktop:grid, ראו הערה שם) - שני עותקי-השלד המובייליים
+  // המקבילים (image1/image2) נבנים עכשיו בנפרד, ישירות ב-ProductPage.tsx
+  // (MobileModelShotSkeleton/MobileProductShotSkeleton למטה), במיקומים
+  // הנכונים סביב שלד ה-buy box - בדיוק כמו ש-GalleryShot האמיתי בנוי
+  // בנפרד שם, לא כאן. אז hidden/desktop:grid כאן חייב להיות **זהה** ל-
+  // className האמיתי ב-ProductGallery.tsx - לא רק "דומה" - אחרת המעבר
+  // בין השלד לתוכן האמיתי יזיז את עמודת התוכן (רוחב-flex שונה) ברגע
+  // שהטעינה מסתיימת.
   return (
     <div
-      className="grid w-full min-w-0 grid-cols-1 items-start gap-md desktop:grid-cols-2 desktop:flex-none desktop:basis-[620px]"
+      className="hidden w-full min-w-0 items-start gap-md desktop:grid desktop:grid-cols-2 desktop:flex-none desktop:basis-[620px]"
       aria-hidden="true"
     >
-      <div className={`aspect-square ${PULSE} desktop:aspect-[4/5]`} />
-      <div className={`aspect-[5/4] ${PULSE} desktop:aspect-[4/5]`} />
+      <div className={`${PULSE} desktop:aspect-[4/5]`} />
+      <div className={`${PULSE} desktop:aspect-[4/5]`} />
     </div>
   );
+}
+
+// image1 (צילום דוגמנות, מובייל-בלבד) - המקבילה הישירה ל-modelShot ב-
+// ProductPage.tsx (GalleryShot עם mobileAspectClassName="h-[55vh]") - לא
+// חלק מ-GallerySkeleton למעלה, שהפך דסקטופ-בלבד בהתאמה ל-ProductGallery.tsx
+// האמיתי (ראו הערה שם). נקרא ישירות מ-ProductPage.tsx, *לפני* GallerySkeleton -
+// אותו סדר בדיוק כמו image1 האמיתי לפני <ProductGallery> במצב הטעון.
+export function MobileModelShotSkeleton() {
+  return <div className={`h-[55vh] w-full rounded-sm ${PULSE} desktop:hidden`} aria-hidden="true" />;
+}
+
+// image2 (צילום flat, מובייל-בלבד) - המקבילה הישירה ל-productShot ב-
+// ProductPage.tsx (GalleryShot עם mobileAspectClassName="aspect-[5/4]").
+// נקראת מתוך ProductContentSkeleton למטה, *מחוץ* לבלוק ה-gap-md של הכפתור -
+// בדיוק כמו productShot האמיתי, שהוא sibling של AddToBagForm ולא ילד שלו
+// (תוקן 2026-09-22, דיווח Oren [1b]).
+export function MobileProductShotSkeleton() {
+  return <div className={`aspect-[5/4] w-full rounded-sm ${PULSE} desktop:hidden`} aria-hidden="true" />;
 }
 
 // שלד עמודת התוכן של עמוד הפריט - מראה בדיוק את מבנה ה-DOM של
@@ -76,8 +100,13 @@ export function ProductContentSkeleton() {
         </div>
       </div>
 
-      {/* AddToBagForm.tsx - form עצמו הוא flex-col gap-md, כל הפריטים למטה
-          הם ילדים ישירים שלו באותה רמה (לא עוד קינון). */}
+      {/* AddToBagForm.tsx - <form> עצמו הוא flex-col gap-md; VariantSelector.tsx
+          מרנדר את שלושת ה-fieldsets (Fit/Colorway/Size) כילדים ישירים שלו,
+          וכפתור "Add to Bag" הוא ה-sibling הרביעי, *באותה* רמת gap-md בדיוק -
+          תוקן 2026-09-22 (דיווח Oren [1b]): הכפתור הועבר לכאן, אחרי המידה.
+          SizeGuideAccordion.tsx/MaterialsCard.tsx **אינם** בתוך ה-<form> -
+          הם ילדים ישירים של ProductPageContent עצמו (gap-lg, לא gap-md) -
+          ולכן ירדו החוצה למטה, כ-siblings ישירים של ה-Fragment הזה. */}
       <div className="flex flex-col gap-md">
         {/* שני צירים לא-מידה (Fit/Colorway) - תמיד בדיוק 2 ערכים בכל אחד
             במודל הנתונים הנוכחי (נשים/גברים, בהיר/כהה - docs/PRD.md סעיף
@@ -103,29 +132,36 @@ export function ProductContentSkeleton() {
           <span className={`w-full ${BOX_PY_SM_BODY} ${PULSE}`} />
         </div>
 
-        {/* SizeGuideAccordion.tsx במצב סגור (ברירת המחדל) - <details> בלי
-            open, אז הגובה האמיתי הראשוני הוא רק שורת ה-summary (p-md,
-            text-body-strong) - בדיוק אותה נוסחה כמו הכפתור למטה, ולכן אותו
-            טוקן BOX_PY_MD_BODY_STRONG. עם border/rounded-md כמו הקומפוננטה
-            האמיתית - זה "כרטיס" של ממש, לא רק שורת טקסט. */}
-        <span className={`w-full rounded-md border border-border-base ${BOX_PY_MD_BODY_STRONG} ${PULSE}`} />
-
-        {/* MaterialsCard.tsx - מעטפת הכרטיס (border/rounded-md/p-lg/bg-surface-base)
-            זהה בוודאות לאמיתית; התוכן בפנים (כותרת h3 + פסקת description)
-            הוא קירוב בלבד - אורך ה-description משתנה בין מוצרים ומגיע רק
-            אחרי שהנתונים חוזרים, אי אפשר לדעת אותו מראש. שתי שורות טקסט
-            הן ניחוש סביר (רוב התיאורים הקיימים כיום קצרים), לא הבטחה. */}
-        <div className="flex flex-col gap-sm rounded-md border border-border-base bg-surface-base p-lg">
-          <span className={`block w-[45%] ${LINE_H3} ${PULSE}`} />
-          <div className="flex flex-col gap-xs">
-            <span className={`block ${LINE_BODY} ${PULSE}`} />
-            <span className={`block w-[80%] ${LINE_BODY} ${PULSE}`} />
-          </div>
-        </div>
-
-        {/* כפתור "Add to Bag" - Button.tsx BASE: py-md + text-body-strong,
-            אותה נוסחה בדיוק כמו ה-accordion למעלה. */}
+        {/* כפתור "Add to Bag" - Button.tsx BASE: py-md + text-body-strong.
+            תוקן 2026-09-22: עבר לכאן (בתוך אותו gap-md כמו ה-fieldsets,
+            מיד אחרי המידה) - זה בדיוק המיקום שהכפתור עצמו עבר אליו כבר
+            ב-A1 (19.9) ב-AddToBagForm.tsx; השלד פשוט לא עודכן איתו עד עכשיו. */}
         <span className={`w-full rounded-sm ${BOX_PY_MD_BODY_STRONG} ${PULSE}`} />
+      </div>
+
+      {/* image2 (צילום flat, מובייל-בלבד) - "תמיד גלוי" (docs/PRD.md סעיף
+          8א) גם כשה-colorway אזל, ו*מחוץ* לטופס - בדיוק כמו productShot
+          האמיתי ב-ProductPage.tsx (sibling של AddToBagForm, לא ילד שלו). */}
+      <MobileProductShotSkeleton />
+
+      {/* SizeGuideAccordion.tsx במצב סגור (ברירת המחדל) - <details> בלי
+          open, אז הגובה האמיתי הראשוני הוא רק שורת ה-summary (p-md,
+          text-body-strong) - בדיוק אותה נוסחה כמו הכפתור למעלה, ולכן אותו
+          טוקן BOX_PY_MD_BODY_STRONG. עם border/rounded-md כמו הקומפוננטה
+          האמיתית - זה "כרטיס" של ממש, לא רק שורת טקסט. */}
+      <span className={`w-full rounded-md border border-border-base ${BOX_PY_MD_BODY_STRONG} ${PULSE}`} />
+
+      {/* MaterialsCard.tsx - מעטפת הכרטיס (border/rounded-md/p-lg/bg-surface-base)
+          זהה בוודאות לאמיתית; התוכן בפנים (כותרת h3 + פסקת description)
+          הוא קירוב בלבד - אורך ה-description משתנה בין מוצרים ומגיע רק
+          אחרי שהנתונים חוזרים, אי אפשר לדעת אותו מראש. שתי שורות טקסט
+          הן ניחוש סביר (רוב התיאורים הקיימים כיום קצרים), לא הבטחה. */}
+      <div className="flex flex-col gap-sm rounded-md border border-border-base bg-surface-base p-lg">
+        <span className={`block w-[45%] ${LINE_H3} ${PULSE}`} />
+        <div className="flex flex-col gap-xs">
+          <span className={`block ${LINE_BODY} ${PULSE}`} />
+          <span className={`block w-[80%] ${LINE_BODY} ${PULSE}`} />
+        </div>
       </div>
     </>
   );
