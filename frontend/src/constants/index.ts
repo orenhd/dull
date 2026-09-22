@@ -28,11 +28,14 @@ export const ROUTES = {
 
 // --- localStorage keys ---
 export const CART_STORAGE_KEY = "dull:cart";
-// דגל "נראה כבר" עבור DisclaimerBanner.tsx (docs/SCREENS_INVENTORY.md מסך 7) -
-// לא zustand persist כמו CART_STORAGE_KEY למעלה, כי אין כאן state שצריך
-// לשתף/לעדכן חי בין קומפוננטות - רק דגל בוליאני חד-פעמי שנקרא פעם אחת
-// ב-mount. ראו הערה מלאה ב-DisclaimerBanner.tsx.
-export const DISCLAIMER_BANNER_STORAGE_KEY = "dull:disclaimerBannerDismissed";
+// תוקן 2026-09-22 (בקשת אורן): DISCLAIMER_BANNER_STORAGE_KEY הוסר -
+// DisclaimerBanner.tsx (הבאנר החד-פעמי העליון) הוחלף לגמרי ב-
+// ConsentBanner.tsx (באנר תחתון מאוחד - גם דיסקליימר וגם consent
+// לאנליטיקה, ראו הערה מלאה ב-stores/consentStore.ts). מבקרים שכבר סגרו
+// את הבאנר הישן ישמרו מפתח יתום (dull:disclaimerBannerDismissed) ב-
+// localStorage שלהם - לא נקרא בקוד יותר, לא משפיע על כלום, לא נמחק ביד
+// (אין דרך "לנקות" localStorage של מבקרים קיימים מבחוץ ממילא).
+export const CONSENT_STORAGE_KEY = "dull:consent";
 // מפתח ברירת המחדל של i18next-browser-languagedetector (src/i18n/index.ts) -
 // לא בשימוש ישיר בקוד שלנו, מתועד כאן כדי שלא יהיה "magic string" לא-מוסבר
 // אם מישהו יחפש אותו ב-devtools.

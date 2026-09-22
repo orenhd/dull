@@ -4,7 +4,7 @@ import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
 import { useAnalyticsIdentity } from "@/hooks/useAnalyticsIdentity";
 import { SkipLink } from "./SkipLink";
 import { SiteHeader } from "./SiteHeader";
-import { DisclaimerBanner } from "./DisclaimerBanner";
+import { ConsentBanner } from "./ConsentBanner";
 import { Footer } from "./Footer";
 import { ToastHost } from "./ToastHost";
 
@@ -31,10 +31,6 @@ export function RootLayout({ children }: { children: ReactNode }) {
     <div className="flex h-[100dvh] flex-col overflow-hidden">
       <SkipLink />
       <SiteHeader />
-      {/* DisclaimerBanner.tsx - flex-item רגיל (shrink-0), לא fixed overlay -
-          כשמוצג הוא פשוט מכווץ את <main> כמו כל שאר ה-app-shell, ונעלם
-          כליל (מחזיר null) לאחר סגירה/ביקור ראשון - ראו הערה מלאה שם. */}
-      <DisclaimerBanner />
       {/* min-h-0 הכרחי: flex-item עם overflow-y-auto לא באמת יגלול בלי זה
           (ברירת המחדל min-height:auto מונעת מה-item להתכווץ מתחת לגובה
           התוכן שלו, וכל ה-<div> היה גדל ודוחף את ה-footer מחוץ למסך). */}
@@ -43,6 +39,9 @@ export function RootLayout({ children }: { children: ReactNode }) {
       </main>
       <Footer />
       <ToastHost />
+      {/* תוקן 2026-09-22: ConsentBanner.tsx - position:fixed (לא flex-item
+          כמו DisclaimerBanner.tsx הישן שהוחלף) - ראו הערה מלאה שם למה. */}
+      <ConsentBanner />
     </div>
   );
 }

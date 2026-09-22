@@ -1,7 +1,7 @@
 // עמוד ה-Disclaimer המלא (docs/SCREENS_INVENTORY.md מסך 7). ה-footer
 // (Footer.tsx) כבר מציג גרסה מקוצרת של אותם שני משפטים בכל עמוד; העמוד הזה
 // הוא ה"הרחבה" שאליה מפנים גם ה-footer (קישור "לפרטים נוספים") וגם
-// DisclaimerBanner.tsx (הבאנר החד-פעמי). שני מקורות התוכן (rightsNote/
+// ConsentBanner.tsx (הבאנר החד-פעמי, תוקן 2026-09-22 - היה DisclaimerBanner.tsx). שני מקורות התוכן (rightsNote/
 // disclaimer) ב-footer.* נשארים כפי שהם - לא שוכפלו כאן, אלא הורחבו
 // למקטע נפרד תחת מפתחות disclaimer.* בקבצי ה-locale.
 //

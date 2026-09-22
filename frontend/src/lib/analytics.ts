@@ -76,8 +76,32 @@ export function initAnalytics(): void {
     track_pageview: "url-with-path",
     // debug רק ב-dev מקומי - לא רועש בפרודקשן.
     debug: import.meta.env.DEV,
+    // תוקן 2026-09-22 (בקשת אורן - consent מפורש, לא רק באנר-מידע): ה-SDK
+    // עצמו כבר תומך במנגנון opt-in/opt-out ייעודי בדיוק לתרחיש הזה - לא
+    // נבנה gate ידני סביב הקריאה ל-init() עצמה (שהייתה דורשת לדחות את כל
+    // ה-side-effect הזה מחוץ ל-main.tsx, ולתאם עם טעינת ה-store/הבאנר).
+    // opt_out_tracking_by_default:true אומר: מבקר חדש (בלי החלטה שמורה
+    // כלל אצל Mixpanel עצמו) לא נשלח שום event - כולל autocapture/
+    // track_pageview האוטומטי למעלה - עד קריאה מפורשת ל-opt_in_tracking()
+    // (grantAnalyticsConsent, למטה). opt_out_tracking()/opt_in_tracking()
+    // הם API רשמי של mixpanel-browser בדיוק לצורך cookie-consent banners -
+    // לא מנגנון תוצרת-בית. ConsentBanner.tsx קורא ל-grant/revoke למטה.
+    opt_out_tracking_by_default: true,
   });
   enabled = true;
+}
+
+// נקראות מ-stores/consentStore.ts בלבד (accept()/decline()) - לא ישירות
+// מרכיבים. no-op אם אין טוקן (enabled===false), אותה מוסכמה בדיוק כמו
+// trackEvent/identifyUser/resetIdentity למעלה - עקביות, לא תלות קריטית.
+export function grantAnalyticsConsent(): void {
+  if (!enabled) return;
+  mixpanel.opt_in_tracking();
+}
+
+export function revokeAnalyticsConsent(): void {
+  if (!enabled) return;
+  mixpanel.opt_out_tracking();
 }
 
 export function trackEvent(name: AnalyticsEventName, properties?: Record<string, unknown>): void {

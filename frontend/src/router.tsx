@@ -116,7 +116,7 @@ export const orderDetailRoute = createRoute({
 });
 
 // /disclaimer - Disclaimer זכויות להקות + באנר חד-פעמי (docs/SCREENS_INVENTORY.md
-// מסך 7). מגיעים לכאן משני מקומות: DisclaimerBanner.tsx (הבאנר החד-פעמי
+// מסך 7). מגיעים לכאן משני מקומות: ConsentBanner.tsx (הבאנר החד-פעמי, תוקן 2026-09-22 - היה DisclaimerBanner.tsx
 // בכניסה הראשונה) ו-Footer.tsx (קישור קבוע "לפרטים נוספים", לחזרה גם אחרי
 // שהבאנר נסגר). אין auth/params - עמוד תוכן סטטי לחלוטין.
 const disclaimerRoute = createRoute({

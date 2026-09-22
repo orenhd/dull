@@ -73,7 +73,8 @@
     "rightsNote": "Band logos and names belong to their respective owners and are shown as a non-commercial homage.",
     "readMore": "Learn more",
     "privacyLink": "Privacy Policy",
-    "termsLink": "Terms of Service"
+    "termsLink": "Terms of Service",
+    "cookiePreferences": "Cookie preferences"
   },
   "disclaimer": {
     "title": "Disclaimer",
@@ -81,10 +82,12 @@
     "demoNote": "Dull is an educational/demo e-commerce project built to practice full-stack development. No real purchase, payment, or shipment takes place — the checkout flow is fully simulated, and no real money ever changes hands.",
     "backLink": "← Back"
   },
-  "disclaimerBanner": {
-    "text": "This site is an educational demo. Band logos are shown as non-commercial homage.",
-    "readMore": "Learn more",
-    "dismiss": "Dismiss"
+  "consent": {
+    "title": "Privacy & cookies",
+    "body": "This site is an educational demo — band logos are shown as non-commercial homage. We use analytics (Mixpanel) to understand how visitors use the site.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "decline": "Decline"
   },
   "home": {
     "title": "Dull"
