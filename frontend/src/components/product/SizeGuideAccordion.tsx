@@ -78,7 +78,7 @@ export function SizeGuideAccordion({ category, fitKey, open, onOpenChange, ref }
         if (typeof ref === "function") ref(node);
         else if (ref) ref.current = node;
       }}
-      className="rounded-md border border-border-base bg-surface-base"
+      className="rounded-md border border-border-base bg-surface-base desktop:max-w-[360px]"
     >
       <button
         type="button"

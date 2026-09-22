@@ -152,6 +152,23 @@
     outline: 2px solid var(--color-brand-primary);
     outline-offset: 1px;
   }
+
+  /* תוקן 2026-09-22 (דיווח Oren - "האחדה של כל מה שclickable"): <button>
+     מקבל ברירת מחדל cursor:default מהדפדפן, לא pointer - בניגוד להנחה
+     הקודמת ב-docs/DESIGN_SYSTEM_AUDIT.md סעיף 5 ("onClick מחובר ל-button/
+     Link מקבלים pointer אוטומטית מהדפדפן"), שהייתה נכונה רק לגבי <a>/
+     Link, לא <button>. בפועל רק 2 מקומות בכל הקוד הגדירו cursor-pointer
+     ידנית (SizeGuideAccordion.tsx, Chip.tsx) - כל שאר הכפתורים (למשל
+     LanguageSwitcher.tsx, UserMenu.tsx, Button.tsx המשותף עצמו, קישור
+     "מדריך מידות" ב-VariantSelector.tsx) הציגו cursor שגוי. חוק גלובלי
+     אחד כאן במקום הוספת cursor-pointer נקודתי בכל כפתור בנפרד - מכסה גם
+     [role="button"] לעתיד. :not(:disabled)/:not([aria-disabled]) משאירים
+     את disabled:cursor-not-allowed הקיים (Button.tsx/Chip.tsx) פעיל בלי
+     התנגשות - האלמנטים המנוטרלים האלה לא אמורים לקבל pointer. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 @theme {

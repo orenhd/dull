@@ -9,7 +9,7 @@ export function MaterialsCard({ description }: { description: string | null }) {
   if (!description) return null;
 
   return (
-    <div className="flex flex-col gap-sm rounded-md border border-border-base bg-surface-base p-lg">
+    <div className="flex flex-col gap-sm rounded-md border border-border-base bg-surface-base p-lg desktop:max-w-[360px]">
       <h2 className="font-headline text-h3 font-black text-text-base">{t("materials.title")}</h2>
       <p className="m-0 text-body text-text-base">{description}</p>
     </div>

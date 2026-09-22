@@ -55,7 +55,7 @@ export function VariantSelector({
     <>
       {nonSizeAxes.map((axis) => (
         <fieldset key={axis.key} className="m-0 flex flex-col gap-sm border-0 p-0">
-          <legend className="p-0 text-caption font-bold tracking-[0.08em] text-text-muted uppercase">
+          <legend className="mb-sm p-0 text-caption font-bold tracking-[0.08em] text-text-muted uppercase">
             {axis.label}
           </legend>
           <div className="flex flex-wrap gap-sm">
@@ -90,13 +90,13 @@ export function VariantSelector({
               שני החלקים לשני קצוות השורה - מתהפך אוטומטית ב-RTL (הקישור
               יושב בצד הנגדי בעברית, בדיוק כבקשת הבריף, בלי קוד ייעודי
               לכיוון). */}
-          <legend className="flex w-full items-baseline justify-between gap-sm p-0 text-caption font-bold tracking-[0.08em] text-text-muted uppercase">
+          <legend className="mb-sm flex w-full items-baseline justify-between gap-sm p-0 text-caption font-bold tracking-[0.08em] text-text-muted uppercase">
             <span>{sizeAxis.label}</span>
             {onOpenSizeGuide && (
               <button
                 type="button"
                 onClick={onOpenSizeGuide}
-                className="-my-xs px-xs py-xs text-caption font-normal normal-case tracking-normal text-text-muted underline hover:text-text-base"
+                className="-my-xs px-xs py-xs text-caption font-normal normal-case tracking-normal text-text-muted underline hover:text-text-base desktop:hidden"
               >
                 {t("sizeGuide.summary")}
               </button>

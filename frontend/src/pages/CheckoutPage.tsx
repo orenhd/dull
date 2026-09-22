@@ -26,7 +26,6 @@ import { useCartStore, selectCartTotalAgorot } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useFreshCartItems } from "@/hooks/useFreshCartItems";
 import { createOrder } from "@/lib/api/orders";
-import { logout } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
 import { formatAgorot } from "@/lib/money";
 import { Button } from "@/components/ui/Button";
@@ -164,17 +163,6 @@ export function CheckoutPage() {
     setShipping((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function handleLogout() {
-    try {
-      await logout();
-    } catch {
-      // best-effort - מנקים את המצב המקומי בכל מקרה (finally), כדי שהמשתמש
-      // תמיד יוכל לנסות להתחבר עם חשבון אחר גם אם קריאת ה-logout עצמה נכשלה.
-    } finally {
-      setUser(null);
-    }
-  }
-
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
@@ -241,12 +229,18 @@ export function CheckoutPage() {
       <form id="checkout-form" onSubmit={handleSubmit} className="flex min-w-0 flex-1 flex-col gap-md">
         <h1 className="m-0 font-headline text-h3 font-black text-text-base">{t("checkout.title")}</h1>
 
-        <div className="flex items-center justify-between gap-sm text-caption text-text-muted">
-          <span>{t("checkout.signedInAs", { name: user.name })}</span>
-          <button type="button" onClick={handleLogout} className="underline hover:text-text-base">
-            {t("checkout.signOut")}
-          </button>
-        </div>
+        {/* תוקן 2026-09-22 (בקשת אורן): כפתור "Sign out" הוסר מכאן - נשאר
+            רק המשפט "מחובר כ-X" בלי אופציה לפעולה. אורן: "הוא באמת לא
+            מכניס וייב של רכישה לשם" - התנתקות באמצע checkout היא פעולה
+            הרסנית לזרימת הקנייה (מוחקת session, לא רק "לצאת מהתפריט"),
+            ולא ברור שום תרחיש legitimate שבו משתמש עם עגלה מלאה, שני צעדים
+            מסיום הזמנה, ירצה בכלל להתנתק כאן - הסרת הפיתוי עדיפה על
+            השארתו "ליתר ביטחון". ה-Sign out הגלובלי (UserMenu.tsx בהדר,
+            t("checkout.signOut") - אותו מפתח i18n, ראו הערה שם "משותף לא
+            כפול") עדיין קיים וזמין תמיד דרך ההדר, לכל עמוד כולל זה - לא
+            אבד שום capability, רק לא מוצע כאן באופן שמעודד שימוש בו.
+            handleLogout/logout import הוסרו - קוד מת אחרי ההסרה. */}
+        <p className="m-0 text-caption text-text-muted">{t("checkout.signedInAs", { name: user.name })}</p>
 
         <fieldset className="m-0 flex flex-col gap-sm border-0 p-0">
           <legend className="mb-xs text-body-strong font-bold text-text-base">{t("checkout.shippingTitle")}</legend>
