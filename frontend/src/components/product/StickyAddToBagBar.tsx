@@ -50,7 +50,17 @@ export function StickyAddToBagBar({ product, selection, anchorRef, formId, outOf
     const anchor = anchorRef.current;
     const root = document.getElementById("main");
     if (!anchor || !root) return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(!entry.isIntersecting), { root, threshold: 0 });
+    // תוקן 2026-09-22 (שגיאת build של אורן - `tsc -b`): עם
+    // `noUncheckedIndexedAccess` (tsconfig.app.json) גם דה-סטרקצ'ור ממערך
+    // (לא רק אינדקס מפורש `entries[0]`) מוקלד `T | undefined` - `entry`
+    // תיאורטית יכול להיות undefined מבחינת הטיפוסים, אף ש-`observer.observe(anchor)`
+    // למטה תמיד קורא ל-callback עם entries שמכיל בדיוק את ה-target הנצפה
+    // היחיד. תוסף guard מפורש במקום non-null assertion (`entry!`) - עקבי
+    // עם הכוונה מאחורי הדגל הזה (בטיחות טיפוסים אמיתית, לא רק השתקתה).
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      setVisible(!entry.isIntersecting);
+    }, { root, threshold: 0 });
     observer.observe(anchor);
     return () => observer.disconnect();
   }, [anchorRef]);
