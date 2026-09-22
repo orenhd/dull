@@ -43,9 +43,19 @@ function writeDecision(decision: ConsentDecision): void {
 interface ConsentState {
   decision: ConsentDecision | null;
   visible: boolean;
+  // תוקן 2026-09-22 (באג שדיווחה המרקטינג - הפס הדביק/StickyAddToBagBar.tsx
+  // מוסתר לגמרי מתחת לבאנר הזה אצל מבקר/ת ראשון/ה, שני האלמנטים fixed/
+  // sticky בתחתית המסך). הגובה **בפועל** של הבאנר (נמדד ב-ConsentBanner.tsx
+  // עצמו, ResizeObserver - ראו הערה שם) נשמר כאן כדי ש-StickyAddToBagBar.tsx
+  // יוכל "לפנות" בדיוק את השטח הזה במקום להסתמך על מספר קבוע-מראש (שהיה
+  // שביר: אורך טקסט שונה בעברית/אנגלית, גלישת שורה, env(safe-area-inset-bottom)
+  // בדיוק כמו שהבאנר עצמו כבר מוסיף לעצמו). 0 כברירת מחדל - לא רלוונטי
+  // כשהבאנר לא מוצג (visible===false), הצרכן תמיד בודק visible קודם.
+  bannerHeightPx: number;
   accept: () => void;
   decline: () => void;
   reopen: () => void;
+  setBannerHeight: (px: number) => void;
 }
 
 export const useConsentStore = create<ConsentState>()((set) => {
@@ -56,6 +66,7 @@ export const useConsentStore = create<ConsentState>()((set) => {
   return {
     decision: initialDecision,
     visible: initialDecision === null,
+    bannerHeightPx: 0,
     accept: () => {
       writeDecision("accepted");
       grantAnalyticsConsent();
@@ -71,5 +82,6 @@ export const useConsentStore = create<ConsentState>()((set) => {
     // בחירה כמו קודם - accept()/decline() פשוט יכתבו את אותו ערך שוב,
     // לא בעיה).
     reopen: () => set({ visible: true }),
+    setBannerHeight: (px) => set({ bannerHeightPx: px }),
   };
 });

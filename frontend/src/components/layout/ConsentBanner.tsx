@@ -15,9 +15,25 @@
 //
 // position:fixed (לא flex-item כמו DisclaimerBanner.tsx הישן) - חייב
 // להופיע מעל **כל** עמוד באתר עם אותה עקביות, לא רק כשה-<main> גולל
-// מספיק כדי לחשוף flex-item בתחתית תוכן. z-20 מעל תוכן רגיל; ToastHost.tsx
-// (fixed bottom-lg, בלי z-index מפורש) לא אמור להתנגש בפועל - toast
-// מופיע כתוצאה מפעולת משתמש (הוספה לעגלה וכו'), לא בביקור ראשון ריק.
+// מספיק כדי לחשוף flex-item בתחתית תוכן. z-20 מעל תוכן רגיל.
+//
+// תוקן 2026-09-22 (באג בחומרה גבוהה שדיווחה המרקטינג): הבאנר (fixed,
+// z-20) ו-StickyAddToBagBar.tsx (sticky בתוך <main>, z-10) שניהם "צפים"
+// באותו אזור-מסך בתחתית - ה-z-index הגבוה יותר כאן פשוט **הסתיר לגמרי**
+// את פס ה-Add to Bag אצל כל מבקר/ת ראשון/ה שגלל/ה למטה לפני שהכריע/ה
+// לגבי consent (בדיוק התרחיש שה-A2 נועד לשרת).
+//
+// **ניסיון תיקון ראשון** (bottom דינמי על StickyAddToBagBar - "מפנה"
+// לבאנר בדיוק את גובהו, נערם מעליו) הוכח שגוי באמפירית - אורן דיווח
+// (צילומי מסך) שהפס "צף" באמצע העמוד, לא צמוד לתחתית. **תוקן שוב**:
+// StickyAddToBagBar.tsx כבר לא נערם מעל הבאנר בכלל - הוא פשוט לא מוצג
+// כלל כל עוד הבאנר מוצג (ראו הערת הקובץ שם לפירוט מלא), אפס מתמטיקת
+// קואורדינטות. ה-bannerHeightPx שנמדד כאן (ResizeObserver על השורש -
+// מגיב גם לגלישת טקסט/החלפת שפה) עדיין נשמר ב-stores/consentStore.ts
+// ומשמש כיום את ToastHost.tsx בלבד (fixed, bottom דינמי - תוקן 2026-09-22
+// אחרי שאורן דיווח שגם ההודעה שמאשרת Add to Bag מוסתרת מתחת לבאנר,
+// גם בדסקטופ וגם במובייל; ראו הערה שם).
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useConsentStore } from "@/stores/consentStore";
@@ -28,7 +44,25 @@ export function ConsentBanner() {
   const visible = useConsentStore((s) => s.visible);
   const accept = useConsentStore((s) => s.accept);
   const decline = useConsentStore((s) => s.decline);
+  const setBannerHeight = useConsentStore((s) => s.setBannerHeight);
   const showToast = useToastStore((s) => s.show);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // תלוי ב-`visible` (לא מערך ריק): הקומפוננטה עצמה **לא** עוברת unmount
+  // אמיתי כשמחליטים (RootLayout.tsx תמיד מרנדר <ConsentBanner/>, ההחזרה
+  // ל-null היא פנימית) - אז effect עם deps ריקים לעולם לא היה רץ שוב
+  // אחרי reopen() (Footer.tsx, "Cookie preferences"). עם `visible` כ-dep,
+  // ה-cleanup (disconnect) רץ ב-Accept/Decline, וה-effect רץ שוב (עם ref
+  // תקין, אחרי ה-commit של ה-JSX) ב-reopen().
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+    const measure = () => setBannerHeight(node.getBoundingClientRect().height);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [visible, setBannerHeight]);
 
   if (!visible) return null;
 
@@ -50,6 +84,7 @@ export function ConsentBanner() {
 
   return (
     <div
+      ref={rootRef}
       role="region"
       aria-label={t("consent.title")}
       className="fixed inset-x-0 bottom-0 z-20 border-t border-border-base bg-surface-base px-md py-md desktop:px-xl"

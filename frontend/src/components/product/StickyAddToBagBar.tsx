@@ -18,8 +18,30 @@
 // מיקום/z: `position: sticky bottom-0` **בזרימת ה-DOM של <main>** (לא
 // `fixed` לחלון!) - זה הרכיב האחרון שמוחזר מ-ProductPage.tsx, ולכן הוא
 // נעצר בדיוק בגבול התחתון של <main>, שמתלכד בדיוק עם המקום שבו הפוטר
-// הקבוע (Footer.tsx, מחוץ ל-<main> לגמרי) מתחיל - כך "לא מכסה את הפוטר"
-// מתקיים מבנית, בלי חישוב offset ידני.
+// הקבוע (Footer.tsx, מחוץ ל-<main> לגמרי) מתחיל - כך "לא מכסה את
+// הפוטר" מתקיים מבנית, בלי חישוב offset ידני. `bottom` נשאר **קבוע ל-0**
+// בכוונה - ראו ההערה הבאה למטה לפני שמנסים להפוך אותו לדינמי שוב.
+//
+// תוקן 2026-09-22, ואז תוקן שוב 2026-09-22 (ניסיון ראשון נכשל בפועל -
+// ראו למטה): הבאג המקורי שדיווחה המרקטינג היה הפס הזה מוסתר לגמרי
+// מתחת ל-ConsentBanner.tsx (fixed, z-20) אצל מבקר/ת ראשון/ה שגולל/ת
+// לפני שהחליט/ה Accept/Decline. **ניסיון תיקון ראשון** (bottom דינמי =
+// גובה הבאנר בפועל, "נערם" מעליו) הוכח כשגוי באמפירית - אורן שלח
+// צילומי מסך: הפס "צף" באמצע העמוד ולא צמוד לתחתית. הסבר סביר: הבאנר
+// במובייל (טקסט דו-שורתי + שני כפתורים, לעיתים נערמים ברוחב מלא) יכול
+// בקלות להגיע ל-200-300px גובה - bottom כזה על position:sticky דוחף את
+// הפס גבוה משמעותית מעל התחתית האמיתית, ובמסך מובייל לא-ארוך זה נראה
+// "באמצע" ולא "צמוד למעלה מהבאנר" כמצופה.
+//
+// **הגישה הנוכחית (מתוקנת)**: בלי מתמטיקת קואורדינטות בכלל. כשה-consent
+// banner מוצג (consentBannerVisible, ראו stores/consentStore.ts) - הפס
+// הדביק **לא מוצג בכלל**, לא "נדחק" ולא "נערם". הכפתור המקורי (עלה
+// למעלה, מיד אחרי בורר הווריאנט, ב-A1) עדיין גלוי ושמיש לגמרי לאורך כל
+// הזמן הזה - הפס הדביק הוא רק נוחות משנית לגלילה, לא הדרך היחידה
+// להוסיף לסל. ברגע שההחלטה מתקבלת (Accept/Decline) והבאנר נסגר, הפס
+// חוזר להתנהג בדיוק כמו במקור: sticky bottom-0 קבוע, בלי חישוב. אפס
+// סיכון לחפיפה כי רק אחד מהשניים מוצג בכל רגע נתון - לא תלוי במדידת
+// גובה, לא רגיש לאורך טקסט/RTL/שבירת שורה.
 //
 // אין אנימציית הופעה/היעלמות (הבריף מתיר במפורש: "אנימציה עדינה בלבד, או
 // בלי") - נבחרה האופציה הפשוטה/הבטוחה יותר: mount/unmount מלא לפי
@@ -31,6 +53,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { formatAgorot } from "@/lib/money";
 import { buildSelectionLabel, getStartingPriceAgorot } from "@/lib/variant";
+import { useConsentStore } from "@/stores/consentStore";
 import type { Product } from "@/types/product";
 import type { useVariantSelection } from "@/hooks/useVariantSelection";
 
@@ -44,7 +67,10 @@ interface StickyAddToBagBarProps {
 
 export function StickyAddToBagBar({ product, selection, anchorRef, formId, outOfStock }: StickyAddToBagBarProps) {
   const { t } = useTranslation();
-  const [visible, setVisible] = useState(false);
+  const [pastAnchor, setPastAnchor] = useState(false);
+  // תוקן 2026-09-22 (ראו הערת הקובץ למעלה): לא צריך יותר את גובה הבאנר -
+  // רק אם הוא מוצג בכלל. כשהוא מוצג, הפס הדביק פשוט לא מוצג.
+  const consentBannerVisible = useConsentStore((s) => s.visible);
 
   useEffect(() => {
     const anchor = anchorRef.current;
@@ -59,12 +85,15 @@ export function StickyAddToBagBar({ product, selection, anchorRef, formId, outOf
     // עם הכוונה מאחורי הדגל הזה (בטיחות טיפוסים אמיתית, לא רק השתקתה).
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry) return;
-      setVisible(!entry.isIntersecting);
+      setPastAnchor(!entry.isIntersecting);
     }, { root, threshold: 0 });
     observer.observe(anchor);
     return () => observer.disconnect();
   }, [anchorRef]);
 
+  // תוקן 2026-09-22: הבאנר מקבל עדיפות מלאה - כל עוד הוא מוצג, הפס הדביק
+  // לא מוצג בכלל (ראו הערת הקובץ למעלה, "הגישה הנוכחית").
+  const visible = pastAnchor && !consentBannerVisible;
   if (!visible) return null;
 
   const { variant, selection: axisSelection, sizeAxis } = selection;
@@ -79,7 +108,9 @@ export function StickyAddToBagBar({ product, selection, anchorRef, formId, outOf
   return (
     <div
       className="sticky bottom-0 z-10 flex items-center justify-between gap-sm border-t border-border-base bg-surface-base px-md py-sm desktop:hidden"
-      style={{ paddingBottom: "calc(var(--space-sm) + env(safe-area-inset-bottom))" }}
+      style={{
+        paddingBottom: "calc(var(--space-sm) + env(safe-area-inset-bottom))",
+      }}
     >
       <div className="flex min-w-0 flex-col">
         {priceAgorot != null && <span className="text-body-strong font-bold text-text-base">{formatAgorot(priceAgorot)}</span>}

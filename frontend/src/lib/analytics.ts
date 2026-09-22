@@ -87,6 +87,22 @@ export function initAnalytics(): void {
     // הם API רשמי של mixpanel-browser בדיוק לצורך cookie-consent banners -
     // לא מנגנון תוצרת-בית. ConsentBanner.tsx קורא ל-grant/revoke למטה.
     opt_out_tracking_by_default: true,
+    // תוקן 2026-09-22 (שאלת Oren: "האם Decline מבטל גם את הצורך בקוקיז,
+    // לא רק את שליחת האנליטיקה?") - נבדק ישירות מול קוד המקור של
+    // mixpanel-browser (node_modules, v2.83.0): `persistence` לא הוגדר
+    // כאן -> ברירת המחדל היא `'cookie'` (לא localStorage!) - ו-
+    // `MixpanelPersistence` (mixpanel-persistence.js) קוראת ל-`save()`
+    // **בבנאי עצמו, ללא תנאי** (רק `disable_persistence`/`opt_out_persistence_by_default`
+    // עוצרים את זה - לא `opt_out_tracking_by_default`). בלי השורה הזו,
+    // עוגיית ה-persistence של Mixpanel (`mp_<token>_mixpanel`) הייתה
+    // *נכתבת בפועל לדפדפן כבר ב-init(), לפני כל החלטת consent* - למרות
+    // ש-`opt_out_tracking_by_default` כבר חוסם נכון שליחת events. ה-Decline
+    // המפורש עצמו כבר היה תקין (opt_out_tracking() מגדיר ברירת מחדל
+    // משלו ל-`clear_persistence:true`, כך שהוא כן מוחק את העוגייה) -
+    // הפער היה בחלון שבין טעינת העמוד לבין החלטה בפועל (או למבקר/ת
+    // שלא מחליט/ה בכלל). עם השורה הזו, ה-persistence עצמו (לא רק שליחת
+    // events) נשאר disabled+נמחק עד opt-in מפורש.
+    opt_out_persistence_by_default: true,
   });
   enabled = true;
 }
