@@ -31,6 +31,12 @@
 // גישה מיידית לעמוד הדיסקליימר מכל עמוד. `legal.learnMore` (לא מפתח חדש) -
 // אותה תווית "Learn more"/"לפרטים נוספים" בדיוק כמו ב-AboutPage.tsx/
 // ConsentBanner.tsx, לאותו יעד (/disclaimer) - לא כפילות ניסוח.
+//
+// תוקן 2026-09-22 (סבב שלישי, StickyAddToBagBar.tsx): `id="site-footer"`
+// נוסף ל-<footer> עצמו - StickyAddToBagBar.tsx צריך לדעת מתי הפוטר נכנס
+// לתצוגה (כדי לא לכסות אותו, אחרי שהוא הפך מ-`position:sticky` ל-`fixed` -
+// ראו הערה מלאה שם) ומאתר אותו לפי id, אותה מוסכמה בדיוק כמו
+// `document.getElementById("main")` הקיים כבר בקובץ ההוא.
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useConsentStore } from "@/stores/consentStore";
@@ -39,7 +45,7 @@ export function Footer() {
   const { t } = useTranslation();
   const reopenConsent = useConsentStore((s) => s.reopen);
   return (
-    <footer className="shrink-0 border-t border-border-base px-md py-sm">
+    <footer id="site-footer" className="shrink-0 border-t border-border-base px-md py-sm">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-xs text-caption text-text-muted">
         <p className="m-0">
           {t("footer.tagline")}{" "}

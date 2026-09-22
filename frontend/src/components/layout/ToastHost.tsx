@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useToastStore } from "@/stores/toastStore";
 import { useConsentStore } from "@/stores/consentStore";
 
@@ -8,31 +9,42 @@ import { useConsentStore } from "@/stores/consentStore";
 // רק לא "צועק" באותה עוצמה.
 //
 // תוקן 2026-09-22 (באג שדיווח אורן: הפופ-אפ מוסתר מתחת ל-ConsentBanner.tsx,
-// גם בדסקטופ וגם במובייל - למשל ההודעה שמאשרת Add to Bag, אצל מבקר/ת
-// ראשון/ה שהוסיף/ה לסל לפני שהחליט/ה Accept/Decline). בשונה מ-
-// StickyAddToBagBar.tsx (position:sticky בתוך <main>, ראו ההערה המפורטת
-// שם על הניסיון הכושל להזיז אותו עם bottom דינמי) - הרכיב הזה תמיד היה
-// `position: fixed` ביחס לחלון, בדיוק כמו הבאנר עצמו. אצל fixed, bottom
-// הוא קואורדינטת-חלון פשוטה וליניארית (לא sticky-threshold, לא מוגבל
-// ל-containing block) - אין את אותה בעיה. כש-consentBannerVisible,
-// מוסיפים בפועל את הגובה שלו (bannerHeightPx, נמדד ב-ConsentBanner.tsx
-// עצמו - ResizeObserver, ראו שם) ל-bottom הקבוע - ה-Toast "עולה" בדיוק
-// מעל הבאנר, בלי לחפוף אליו. אין השפעה על מקרה הרגיל (בלי באנר) - אז
-// bottom נשאר var(--space-lg) בדיוק כמו קודם.
+// גם בדסקטופ וגם במובייל). ותוקן שוב, באותו סבב (ממצא יזום, לא דווח עדיין):
+// בדיקה בדפדפן חי מול dull.onrender.com גילתה שגם כש-**אין** באנר, ה-toast
+// (fixed, bottom קבוע) חופף בפועל לפוטר הקבוע - RootLayout.tsx בנוי
+// כ-app-shell (h-[100dvh]) שבו Footer.tsx **תמיד** גלוי בתחתית המסך, לא
+// משהו שגוללים אליו - אז "bottom קבוע" תמיד נוחת בתוך אזור הפוטר, לא
+// מתחתיו. אותו מנגנון בדיוק כמו התיקון ל-StickyAddToBagBar.tsx (ראו שם
+// הסבר מפורט + אימות): הגובה **בפועל** של הפוטר נמדד כאן ישירות
+// (ResizeObserver על `#site-footer`, לא ב-store משותף - רק שני צרכנים,
+// לא הצדיק תלות משותפת חדשה) - כש-consentBannerVisible, `bottom` מוסיף
+// את גובה הבאנר (כמו קודם), אחרת מוסיף את גובה הפוטר (חדש) - כך ה-toast
+// תמיד "נערם" מעל מה שבאמת תופס את תחתית המסך באותו רגע, ולא נופל
+// בתוכו.
 export function ToastHost() {
   const message = useToastStore((state) => state.message);
   const tone = useToastStore((state) => state.tone);
   const consentBannerVisible = useConsentStore((s) => s.visible);
   const consentBannerHeightPx = useConsentStore((s) => s.bannerHeightPx);
+  const [footerHeightPx, setFooterHeightPx] = useState(0);
+
+  useEffect(() => {
+    const footer = document.getElementById("site-footer");
+    if (!footer) return;
+    const measure = () => setFooterHeightPx(footer.getBoundingClientRect().height);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   const toneClassName =
     tone === "subtle"
       ? "border border-border-base bg-surface-base text-text-base"
       : "bg-text-base text-surface-base";
 
-  const bottomStyle = consentBannerVisible
-    ? `calc(var(--space-lg) + ${consentBannerHeightPx}px)`
-    : "var(--space-lg)";
+  const baseOffsetPx = consentBannerVisible ? consentBannerHeightPx : footerHeightPx;
+  const bottomStyle = `calc(var(--space-lg) + ${baseOffsetPx}px)`;
 
   return (
     <div
