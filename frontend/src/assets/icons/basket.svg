@@ -1,0 +1,27 @@
+<!--
+  הועבר מ-BasketIcon.tsx (docs/PRD.md סעיף 60, בקשת Oren 2026-09-23) לקובץ
+  .svg עצמאי, מיובא כרכיב React דרך vite-plugin-svgr (import Basket from
+  "./basket.svg?react") - במקום SVG "מוזרק" ידנית לתוך TSX. אייקון סל-
+  קניות בקו אחד. בכוונה לא "ריאליסטי"/עם מרקם קש בפועל - בגודל אייקון-הדר
+  (24px) פירוט כזה לא היה קריא. stroke="currentColor" כדי שיירש צבע דרך
+  text-*/color רגיל (מועבר אוטומטית דרך spread-props של SVGR על ה-<svg>
+  השורשי) - אין צורך ב-prop צבע נפרד.
+
+  הידית (ה-path הראשון, קשת) היא ה"עוגן" המיועד לאנימציית הנענוע ב-
+  SiteHeader.tsx (CartLink, animate-basket-swing) - origin-top שם מסתמך
+  על כך שהידית יושבת בדיוק בחלק העליון של ה-viewBox (y≈2-9 מתוך 0-24).
+-->
+<svg
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.75"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <!-- ידית - קשת בין שני קצות גוף הסל -->
+  <path d="M8 9C8 4.5 9.8 2 12 2C14.2 2 16 4.5 16 9" />
+  <!-- גוף הסל - טרפז (רחב למעלה, צר למטה) -->
+  <path d="M4 9H20L18 19H6L4 9Z" />
+</svg>

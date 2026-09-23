@@ -8,7 +8,9 @@ import { Link } from "@tanstack/react-router";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { wordmarkClassName } from "@/lib/wordmark";
 import { useCartStore, selectCartItemCount } from "@/stores/cartStore";
-import { BasketIcon } from "./BasketIcon";
+// אייקון מ-src/assets/icons/ (docs/PRD.md סעיף 60) - לא רכיב מקומי מוזרק
+// יותר; ראו src/assets/icons/README.md למוסכמה המלאה.
+import BasketIcon from "@/assets/icons/basket.svg?react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { UserMenu } from "./UserMenu";
 
@@ -58,7 +60,7 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void 
 // לצד ה-LanguageSwitcher בדסקטופ, ובתפריט המובייל.
 //
 // תוקן 2026-09-23 (PRD.md סעיף 55, בקשת אורן [ג]) - הכותרת הטקסטואלית
-// "Bag"/"סל" הוחלפה באייקון (BasketIcon.tsx) + באדג' עם המספר. הטקסט לא
+// "Bag"/"סל" הוחלפה באייקון (src/assets/icons/basket.svg, ראו README שם) + באדג' עם המספר. הטקסט לא
 // נעלם - עבר ל-sr-only (אותה מוסכמה בדיוק כמו כפתור ההמבורגר למעלה),
 // כדי שקורא-מסך עדיין ישמע "Bag (4)" בדיוק כמו קודם. הבאדג' עצמו
 // aria-hidden כדי לא לשכפל את המספר בהכרזה.

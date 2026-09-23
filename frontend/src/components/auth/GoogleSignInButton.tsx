@@ -107,13 +107,26 @@ export function GoogleSignInButton() {
     <div className="flex flex-col items-center gap-xs">
       <div ref={containerRef} className="flex justify-center" aria-live="polite" />
       {/* בלי children (אותו לקח מ-BandCredit.tsx, docs/PRD.md סעיף 12.11) -
-          components בלבד, בלי values (שני התגים סטטיים, אין אינטרפולציה). */}
+          components בלבד, בלי values (שני התגים סטטיים, אין אינטרפולציה).
+
+          תוקן 2026-09-23 (PRD.md סעיף 62, דיווח אורן) - "Terms of Service"/
+          "מדיניות הפרטיות" נשברו באמצע (למשל "Terms of" בשורה אחת ו-
+          "Service" לבדה בשורה הבאה) בתוך המיכל הצר (max-w-[280px]) הזה.
+          הסיבה: קישור מרובה-מילים הוא תוכן inline רגיל מבחינת שבירת-שורה -
+          לדפדפן אין שום סיבה "לדעת" שהוא אמור להישאר יחידה אחת. הפתרון
+          האלגנטי: `whitespace-nowrap` על ה-<Link> עצמו - הופך את הביטוי
+          (לא את כל הפסקה) ליחידת-שבירה בודדת: הדפדפן עדיין שובר שורה בין
+          הביטוי לטקסט הסובב אותו כרגיל, אבל לא באמצעו. עדיף על הרחבת
+          המיכל (משנה את הקומפוזיציה בלי לפתור את שורש הבעיה - כל טקסט
+          ארוך מספיק ישבר שוב) או `&nbsp;` ידני בין מילים (שביר לתרגום/
+          לשינוי נוסח עתידי, ולא סמנטי). שני הביטויים קצרים מספיק (גם
+          בעברית) שאין סיכון גלישה מהמיכל הצר גם כשהם "נעולים" ליחידה. */}
       <p className="m-0 max-w-[280px] text-center text-caption text-text-muted">
         <Trans
           i18nKey="authConsent.text"
           components={{
-            terms: <Link to="/terms" className="underline hover:text-text-base" />,
-            privacy: <Link to="/privacy" className="underline hover:text-text-base" />,
+            terms: <Link to="/terms" className="underline whitespace-nowrap hover:text-text-base" />,
+            privacy: <Link to="/privacy" className="underline whitespace-nowrap hover:text-text-base" />,
           }}
         />
       </p>
