@@ -8,6 +8,7 @@ import { Link } from "@tanstack/react-router";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { wordmarkClassName } from "@/lib/wordmark";
 import { useCartStore, selectCartItemCount } from "@/stores/cartStore";
+import { BasketIcon } from "./BasketIcon";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { UserMenu } from "./UserMenu";
 
@@ -55,19 +56,70 @@ function NavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void 
 // פריטים חיה מה-store) אז קומפוננטה נפרדת, לא חלק מ-NAV_ITEMS/NavLink.
 // אותה מיקום שהיה שייך פעם ל-Wishlist (הוסר, 2026-09-08) - בקבוצת הסוף
 // לצד ה-LanguageSwitcher בדסקטופ, ובתפריט המובייל.
+//
+// תוקן 2026-09-23 (PRD.md סעיף 55, בקשת אורן [ג]) - הכותרת הטקסטואלית
+// "Bag"/"סל" הוחלפה באייקון (BasketIcon.tsx) + באדג' עם המספר. הטקסט לא
+// נעלם - עבר ל-sr-only (אותה מוסכמה בדיוק כמו כפתור ההמבורגר למעלה),
+// כדי שקורא-מסך עדיין ישמע "Bag (4)" בדיוק כמו קודם. הבאדג' עצמו
+// aria-hidden כדי לא לשכפל את המספר בהכרזה.
+//
+// צבע הבאדג': גרסה ראשונה (2026-09-23, PRD §55) מילאה את --color-brand-
+// primary-light (בקשת אורן המקורית) + border, כי המילוי הבהיר לבדו נכשל
+// בניגודיות (2.77:1 מול רקע לבן, מתחת ל-3:1 הנדרש ל-WCAG 1.4.11). אורן ביקש
+// (2026-09-23, PRD §57) להיפטר מה-border - "מכביד". נבדקו שתי החלופות שהוא
+// הציע: צהוב-לימון/צהוב-שמש (--color-accent-lemon/--color-accent-sun) נכשלים
+// אפילו יותר גרוע (1.13:1/1.31:1 - בהירים מדי, קרובים ללבן) ומספר לבן על
+// המילוי הבהיר גם נכשל (2.77:1, צריך 4.5:1) - אף אחת מהחלופות לא פתרה את
+// הבעיה בלי border. הפתרון שנבחר (אושר ע"י אורן): במקום להבהיר עוד, הוחלף
+// המילוי לכחול-הנייבי הכהה --color-brand-primary (הצבע העיקרי של המותג) עם
+// מספר בלבן (--color-surface-base, לא Tailwind text-white גולמי - אותה
+// מוסכמת "רק טוקנים" כמו בכל הקובץ) - ניגודיות 14.2:1 גם מול הרקע (1.4.11)
+// וגם לטקסט (1.4.3), בלי צורך ב-border בכלל.
+//
+// אנימציית הנענוע (ראו --animate-basket-swing, index.css): מופעלת פעם
+// אחת בכל הוספה מוצלחת לסל (עלייה במספר, לא בכל שינוי - למשל לא בהסרה
+// בעמוד הסל). `key={swingTrigger}` מכריח remount של ה-span העוטף בכל
+// טריגר, כדי שהאנימציה תתחיל תמיד מחדש בבירור גם בהוספות מהירות
+// עוקבות - לא תלוי ב-onAnimationEnd (יציב יותר, לא "נתקע" אם אירוע
+// לא יורה מסיבה כלשהי).
 function CartLink({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useTranslation();
   const count = useCartStore(selectCartItemCount);
+  const previousCountRef = useRef(count);
+  const [swingTrigger, setSwingTrigger] = useState(0);
+
+  useEffect(() => {
+    if (count > previousCountRef.current) {
+      setSwingTrigger((current) => current + 1);
+    }
+    previousCountRef.current = count;
+  }, [count]);
 
   return (
     <Link
       to="/cart"
       onClick={onNavigate}
-      className="inline-block px-xs py-xs text-caption text-text-muted hover:text-text-base"
-      activeProps={{ className: "text-text-base font-bold" }}
+      className="relative inline-flex items-center justify-center p-xs text-text-muted hover:text-text-base"
+      activeProps={{ className: "text-text-base" }}
     >
-      {t("cart.navLabel")}
-      {count > 0 ? ` (${count})` : ""}
+      <span
+        key={swingTrigger}
+        className={`inline-block origin-top ${swingTrigger > 0 ? "animate-basket-swing" : ""}`}
+      >
+        <BasketIcon className="size-6" />
+      </span>
+      {count > 0 && (
+        <span
+          aria-hidden="true"
+          className="absolute -end-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-primary px-[3px] text-[10px] leading-none font-bold text-surface-base"
+        >
+          {count}
+        </span>
+      )}
+      <span className="sr-only">
+        {t("cart.navLabel")}
+        {count > 0 ? ` (${count})` : ""}
+      </span>
     </Link>
   );
 }
@@ -159,10 +211,21 @@ export function SiteHeader() {
             ))}
             {/* בלי כניסת OrdersLink כפולה כאן - UserMenu (למעלה בשורת הheader
                 העליונה, לא בתוך הדיסקלוז הזה) כבר גלוי גם במובייל ומכיל את
-                קישור ההזמנות בתוך התפריט שלו. */}
-            <li>
-              <CartLink onNavigate={() => setMenuOpen(false)} />
-            </li>
+                קישור ההזמנות בתוך התפריט שלו.
+
+                תוקן 2026-09-23 (PRD.md סעיף 57, דיווח אורן): הוסרה כאן גם
+                הכניסה הכפולה של CartLink (הייתה עד כה, לצד NAV_ITEMS, בנפרד
+                מהמופע בשורת ה-header העליונה). הסיבה לא הייתה רק "כפילות
+                נחמדה-להסיר" - היא הייתה גם באג ויזואלי אמיתי: CartLink בנוי
+                כ-inline-flex עוטף אייקון+באדג' עם מיקום מוחלט (`absolute
+                -end-1 -top-1`), בזמן שה-<li> כאן מעוצב לשורת ניווט טקסטואלית
+                פשוטה (NavLink, inline-block+padding) - שילוב שגרם לבאדג'
+                לחרוג/להיראות "לא במקום" בתוך התפריט. מכיוון שקבוצת ה-header
+                העליונה (UserMenu/CartLink/LanguageSwitcher, למעלה בקומפוננטה)
+                כבר *תמיד* גלויה - גם במובייל, בלי שום `hidden`/`desktop:`
+                מותנה - הסל כבר נגיש משם בכל רוחב מסך; אין צורך במופע נוסף
+                כאן, וההסרה גם פותרת את הבאג מבלי לנסות "לתקן" את המיקום
+                המוחלט של הבאדג' בתוך הקשר-עיצוב שלא מתאים לו. */}
           </ul>
         </nav>
       )}

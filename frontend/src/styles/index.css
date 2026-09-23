@@ -183,6 +183,15 @@
      כאן) - משתמש רק בעקומת ה-easing המשותפת לאתר, לא במשך שלה, לשמור על
      אותה "אישיות תנועה" גם בקצב אחר. */
   --animate-homepage-banner-crossfade: homepage-banner-crossfade 20s var(--ease-standard) infinite;
+
+  /* נענוע אייקון הסל (PRD.md סעיף 55, בקשת אורן [ג]) - מופעל פעם אחת
+     (לא infinite כמו שני האחרים למעלה) בכל הוספה מוצלחת לסל
+     (SiteHeader.tsx, CartLink) - "כמו שקורה כשסוחבים סל אמיתי", בקשת
+     אורן במפורש: הידית היא העוגן (origin-top על האלמנט העוטף ב-
+     SiteHeader.tsx, שמתאים לאיפה שהידית של BasketIcon.tsx יושבת), הסל
+     "מתנדנד" במסלול מרוכך-בהדרגה (5 תנודות פוחתות, לא נדנוד אחיד קבוע) -
+     מדמה פיזיקה אמיתית של מטוטלת שמאבדת תנופה, לא רק אפקט מכני. */
+  --animate-basket-swing: basket-swing 700ms var(--ease-standard) 1;
 }
 
 @keyframes pulse-soft {
@@ -210,6 +219,30 @@
   }
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes basket-swing {
+  0% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(14deg);
+  }
+  35% {
+    transform: rotate(-10deg);
+  }
+  55% {
+    transform: rotate(7deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+  90% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0deg);
   }
 }
 
