@@ -65,12 +65,18 @@
 //
 // אין אנימציית הופעה/היעלמות (הבריף מתיר במפורש: "אנימציה עדינה בלבד, או
 // בלי") - נשמר mount/unmount מלא לפי `visible`, לא CSS transition.
+//
+// תוקן 2026-09-22 (סעיף 52 ב-PRD): לוגיקת המדידה/offset (הפסקה שלמעלה)
+// חולצה ל-hook משותף - `useStickyBottomOffset` (hooks/) - אחרי שאותה
+// בעיה בדיוק נמצאה גם ב-ToastHost.tsx וגם בסיכום הדביק של CartPage.tsx/
+// CheckoutPage.tsx. ההיסטוריה/האבחון למעלה עדיין רלוונטיים במלואם - רק
+// המימוש בפועל של המדידה עבר החוצה.
 import { useEffect, useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/Button";
 import { formatAgorot } from "@/lib/money";
 import { buildSelectionLabel, getStartingPriceAgorot } from "@/lib/variant";
-import { useConsentStore } from "@/stores/consentStore";
+import { useStickyBottomOffset } from "@/hooks/useStickyBottomOffset";
 import type { Product } from "@/types/product";
 import type { useVariantSelection } from "@/hooks/useVariantSelection";
 
@@ -85,14 +91,10 @@ interface StickyAddToBagBarProps {
 export function StickyAddToBagBar({ product, selection, anchorRef, formId, outOfStock }: StickyAddToBagBarProps) {
   const { t } = useTranslation();
   const [pastAnchor, setPastAnchor] = useState(false);
-  // תוקן 2026-09-22 (ניסיון 3, ראו הערת הקובץ למעלה): נמדד ישירות כאן
-  // (לא ב-store משותף כמו הבאנר) - רק הרכיב הזה צריך את זה, אין צרכן
-  // שני. אותה מוסכמה בדיוק כמו המדידה ב-ConsentBanner.tsx (ResizeObserver
-  // על ה-DOM node עצמו, לא מספר קבוע-מראש - הפוטר זהה בכל עמוד, אבל
-  // הגובה שלו יכול להשתנות בין עברית/אנגלית).
-  const [footerHeightPx, setFooterHeightPx] = useState(0);
-  const consentBannerVisible = useConsentStore((s) => s.visible);
-  const consentBannerHeightPx = useConsentStore((s) => s.bannerHeightPx);
+  // תוקן 2026-09-22 (סעיף 52 ב-PRD): חולץ ל-hook משותף (useStickyBottomOffset)
+  // אחרי שאותה לוגיקה בדיוק נדרשה גם ב-ToastHost.tsx וגם ב-CartPage.tsx/
+  // CheckoutPage.tsx - ראו הסבר מלא ב-hooks/useStickyBottomOffset.ts.
+  const bottomOffsetPx = useStickyBottomOffset();
 
   useEffect(() => {
     const anchor = anchorRef.current;
@@ -113,19 +115,6 @@ export function StickyAddToBagBar({ product, selection, anchorRef, formId, outOf
     return () => observer.disconnect();
   }, [anchorRef]);
 
-  // תוקן 2026-09-22 (ניסיון 3, ראו הערת הקובץ למעלה): מודד את הפוטר
-  // (`#site-footer`, ראו id חדש ב-Footer.tsx) כדי שהפס ה-fixed יידע כמה
-  // "לפנות" לו במקום להסתמך על עצירה מבנית כמו ב-sticky.
-  useEffect(() => {
-    const footer = document.getElementById("site-footer");
-    if (!footer) return;
-    const measure = () => setFooterHeightPx(footer.getBoundingClientRect().height);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(footer);
-    return () => observer.disconnect();
-  }, []);
-
   if (!pastAnchor) return null;
 
   const { variant, selection: axisSelection, sizeAxis } = selection;
@@ -136,10 +125,6 @@ export function StickyAddToBagBar({ product, selection, anchorRef, formId, outOf
   // i18n שכבר משמש כ-placeholder בבורר המידה עצמו (הבריף, סעיף 2).
   const sizeMissing = Boolean(sizeAxis) && !axisSelection.size;
   const selectionLabel = sizeMissing ? t("variant.selectSize") : buildSelectionLabel(product.axes, axisSelection);
-  // תוקן 2026-09-22 (ניסיון 3): `bottom` דינמי - "נערם" מעל הבאנר כשהוא
-  // מוצג, אחרת מעל הפוטר (שתמיד גלוי - app-shell, ראו הערת הקובץ למעלה).
-  // אומת בדפדפן חי נגד dull.onrender.com עצמו, לא רק נימוקית.
-  const bottomOffsetPx = consentBannerVisible ? consentBannerHeightPx : footerHeightPx;
   // safe-area-inset-bottom (חריץ/פס-בית בטלפון) רלוונטי רק כשהפס נוגע
   // ממש בקצה הפיזי של המסך - וזה כבר לא קורה יותר בכלל (הוא תמיד נערם
   // מעל הבאנר או מעל הפוטר, ששניהם כבר מוסיפים לעצמם את אותו safe-area).

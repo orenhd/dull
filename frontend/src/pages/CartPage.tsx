@@ -17,10 +17,12 @@
 // CheckoutPage שצריך בדיוק את אותה לוגיקה לסיכום ההזמנה) - שולף מחדש כל
 // מוצר ייחודי שיש בעגלה בשפה הנוכחית ומציג את זה במקום ה-cache השמור, עם
 // נפילה חזרה ל-cache אם ה-fetch עוד לא חזר/נכשל/הוריאנט כבר לא קיים.
+import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useCartStore, selectCartTotalAgorot } from "@/stores/cartStore";
 import { useFreshCartItems } from "@/hooks/useFreshCartItems";
+import { useStickyBottomOffset } from "@/hooks/useStickyBottomOffset";
 import { formatAgorot } from "@/lib/money";
 import { buttonClassName } from "@/components/ui/Button";
 import { MAX_LINE_ITEM_QUANTITY } from "@/constants";
@@ -31,6 +33,7 @@ export function CartPage() {
   const setQuantity = useCartStore((s) => s.setQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
   const freshItems = useFreshCartItems();
+  const bottomOffsetPx = useStickyBottomOffset();
 
   if (freshItems.length === 0) {
     return (
@@ -108,11 +111,20 @@ export function CartPage() {
         </ul>
       </div>
 
-      {/* סיכום + CTA: מובייל - sticky לתחתית אזור הגלילה (<main>, לא ה-
-          viewport - יש כבר footer קבוע שם, ראו RootLayout.tsx). דסקטופ -
-          כרטיס "קבוע בצד" (docs/SCREENS_INVENTORY.md מסך 10), sticky לראש
-          העמודה תוך כדי גלילת רשימת הפריטים. */}
-      <div className="sticky bottom-0 z-10 -mx-md flex flex-col gap-sm border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:top-lg desktop:bottom-auto desktop:mx-0 desktop:w-[320px] desktop:flex-none desktop:rounded-sm desktop:border">
+      {/* סיכום + CTA: מובייל - fixed לתחתית המסך (לא sticky - ראו הערה
+          מלאה/מאומתת ב-StickyAddToBagBar.tsx למה sticky עם offset דינמי
+          לא אמין; useStickyBottomOffset דואג שזה "יפנה" את ConsentBanner.tsx/
+          Footer.tsx בדיוק כמו שם). דסקטופ - כרטיס "קבוע בצד"
+          (docs/SCREENS_INVENTORY.md מסך 10), sticky לראש העמודה תוך כדי
+          גלילת רשימת הפריטים - לא נוגע בבאנר/בפוטר בכלל, לא צריך את
+          המנגנון הזה (desktop:bottom-auto/desktop:inset-x-auto מנטרלים
+          את ה-fixed ומחזירים להתנהגות המקורית). תוקן 2026-09-22 (PRD
+          סעיף 52, דיווח אורן): קודם היה sticky+z-10 קבוע, מוסתר לגמרי
+          מתחת לבאנר. */}
+      <div
+        className="fixed inset-x-0 bottom-[var(--sticky-bottom-offset)] z-10 flex flex-col gap-sm border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:inset-x-auto desktop:top-lg desktop:bottom-auto desktop:w-[320px] desktop:flex-none desktop:rounded-sm desktop:border"
+        style={{ "--sticky-bottom-offset": `${bottomOffsetPx}px` } as CSSProperties}
+      >
         <div className="flex items-center justify-between text-body-strong font-bold text-text-base">
           <span>{t("cart.total")}</span>
           <span>{formatAgorot(total)}</span>

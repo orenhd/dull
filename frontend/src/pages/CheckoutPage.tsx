@@ -19,12 +19,13 @@
 // שדות טופס המשלוח (docs/API_CONTRACT.md: "כל מבנה - טופס המשלוח עוד לא
 // נקבע סופית ב-PRD"): סט מינימלי - שם מלא, טלפון, כתובת, עיר, מיקוד - ראו
 // docs/PRD.md סעיף 12.5 ו-src/types/order.ts.
-import { useState, useRef, useEffect, type FormEvent } from "react";
+import { useState, useRef, useEffect, type FormEvent, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useCartStore, selectCartTotalAgorot } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useFreshCartItems } from "@/hooks/useFreshCartItems";
+import { useStickyBottomOffset } from "@/hooks/useStickyBottomOffset";
 import { createOrder } from "@/lib/api/orders";
 import { ApiError } from "@/lib/api/client";
 import { formatAgorot } from "@/lib/money";
@@ -74,6 +75,7 @@ export function CheckoutPage() {
   const clearCart = useCartStore((s) => s.clear);
   const setQuantity = useCartStore((s) => s.setQuantity);
   const freshItems = useFreshCartItems();
+  const bottomOffsetPx = useStickyBottomOffset();
 
   const [shipping, setShipping] = useState<ShippingAddress>(EMPTY_SHIPPING);
   const [submitting, setSubmitting] = useState(false);
@@ -286,7 +288,12 @@ export function CheckoutPage() {
         <p className="m-0 text-caption text-text-muted">{t("checkout.noRealChargeNote")}</p>
       </form>
 
-      <div className="sticky bottom-0 z-10 -mx-md flex flex-col gap-sm border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:top-lg desktop:bottom-auto desktop:mx-0 desktop:w-[320px] desktop:flex-none desktop:rounded-sm desktop:border">
+      {/* תוקן 2026-09-22 (PRD סעיף 52, דיווח אורן): fixed לא sticky, אותו
+          מנגנון/הסבר מלא כמו CartPage.tsx ו-StickyAddToBagBar.tsx. */}
+      <div
+        className="fixed inset-x-0 bottom-[var(--sticky-bottom-offset)] z-10 flex flex-col gap-sm border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:inset-x-auto desktop:top-lg desktop:bottom-auto desktop:w-[320px] desktop:flex-none desktop:rounded-sm desktop:border"
+        style={{ "--sticky-bottom-offset": `${bottomOffsetPx}px` } as CSSProperties}
+      >
         <h2 className="m-0 text-body-strong font-bold text-text-base">{t("checkout.summaryTitle")}</h2>
         <ul className="m-0 flex list-none flex-col gap-xs p-0">
           {freshItems.map((item) => (
