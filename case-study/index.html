@@ -253,6 +253,7 @@ footer .btn-row{justify-content:center}
       <a href="#beforeafter">לפני ואחרי</a>
       <a href="#measure">מדידה</a>
       <a href="#mistakes">מה נשבר</a>
+      <a href="#iteration">אחרי המצגת</a>
       <a href="#impact">סיכום</a>
       <a href="#learned">מה למדתי</a>
     </div>
@@ -304,8 +305,9 @@ footer .btn-row{justify-content:center}
           <li><a href="#beforeafter"><b>09</b> לפני ואחרי</a></li>
           <li><a href="#measure"><b>10</b> מדידה</a></li>
           <li><a href="#mistakes"><b>11</b> מה נשבר</a></li>
-          <li><a href="#impact"><b>12</b> סיכום</a></li>
-          <li><a href="#learned"><b>13</b> מה למדתי</a></li>
+          <li><a href="#iteration"><b>12</b> אחרי המצגת</a></li>
+          <li><a href="#impact"><b>13</b> סיכום</a></li>
+          <li><a href="#learned"><b>14</b> מה למדתי</a></li>
         </ol>
       </nav>
     </div>
@@ -697,10 +699,44 @@ footer .btn-row{justify-content:center}
   </div>
 </section>
 
-<!-- ═══════════ 13. סיכום ═══════════ -->
-<section id="impact">
+<!-- ═══════════ 13. אחרי המצגת ═══════════ -->
+<section id="iteration">
   <div class="wrap">
-    <p class="eyebrow">12 · סיכום</p>
+    <p class="eyebrow">12 · אחרי המצגת</p>
+    <h2>התהליך לא נעצר במצגת</h2>
+    <p class="claim">הביקורת החיצונית לא ביקשה רענון ויזואלי - היא מצאה בעיות אמיתיות, בעמוד הפריט ובנגישות, שדרשו תיקון בפועל.</p>
+    <p>ב-17.9 הצגתי את הפרויקט במצגת. בעקבותיה פתחתי שיחת Dull Marketing חדשה, כדי לקבל ביקורת חיצונית לא-טכנית על המוצר. הפידבק התמקד בעמוד הפריט (ה-buy box) ובכמה נושאי פרטיות והסכמה לאנליטיקה - וכל מה שמתואר כאן הוא סבב התיקונים שיצא מתוך זה, ישירות מול production.</p>
+
+    <div class="grid g3" style="margin-top:2.2rem">
+      <div class="card"><h3>אותו באג, שלוש פעמים</h3><p>תיקנתי בר דביק שמכסה תוכן בעמוד הפריט. אותו באג בדיוק חזר פעמיים נוספות, בעגלה ובצ'קאאוט. בפעם השלישית כתבתי hook משותף (useStickyBottomOffset) במקום לתקן שוב בנפרד - ואחרי הדיפלוי התגלתה תופעת לוואי חדשה: העמוד הפסיק להיות ניתן לגלילה. תוקן עם hook נוסף שמודד גובה בפועל, ואומת מול האתר החי, לא רק בקוד.</p></div>
+      <div class="card"><h3>הצבע שנראה בטוח, לא היה</h3><p>לבאדג' של הסל הצעתי לעצמי שני צבעים חלופיים. שניהם נכשלו במתמטיקה של ניגודיות (1.13:1 ו-1.31:1, מול סף 3:1 הנדרש) - גרועים אפילו מהצבע שכבר סומן כבעייתי (2.77:1). הפתרון: באדג' בנייבי הכהה של המותג עם מספר לבן, 14.2:1, בלי צורך במסגרת.</p></div>
+      <div class="card"><h3>פרטיות ונגישות, לא רק ניגודיות</h3><p>באנר ה-consent הוחלף מהודעת מידע בלבד ל-gating אמיתי מול Mixpanel, עם אפשרות קבועה "לשנות דעה" בפוטר. ובדיקה נפרדת מצאה ששדות הטופס ב-checkout חסרו לגמרי name ו-autoComplete - לא רק אי-נוחות, אלא הפרה של תקן נגישות WCAG 1.3.5.</p></div>
+    </div>
+
+    <p class="claim" style="margin-top:2.4rem">עמוד ה-checkout שרואים היום זה לא רק תמונה חדשה - זה גם אייקון שרטוט-יד, באדג' בניגודיות תקנית, ומבנה שורות שעבר כמה גרסאות עד שהתייצב.</p>
+
+    <div class="gallery gallery--one" style="--ar:1/1;margin-block-start:1.2rem">
+      <button type="button" data-full="assets/screen-checkout-talia.jpg" data-cap="עמוד ה-checkout בגרסה הסופית: התמונה האמיתית של טליה עם השקית, באדג' סל בניגודיות תקנית (14.2:1), ואייקון שקית מצויר ביד. לא פלייסהולדר - זה מה שרץ היום ב-production.">
+        <span class="shot"><img src="assets/screen-checkout-talia-thumb.jpg" alt="עמוד הצ'קאאוט של Dull, עם תמונת טליה ושקית קניות ליד עמודת הסיכום, ובאדג' סל נייבי עם מספר לבן" loading="lazy"></span>
+        <span class="zoom" aria-hidden="true"><svg class="ico" style="width:1.05rem;height:1.05rem"><use href="#i-zoom"/></svg></span>
+        <span class="cap"><span class="role out">תוצר</span><b>עמוד ה-checkout, היום</b>אותה תמונה בשתי השפות - גרסה מראה-מראה לא הושגה בזמן - אחרי כמה גרסאות של הבאדג' והאייקון.</span>
+      </button>
+    </div>
+
+    <h3 style="margin-top:2.8rem">גם אופן העבודה השתנה</h3>
+    <p>מכאן ואילך אני עושה את ה-git commit בעצמי, לא הסוכן. ובסבב הזה פיתחתי גם גישה לדפדפן חי על המחשב שלי, ככלי אבחון - לבדוק באג ישירות מול האתר החי, לא רק בקוד.</p>
+
+    <div class="gap">
+      <b>פער מסומן</b>
+      <p>בשל לחץ זמן (המעבר לעדכון הקייס סטאדי), ויתרתי במפורש על שלושה דברים: ספלאש צבע נוסף, עוד סבב ביקורת מרקטינג, ושיחת נגישות ייעודית. לא נמצא סיכון חוסם באף אחד מהם - אבל ממצא ה-autoComplete מראה שנגישות חובקת יותר מניגודיות צבע בלבד, אז הוויתור על שיחה ייעודית הוא ויתור סביר, לא הוכחה שהכל נבדק במיצוי.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 14. סיכום ═══════════ -->
+<section id="impact" class="soft">
+  <div class="wrap">
+    <p class="eyebrow">13 · סיכום</p>
     <h2>מה נעשה, ומה עוד פתוח</h2>
     <p>שורה בלי ראיה לא נכנסה.</p>
     <div class="scroll-x">
@@ -719,12 +755,12 @@ footer .btn-row{justify-content:center}
   </div>
 </section>
 
-<!-- ═══════════ מה למדתי ═══════════ -->
-<section id="learned" class="soft">
+<!-- ═══════════ 15. מה למדתי ═══════════ -->
+<section id="learned">
   <div class="wrap">
     <div class="grid g2" style="align-items:start">
       <div>
-        <p class="eyebrow">13 · מה למדתי</p>
+        <p class="eyebrow">14 · מה למדתי</p>
         <h2>שלושה דברים</h2>
         <ul>
           <li>שתעדוף הבנת המוצר על פני קוד "אנושי" חף מתיעוד היה השינוי שבזכותו המעבר מעיצוב לקוד עבד.</li>
