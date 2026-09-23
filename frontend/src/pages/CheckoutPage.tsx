@@ -302,45 +302,77 @@ export function CheckoutPage() {
         <p className="m-0 text-caption text-text-muted">{t("checkout.noRealChargeNote")}</p>
       </form>
 
-      {/* תוקן 2026-09-22 (PRD סעיף 52, דיווח אורן): fixed לא sticky, אותו
-          מנגנון/הסבר מלא כמו CartPage.tsx ו-StickyAddToBagBar.tsx.
-          תוקן 2026-09-23 (PRD סעיף 53): max-h/overflow-y-auto במובייל
-          בלבד - הגנה נוספת מעבר לתיקון ה-padding: בעגלה עם הרבה פריטים
-          הסיכום הזה (כותרת+רשימה+סה"כ+כפתור) יכול תיאורטית לצמוח לגובה
-          שגדול מהמסך עצמו - הגבלה + גלילה פנימית מבטיחה שתמיד יישאר שטח
-          פנוי למעלה למגע/גלילה של <main>, גם בעגלה גדולה. לא נוגע
-          בדסקטופ (desktop:max-h-none/desktop:overflow-visible) - שם זה
-          כרטיס-צד קבוע, לא צף מעל תוכן. */}
-      <div
-        ref={summaryRef}
-        className="fixed inset-x-0 bottom-[var(--sticky-bottom-offset)] z-10 flex max-h-[70dvh] flex-col gap-sm overflow-y-auto border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:inset-x-auto desktop:top-lg desktop:bottom-auto desktop:max-h-none desktop:w-[320px] desktop:flex-none desktop:overflow-visible desktop:rounded-sm desktop:border"
-        style={{ "--sticky-bottom-offset": `${bottomOffsetPx}px` } as CSSProperties}
-      >
-        <h2 className="m-0 text-body-strong font-bold text-text-base">{t("checkout.summaryTitle")}</h2>
-        <ul className="m-0 flex list-none flex-col gap-xs p-0">
-          {freshItems.map((item) => (
-            <li
-              key={item.variantId}
-              className="flex items-center justify-between gap-sm text-caption text-text-muted"
-            >
-              {/* <bdi> רק סביב השם (לא סביב "× qty" - אומת ויזואלית שבידוד
-                  רק השם מספיק, docs/PRD.md סעיף 28) - אותה מחלקת-באג bidi
-                  כמו ProductPage.tsx h1 (ראו הערה שם), חמורה יותר כאן כי
-                  בלי בידוד גם ה-"×" והכמות מתערבבים לסדר שגוי לגמרי. */}
-              <span className="min-w-0 [overflow-wrap:anywhere]">
-                <bdi>{item.displayName}</bdi> × {item.quantity}
-              </span>
-              <span className="flex-none text-text-base">{formatAgorot(item.priceAgorot * item.quantity)}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="flex items-center justify-between text-body-strong font-bold text-text-base">
-          <span>{t("cart.total")}</span>
-          <span>{formatAgorot(total)}</span>
+      {/* עמודת סיכום+דימוי (PRD.md סעיף 58 - עדכון ספק על סעיף 56, בקשת
+          אורן אחרי התייעצות): הספק הקודם היה שלוש עמודות נפרדות (טופס,
+          סיכום, דימוי-צר-לצד). אורן שינה: בלי דימוי בכלל במובייל (הוסר
+          למעלה), ובדסקטופ דימוי *ריבועי* שיושב *מתחת* לעמודת הסיכום -
+          לא לידה כעמודה נפרדת - ברוחב זהה לה בדיוק. לכן שתיהן (כרטיס
+          הסיכום + הדימוי) עברו להיות יחד תחת עטיפת-flex-col אחת, שהיא
+          עכשיו העמודה היחידה השלישית בשורת ה-flex החיצונית (אחרונה
+          ב-DOM - עדיין נוחתת בקצה ה"סוף" הלוגי, ימין באנגלית/שמאל
+          בעברית, אותה מוסכמת RTL כמו קודם). ברוחב שהעטיפה קובעת
+          (320px, אותו ערך כמו קודם) - כרטיס הסיכום עצמו עבר מ-`w-[320px]`
+          ל-`w-full` (ממלא את רוחב העטיפה במקום לקבוע רוחב עצמאי).
+          במובייל העטיפה לא משפיעה (בלי flex/width - ברירת מחדל block) -
+          כרטיס הסיכום עדיין `fixed` (בורח מהזרימה הרגילה כרגיל, לא
+          מושפע מהעטיפה סביבו), והדימוי `hidden` שם (לא רק aspect-ratio
+          קטן כמו הגרסה הקודמת - עכשיו אין אותו בכלל, per §1 בבקשת אורן). */}
+      <div className="desktop:flex desktop:w-[320px] desktop:flex-none desktop:flex-col desktop:gap-lg">
+        {/* תוקן 2026-09-22 (PRD סעיף 52, דיווח אורן): fixed לא sticky, אותו
+            מנגנון/הסבר מלא כמו CartPage.tsx ו-StickyAddToBagBar.tsx.
+            תוקן 2026-09-23 (PRD סעיף 53): max-h/overflow-y-auto במובייל
+            בלבד - הגנה נוספת מעבר לתיקון ה-padding: בעגלה עם הרבה פריטים
+            הסיכום הזה (כותרת+רשימה+סה"כ+כפתור) יכול תיאורטית לצמוח לגובה
+            שגדול מהמסך עצמו - הגבלה + גלילה פנימית מבטיחה שתמיד יישאר שטח
+            פנוי למעלה למגע/גלילה של <main>, גם בעגלה גדולה. לא נוגע
+            בדסקטופ (desktop:max-h-none/desktop:overflow-visible) - שם זה
+            כרטיס-צד קבוע, לא צף מעל תוכן. */}
+        <div
+          ref={summaryRef}
+          className="fixed inset-x-0 bottom-[var(--sticky-bottom-offset)] z-10 flex max-h-[70dvh] flex-col gap-sm overflow-y-auto border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:inset-x-auto desktop:top-lg desktop:bottom-auto desktop:max-h-none desktop:w-full desktop:overflow-visible desktop:rounded-sm desktop:border"
+          style={{ "--sticky-bottom-offset": `${bottomOffsetPx}px` } as CSSProperties}
+        >
+          <h2 className="m-0 text-body-strong font-bold text-text-base">{t("checkout.summaryTitle")}</h2>
+          <ul className="m-0 flex list-none flex-col gap-xs p-0">
+            {freshItems.map((item) => (
+              <li
+                key={item.variantId}
+                className="flex items-center justify-between gap-sm text-caption text-text-muted"
+              >
+                {/* <bdi> רק סביב השם (לא סביב "× qty" - אומת ויזואלית שבידוד
+                    רק השם מספיק, docs/PRD.md סעיף 28) - אותה מחלקת-באג bidi
+                    כמו ProductPage.tsx h1 (ראו הערה שם), חמורה יותר כאן כי
+                    בלי בידוד גם ה-"×" והכמות מתערבבים לסדר שגוי לגמרי. */}
+                <span className="min-w-0 [overflow-wrap:anywhere]">
+                  <bdi>{item.displayName}</bdi> × {item.quantity}
+                </span>
+                <span className="flex-none text-text-base">{formatAgorot(item.priceAgorot * item.quantity)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center justify-between text-body-strong font-bold text-text-base">
+            <span>{t("cart.total")}</span>
+            <span>{formatAgorot(total)}</span>
+          </div>
+          <Button type="submit" form="checkout-form" disabled={submitting}>
+            {submitting ? t("checkout.placingOrder") : t("checkout.placeOrder")}
+          </Button>
         </div>
-        <Button type="submit" form="checkout-form" disabled={submitting}>
-          {submitting ? t("checkout.placingOrder") : t("checkout.placeOrder")}
-        </Button>
+
+        {/* דימוי עריכתי טליה+סל - ריבועי, מתחת לכרטיס הסיכום, דסקטופ בלבד
+            (PRD.md סעיף 58, בקשת אורן [ג]). placeholder אפור בינתיים - ראו
+            הערה מקבילה ב-AboutPage.tsx (סעיף 35) לאותה מוסכמה. תוכן
+            הדימוי בפועל (לפי תיאור אורן): טליה יושבת, סל לידה עם כמה
+            חולצות מזדקרות ממנו - הידיים עשויות להסתיר חלק מהחולצה (בניגוד
+            לתמונות עמוד הפריט, שם התצוגה המלאה קריטית). כיוון-מבט/הטיית-
+            גוף טליה (פנייה ימינה/שמאלה) עדיין בבירור מול אורן - ייתכן
+            שיידרשו שתי גרסאות תמונה (לא שיקוף CSS - עלול להפוך טקסט/הדפס
+            על החולצות אחורה) כדי שהיא תפנה פנימה לתוכן בשתי השפות; ראו
+            הדיון בסלאק/הצ'אט. */}
+        <div
+          aria-hidden="true"
+          className="hidden desktop:block desktop:aspect-square desktop:w-full desktop:rounded-sm desktop:bg-surface-sunken"
+        />
       </div>
     </div>
   );
