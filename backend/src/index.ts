@@ -76,6 +76,32 @@ app.get("/products/:slug", async (req, res, next) => {
 
 app.use("/products", productsRouter);
 app.use("/auth", authRouter);
+
+// אותה בעיה בדיוק כמו GET /products/:slug למעלה, בלי צורך ב-meta injection
+// (דפי הזמנות פרטיים, לא משותפים ברשתות חברתיות - אין og:image ייעודי
+// להוסיף) - דיווח אורן (2026-09-23): ניווט דפדפן ישיר ל-/orders או
+// /orders/:id (הדבקת URL, סימניה, רענון עמוד) היה תופס ישירות את
+// ordersRouter (JSON API, מאחורי requireAuth) במקום את ה-SPA - כי
+// app.use("/orders", ordersRouter) היה ממוקם *לפני* ה-SPA fallback
+// התחתון, ו-Express תופס את ה-route התואם הראשון. תוקן באותו wantsHtmlPreview()
+// בדיוק כמו למעלה: אם הבקשה רוצה HTML (ניווט דפדפן, לא fetch() פנימי
+// של ה-SPA - ראו התיעוד המלא ב-wantsHtmlPreview()) - מגישים את ה-shell
+// הבנוי ולא נוגעים ב-API כלל, ובדיקת ה-auth (requireAuth) נשארת אחריות
+// בלעדית של ה-client-side route עצמו (OrdersPage.tsx/OrderDetailPage.tsx
+// כבר מטפלים ב"לא מחובר/ת" - אותו דפוס state בדיוק כמו CheckoutPage.tsx),
+// לא של ה-middleware הזה - בדיוק כמו ש-/checkout עצמו כבר עובד היום (route
+// טהור של ה-SPA, בלי שום route תואם בבקאנד, אין שם התנגשות מלכתחילה).
+// GET בלבד (לא app.use) - POST /orders (יצירת הזמנה מ-Checkout) תמיד
+// מגיע מ-fetch() של ה-SPA עצמו, אף פעם לא מניווט דפדפן ישיר, אז אין שום
+// התנגשות שם, בדיוק כמו PATCH/POST-ים אחרים שלא הוזכרו כאן.
+app.get(["/orders", "/orders/:id"], (req, res, next) => {
+  if (!wantsHtmlPreview(req) || !fs.existsSync(WEB_INDEX_HTML_PATH)) {
+    next();
+    return;
+  }
+  res.sendFile(WEB_INDEX_HTML_PATH);
+});
+
 app.use("/orders", ordersRouter);
 
 // קבצי ה-build הסטטיים של frontend/ (JS/CSS/אסטים, הועתקו ל-public/web
