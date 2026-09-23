@@ -28,7 +28,7 @@ import { useFreshCartItems } from "@/hooks/useFreshCartItems";
 import { useStickyBottomOffset } from "@/hooks/useStickyBottomOffset";
 import { useElementHeight } from "@/hooks/useElementHeight";
 import { createOrder } from "@/lib/api/orders";
-import { ApiError } from "@/lib/api/client";
+import { ApiError, resolveMediaUrl } from "@/lib/api/client";
 import { formatAgorot } from "@/lib/money";
 import { Button } from "@/components/ui/Button";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
@@ -55,6 +55,14 @@ const EMPTY_SHIPPING: ShippingAddress = {
   city: "",
   postalCode: "",
 };
+
+// דימוי עריכתי טליה+סל (docs/PRD.md סעיף 63, תמונה אמיתית של אורן,
+// 2026-09-23) - hi-res/talia-checkout_page.jpg, 2048x2048 בדיוק (ריבוע
+// טבעי) - אותה מוסכמת-שם-קובץ/מיקום כמו ABOUT_IMAGE_URL ב-AboutPage.tsx
+// (סעיף 35). אורן אישר במפורש להשתמש באותה תמונה גם לעברית וגם לאנגלית
+// (לא יצר גרסת-מראה בגלל לוח-זמנים) - ראו ההערה המלאה ליד ה-<img>
+// למטה על שאלת כיוון-המבט שנשארה פתוחה ולמה זה בסדר.
+const CHECKOUT_TALIA_IMAGE_URL = "/images/talia-checkout_page.webp";
 
 // [מפתח, type/inputMode] - לא רק שם השדה, כדי שמקלדת המובייל תתאים
 // (מספרים לטלפון/מיקוד).
@@ -370,18 +378,25 @@ export function CheckoutPage() {
         </div>
 
         {/* דימוי עריכתי טליה+סל - ריבועי, מתחת לכרטיס הסיכום, דסקטופ בלבד
-            (PRD.md סעיף 58, בקשת אורן [ג]). placeholder אפור בינתיים - ראו
-            הערה מקבילה ב-AboutPage.tsx (סעיף 35) לאותה מוסכמה. תוכן
-            הדימוי בפועל (לפי תיאור אורן): טליה יושבת, סל לידה עם כמה
-            חולצות מזדקרות ממנו - הידיים עשויות להסתיר חלק מהחולצה (בניגוד
-            לתמונות עמוד הפריט, שם התצוגה המלאה קריטית). כיוון-מבט/הטיית-
-            גוף טליה (פנייה ימינה/שמאלה) עדיין בבירור מול אורן - ייתכן
-            שיידרשו שתי גרסאות תמונה (לא שיקוף CSS - עלול להפוך טקסט/הדפס
-            על החולצות אחורה) כדי שהיא תפנה פנימה לתוכן בשתי השפות; ראו
-            הדיון בסלאק/הצ'אט. */}
-        <div
-          aria-hidden="true"
-          className="hidden desktop:block desktop:aspect-square desktop:w-full desktop:rounded-sm desktop:bg-surface-sunken"
+            (PRD.md סעיף 58, עימוד; סעיף 63, תמונה אמיתית). תוכן: טליה
+            יושבת על קרקע סלעית מדברית (אותה אסתטיקה כמו שאר צילומי טליה
+            באתר), סל קש/פלסטיק לידה עם חולצות מקופלות ומזדקרות ממנו.
+
+            כיוון-מבט: אורן דיווח שלא הצליח להפיק גרסת-מראה (שיקוף CSS
+            נפסל מראש - היה הופך את הדפס/טקסט החולצות בסל אחורה) בגלל
+            לוחות-זמנים, והכריע במפורש להשתמש באותה תמונה בדיוק גם
+            לעברית וגם לאנגלית (ראו הדיון בצ'אט, 2026-09-23) - כלומר אין
+            כאן היפוך תלוי-שפה כפי שנשקל בסעיף 58; זו תמונה יחידה,
+            ניטרלית-מספיק, לשתי השפות.
+
+            object-cover נשאר כרשת-ביטחון בלבד (בדיוק כמו ב-AboutPage.tsx,
+            סעיף 35) - התמונה כבר ריבוע מדויק 2048x2048 בפועל, כך שלא
+            נדרש חיתוך אמיתי. alt אמיתי ומתורגם (לא ריק) - זו תמונה
+            עריכתית משמעותית, לא רקע דקורטיבי גרידא. */}
+        <img
+          src={resolveMediaUrl(CHECKOUT_TALIA_IMAGE_URL)}
+          alt={t("checkout.taliaImageAlt")}
+          className="hidden desktop:block desktop:aspect-square desktop:w-full desktop:rounded-sm desktop:bg-surface-sunken desktop:object-cover"
         />
       </div>
     </div>
