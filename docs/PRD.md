@@ -867,3 +867,42 @@
 **קבצים שהשתנו:** `backend/src/index.ts`.
 
 **אימות:** esbuild (מה-frontend, מצביע על קובץ ה-backend) נקי - 1.3MB (כולל כל ה-imports היחסיים, לא רק הקובץ עצמו). הבאג **שוחזר במדויק** לפני התיקון ישירות מול production (שני ה-URL-ים החזירו JSON גולמי, כולל פרטי המשלוח המלאים). **התיקון עצמו טרם נבדק חי** (לא deployed עדיין) - ממתין ל-commit/push/deploy של אורן; מומלץ לו לבדוק שוב את שני ה-URL-ים אחרי הפריסה.
+
+## 66. תיקון סופי ל-`/orders` - החלפת content-negotiation ב-`/api/orders` (2026-09-23)
+
+### רקע
+
+אחרי §65 (תיקון `/orders`/`/orders/:id` עם `wantsHtmlPreview()`, אותו מנגנון כמו `/products/:slug`), אורן דיווח שהתיקון **לא יציב מספיק**: "Duplicate" של טאב בדפדפן (לא רק ניווט/רענון רגילים) עדיין קיבל JSON גולמי, בעוד שרענון רגיל (F5) עבד נכון. אורן גם שאל שאלה ארכיטקטונית ישירה: האם כפילות ה-routes (אותו path בדיוק בין ה-API בבקאנד לבין ה-SPA בפרונטאנד) היא דפוס מקובל, או שתיראה כטעות לעיני reviewer - וביקש פתרון נקי ומהיר, בלי להצריך בדיקות רגרסיה נרחבות.
+
+### האבחנה
+
+Duplicate Tab בדפדפן לא בהכרח שולח את אותה בקשת-ניווט "טרייה"/אותו Accept header כמו הקלדת URL/לחיצת קישור/F5 - `wantsHtmlPreview()` (מבוסס content negotiation לפי Accept header + רשימת בוטים) הוא **היוריסטיקה תלוית-התנהגות-דפדפן**, לא הבטחה. זה בדיוק סוג השבירות שאורן חשד בה. תשובה ישירה לשאלה הארכיטקטונית: **לא**, path זהה בין API ל-SPA route אינו דפוס מקובל/סטנדרטי - זו מלכודת ידועה בפרויקטי Express+SPA ידניים (framework-ים עם routing מובנה כמו Next.js נמנעים ממנה במוסכמה), וה-reviewer הממוצע כן ירים את זה כדגל. ה-`wantsHtmlPreview()` הוא כלי לגיטימי לבעיה *אחרת* (content negotiation לבוטי-preview שלא מריצים JS כלל) - לא הכלי הנכון כשה-stakes הם "לעולם אל תחזיר JSON לדפדפן אמיתי", כי שם טעות היוריסטית = משתמש רואה JSON גולמי, ולא רק preview לא-מדויק.
+
+### הפתרון
+
+**במקום עוד ניחוש** - הוסרה כליל ה-content negotiation עבור `/orders`, והוחלף ה-mount prefix של ה-API עצמו: `app.use("/orders", ordersRouter)` → `app.use("/api/orders", ordersRouter)`. זה מסיר את ההתנגשות **מבנית** - אין יותר שום path זהה בין ה-API ל-SPA בכלל, אז אין עוד ניחוש-התנהגות-דפדפן שיכול להיכשל, בלי תלות בסוג ניווט/Accept header/Duplicate Tab/כל מנגנון-cache עתידי. ה-URL הציבורי שהמשתמש רואה בדפדפן (`/orders`, `/orders/:orderId`) **לא השתנה בכלל** - רק ה-endpoint הפנימי שה-frontend קורא לו מ-`fetch()`.
+
+**היקף מכוון, בכוונה מצומצם** (לפי בקשת אורן: "נקי ומהיר, לא בדיקות רגרסיה רבות"): שונו רק `backend/src/index.ts` (מיקום ה-mount, הסרת ה-intercept הישן) ו-`frontend/src/lib/api/orders.ts` (שלוש קריאות ה-fetch: `POST /orders`→`POST /api/orders`, `GET /orders`→`GET /api/orders`, `GET /orders/:id`→`GET /api/orders/:id`) + עדכון הערות מתאימות ב-`client.ts` ו-`docs/API_CONTRACT.md`. **`/products/:slug` נשאר כרגע ללא שינוי מקביל** - יש לו בדיוק אותה מחלקת-בעיה תיאורטית (הוא כן מגיש meta injection אמיתי לבוטים, אז `wantsHtmlPreview()` עדיין נחוץ שם למטרה המקורית - אבל ה-collision העקרוני עם `productsRouter` עדיין קיים) - תוקד כניואנס פתוח, לא נשכח/פוספס, ראו הערת הקוד המפורשת ב-`index.ts` (ליד `/products/:slug`). מעבר מקביל ל-`/api/products` ידרוש גם לגעת בלוגיקת ה-query-params/וריאנטים של `buildProductMetaValues` - שטח-נגיעה גדול משמעותית, נדחה בכוונה למקרה שאורן ירצה להרחיב את התיקון בעתיד.
+
+**קבצים שהשתנו:** `backend/src/index.ts`, `backend/src/lib/metaInjection.ts` (רק תיעוד/סדר, לא לוגיקה - ראו §67 למטה לשינוי האמיתי שם), `frontend/src/lib/api/orders.ts`, `frontend/src/lib/api/client.ts` (הערה בלבד), `docs/API_CONTRACT.md`.
+
+**אימות:** esbuild נקי על שני הצדדים (`backend/src/index.ts` - 1.3MB כולל imports יחסיים; `frontend/src/lib/api/orders.ts` - 1.7kb, ואומת ש-`"/api/orders"` אכן מופיע בבאנדל המקומפל פעמיים כמצופה). לא נבדק חי (Duplicate Tab לא ניתן לשחזור אמין דרך אוטומציית דפדפן) - התיקון מבטל את מחלקת-הבאג כולה מבנית, לא רק את התסמין הספציפי שדווח, כך שרמת הביטחון גבוהה יותר ממה שבדיקת-שחזור בודדת הייתה נותנת. ממתין ל-commit/push/deploy של אורן.
+
+## 67. תמונות שיתוף (Open Graph) קבועות ל-Homepage ו-About (2026-09-23)
+
+### רקע
+
+אורן ביקש: בהומפייג' - תמונת `talia-checkout_page`, בלי שינוי טקסט. ב-About - תמונת `sarah-about`, עם טקסט שמבהיר שזה עמוד ה-About. שאר העמודים (כולל כל עמודי תהליך הרכישה - cart/checkout/orders) נשארים כמו שהיו (ללא תמונת שיתוף) - אורן: "לא סביר" שישתפו אותם.
+
+### מימוש
+
+בניגוד ל-`/products/:slug` - אלו עמודים **סטטיים** (לא תלויי-DB/query-params), אז לא נדרשה שום לוגיקה חדשה מורכבת. שני `app.get` חדשים נוספו ב-`index.ts`, *לפני* ה-static fallback, **בלי** `wantsHtmlPreview()` בכלל (בניגוד ל-`/products/:slug`/`/orders`) - כי אין שום route API עם אותו path ל"/'" או ל-"/about" להתנגש איתו; כל GET לשם הוא תמיד ניווט-עמוד.
+
+- **הומפייג' (`GET /`)**: פונקציה חדשה `injectStaticPageImage()` (ב-`lib/metaInjection.ts`) - מזריקה **רק** `og:image`/`twitter:image` (+ שדרוג `twitter:card` ל-`summary_large_image`), לא נוגעת ב-`<title>`/`og:title`/`og:url` בכלל. זו לא הייתה יכולה להיות שימוש חוזר ב-`injectProductMeta` הקיימת - זו תמיד דורסת את ה-title (`"${title} — Dull"`), וקריאה לה עם `title:"Dull"` הקיים הייתה מייצרת `"Dull — Dull"` שגוי במקום להשאיר את ברירת המחדל כמו שהיא.
+- **About (`GET /about`)**: נעשה שימוש חוזר ב-`injectProductMeta()` הקיימת (לא נכתבה פונקציה נוספת) - `title:"About"` (תואם בדיוק את `about.title` הקיים ב-i18n, לא ניסוח חדש) גם מבהיר לבירור שזה עמוד ה-About (בקשת אורן) וגם עקבי עם אותה מוסכמה בדיוק כמו כל עמוד מוצר (`<title>About — Dull</title>`).
+
+שני ה-endpoints בונים URL מוחלט לתמונה (`new URL("/images/<file>.webp", baseUrl)`) - אותה טכניקה בדיוק כמו `buildProductMetaValues` (הקבצים `talia-checkout_page.webp`/`sarah-about.webp` כבר קיימים ב-`public/images` דרך `generate-web-images.ts` הקיים, ראו §35/§63 - אין צורך בשום שינוי נוסף ל-pipeline ההמרה).
+
+**קבצים שהשתנו:** `backend/src/index.ts`, `backend/src/lib/metaInjection.ts` (הוספת `injectStaticPageImage`).
+
+**אימות:** esbuild נקי (חלק מאותה בדיקת `backend/src/index.ts` בסעיף 66 למעלה - שתי התוספות נבדקו יחד). לא נבדק חי (תלוי ב-deploy + כלי debugger חיצוני כמו Facebook Sharing Debugger כדי לראות בפועל preview אמיתי) - ממתין ל-commit/push/deploy של אורן; מומלץ לו לבדוק עם כלי debug של פייסבוק/טוויטר אחרי הפריסה.

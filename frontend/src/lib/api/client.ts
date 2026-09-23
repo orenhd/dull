@@ -1,6 +1,7 @@
 // HTTP client דק מול ה-backend. שני כללים קשיחים (docs/API_CONTRACT.md):
 //   1. credentials: 'include' בכל קריאה - אחרת ה-session cookie (httpOnly,
-//      חתום) לא נשלח/מתקבל, וכל endpoint מתחת ל-/orders יחזיר 401.
+//      חתום) לא נשלח/מתקבל, וכל endpoint מתחת ל-/api/orders יחזיר 401
+//      (docs/PRD.md סעיף 66 - prefix /api/, לא /orders כמו ה-URL של ה-SPA).
 //   2. base URL תמיד מ-env.ts (VITE_API_BASE_URL) - אף קריאת fetch בקוד
 //      הקומפוננטות לא בונה URL בעצמה.
 import { env } from "@/config/env";

@@ -136,6 +136,23 @@ export function injectProductMeta(html: string, values: ProductMetaValues): stri
   return result;
 }
 
+// מזריקה *רק* תמונת שיתוף (og:image/twitter:image + שדרוג ה-card ל-
+// summary_large_image) - בלי לגעת ב-<title>/og:title/og:url בכלל (docs/PRD.md
+// סעיף 67, בקשת אורן: "אין צורך להוסיף טקסט" עבור ה-homepage). שונה
+// במכוון מ-injectProductMeta - זו לא קיצור-דרך/כפילות: injectProductMeta
+// *תמיד* דורסת את ה-title (מתאים לעמוד מוצר/About, שם רוצים כותרת
+// ספציפית) - קריאה לה עם title="Dull" הקיים הייתה מייצרת "Dull — Dull"
+// שגוי, לא משאירה את ברירת המחדל כמו שהיא. ראו index.ts (GET /) לשימוש.
+export function injectStaticPageImage(html: string, imageUrl: string): string {
+  const twitterCardReplacement = [
+    '<meta name="twitter:card" content="summary_large_image" />',
+    `<meta property="og:image" content="${escapeHtml(imageUrl)}" />`,
+    `<meta name="twitter:image" content="${escapeHtml(imageUrl)}" />`,
+  ].join("\n    ");
+
+  return html.replace('<meta name="twitter:card" content="summary" />', twitterCardReplacement);
+}
+
 // בונה את שלוש הערכים הדרושים ל-injectProductMeta() ישירות מה-DB
 // (getProductBySlug) - "fail open" מלא: כל כשל (מוצר לא נמצא/לא פעיל,
 // שגיאת DB) מחזיר null כדי שה-caller (index.ts) יגיש את index.html

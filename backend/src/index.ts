@@ -8,7 +8,7 @@ import { productsRouter } from "./routes/products.js";
 import { authRouter } from "./routes/auth.js";
 import { ordersRouter } from "./routes/orders.js";
 import { PUBLIC_IMAGES_DIR, PUBLIC_WEB_DIR, WEB_INDEX_HTML_PATH, PUBLIC_CASE_STUDY_DIR } from "./lib/paths.js";
-import { buildProductMetaValues, injectProductMeta, wantsHtmlPreview } from "./lib/metaInjection.js";
+import { buildProductMetaValues, injectProductMeta, injectStaticPageImage, wantsHtmlPreview } from "./lib/metaInjection.js";
 
 const app = express();
 
@@ -60,6 +60,16 @@ app.get("/health", (_req, res) => {
 // עצמו (frontend/src/lib/api/client.ts) ממשיכות ל-productsRouter כרגיל -
 // ראו התיעוד המלא ב-wantsHtmlPreview() (lib/metaInjection.ts) על איך
 // ההבחנה הזו עובדת בלי שום שינוי בצד ה-frontend.
+//
+// **הערה על עקביות ארכיטקטונית (docs/PRD.md סעיף 66)**: זהו עדיין המקום
+// היחיד באתר עם path זהה בין route API בבקאנד ל-route SPA בפרונטאנד
+// (ה-/orders המקביל תוקן לגמרי למטה - ראו app.use("/api/orders", ...) -
+// ע"י שינוי ה-prefix, לא ע"י תלות בניחוש Accept header). הכפילות כאן
+// *נשארה בכוונה* כרגע: התיקון המקביל (מעבר ל-/api/products) דורש לגעת גם
+// ב-buildProductMetaValues/injectProductMeta (יחסית לתמונות/query params
+// של קומבינציית Fit+Colorway) - שינוי גדול יותר מבחינת שטח-נגיעה, נדחה
+// בכוונה מתוך משמעת-scope (אורן ביקש היום תיקון ל-/orders בלבד, "נקי
+// ומהיר בלי בדיקות רגרסיה רבות") - לא פוספס/נשכח. ראו התיעוד המלא.
 app.get("/products/:slug", async (req, res, next) => {
   if (!wantsHtmlPreview(req) || !fs.existsSync(WEB_INDEX_HTML_PATH)) {
     // fs.existsSync נכשל רק ב-dev מקומי (frontend לא נבנה ל-public/web שם -
@@ -74,35 +84,67 @@ app.get("/products/:slug", async (req, res, next) => {
   res.type("html").send(values ? injectProductMeta(indexHtml, values) : indexHtml);
 });
 
-app.use("/products", productsRouter);
-app.use("/auth", authRouter);
-
-// אותה בעיה בדיוק כמו GET /products/:slug למעלה, בלי צורך ב-meta injection
-// (דפי הזמנות פרטיים, לא משותפים ברשתות חברתיות - אין og:image ייעודי
-// להוסיף) - דיווח אורן (2026-09-23): ניווט דפדפן ישיר ל-/orders או
-// /orders/:id (הדבקת URL, סימניה, רענון עמוד) היה תופס ישירות את
-// ordersRouter (JSON API, מאחורי requireAuth) במקום את ה-SPA - כי
-// app.use("/orders", ordersRouter) היה ממוקם *לפני* ה-SPA fallback
-// התחתון, ו-Express תופס את ה-route התואם הראשון. תוקן באותו wantsHtmlPreview()
-// בדיוק כמו למעלה: אם הבקשה רוצה HTML (ניווט דפדפן, לא fetch() פנימי
-// של ה-SPA - ראו התיעוד המלא ב-wantsHtmlPreview()) - מגישים את ה-shell
-// הבנוי ולא נוגעים ב-API כלל, ובדיקת ה-auth (requireAuth) נשארת אחריות
-// בלעדית של ה-client-side route עצמו (OrdersPage.tsx/OrderDetailPage.tsx
-// כבר מטפלים ב"לא מחובר/ת" - אותו דפוס state בדיוק כמו CheckoutPage.tsx),
-// לא של ה-middleware הזה - בדיוק כמו ש-/checkout עצמו כבר עובד היום (route
-// טהור של ה-SPA, בלי שום route תואם בבקאנד, אין שם התנגשות מלכתחילה).
-// GET בלבד (לא app.use) - POST /orders (יצירת הזמנה מ-Checkout) תמיד
-// מגיע מ-fetch() של ה-SPA עצמו, אף פעם לא מניווט דפדפן ישיר, אז אין שום
-// התנגשות שם, בדיוק כמו PATCH/POST-ים אחרים שלא הוזכרו כאן.
-app.get(["/orders", "/orders/:id"], (req, res, next) => {
-  if (!wantsHtmlPreview(req) || !fs.existsSync(WEB_INDEX_HTML_PATH)) {
+// Meta-injection ל-GET / ו-GET /about (docs/PRD.md סעיף 67, בקשת אורן
+// 2026-09-23): שתי תמונות-שיתוף קבועות (לא תלויות-DB כמו /products/:slug
+// למעלה - אין כאן וריאנטים/query params, ערך סטטי יחיד לכל עמוד).
+// **בניגוד** ל-/products/:slug ול-/orders (למטה) - אין כאן שום route API
+// עם אותו path ל"התנגש" איתו, אז אין צורך ב-wantsHtmlPreview()/content
+// negotiation בכלל: כל GET ל-/ או ל-/about הוא תמיד ניווט-עמוד, לא קריאת
+// API פנימית. homepage: תמונה בלבד, בלי שינוי טקסט (בקשת אורן המפורשת -
+// injectStaticPageImage החדשה, בניגוד ל-injectProductMeta, לא נוגעת ב-
+// <title>/og:title/og:url בכלל). about: injectProductMeta הקיימת נבחרה
+// בכוונה (לא נכתבה פונקציה חדשה) - title:"About" (תואם i18n about.title
+// הקיים) גם מבהיר בבירור שזה עמוד ה-About (בקשת אורן) וגם עקבי עם אותה
+// מוסכמה בדיוק כמו כל עמוד מוצר (<title>About — Dull</title>, אותו
+// תבנית).
+app.get("/", (req, res, next) => {
+  if (!fs.existsSync(WEB_INDEX_HTML_PATH)) {
     next();
     return;
   }
-  res.sendFile(WEB_INDEX_HTML_PATH);
+  const indexHtml = fs.readFileSync(WEB_INDEX_HTML_PATH, "utf-8");
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  const imageUrl = new URL("/images/talia-checkout_page.webp", baseUrl).toString();
+  res.type("html").send(injectStaticPageImage(indexHtml, imageUrl));
 });
 
-app.use("/orders", ordersRouter);
+app.get("/about", (req, res, next) => {
+  if (!fs.existsSync(WEB_INDEX_HTML_PATH)) {
+    next();
+    return;
+  }
+  const indexHtml = fs.readFileSync(WEB_INDEX_HTML_PATH, "utf-8");
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+  const values = {
+    title: "About",
+    pageUrl: `${baseUrl}/about`,
+    imageUrl: new URL("/images/sarah-about.webp", baseUrl).toString(),
+  };
+  res.type("html").send(injectProductMeta(indexHtml, values));
+});
+
+app.use("/products", productsRouter);
+app.use("/auth", authRouter);
+
+// דיווח אורן (2026-09-23): ניווט דפדפן ישיר ל-/orders/-/orders/:id (הדבקת
+// URL, סימניה, וגם "Duplicate" של טאב בדפדפן - ראו בהמשך) חזר כ-JSON
+// גולמי במקום כ-SPA. **תוקן תחילה** (סעיף 65) עם אותו wantsHtmlPreview()
+// כמו /products/:slug למעלה - אבל אורן מצא בפועל שזה *לא* מספיק יציב
+// (Duplicate Tab עדיין קיבל JSON, למרות שרענון רגיל עבד נכון) - ניווט-
+// שכפול-טאב של הדפדפן לא בהכרח שולח את אותו Accept header/סוג-בקשה כמו
+// ניווט "רגיל", כך שההבחנה ההיוריסטית לא אמינה מספיק כשה-stakes האמיתיים
+// הם "פשוט אל תחזיר JSON לדפדפן" ולא רק "שפר preview לבוטים" (שם, אם
+// הבחנה נכשלת, התוצאה היא היעדר meta מדויקת - לא JSON גולמי מוצג
+// למשתמש).
+//
+// **הפתרון הסופי** (סעיף 66): לא עוד content-negotiation בכלל - שינוי
+// ה-mount prefix עצמו מ-/orders ל-/api/orders. זה מסיר את ההתנגשות
+// *מבנית* (אין יותר שום path זהה בין ה-API לבין ה-SPA), לא רק מנחש נכון
+// יותר איזו בקשה זו. שינה גם את frontend/src/lib/api/orders.ts (שלושת
+// הקריאות: POST/GET /orders, GET /orders/:id) ואת docs/API_CONTRACT.md
+// בהתאם - ה-URL הציבורי שהמשתמש רואה (/orders, /orders/:orderId ב-SPA)
+// לא השתנה כלל, רק ה-endpoint הפנימי שה-frontend קורא לו.
+app.use("/api/orders", ordersRouter);
 
 // קבצי ה-build הסטטיים של frontend/ (JS/CSS/אסטים, הועתקו ל-public/web
 // ע"י scripts/render-build.ts - docs/PRD.md 12.10). ממוקם *אחרי* /products
@@ -111,10 +153,11 @@ app.use(express.static(PUBLIC_WEB_DIR));
 
 // SPA fallback: כל GET שלא תואם route קיים למעלה, ולא קובץ אסט קיים תחת
 // public/web (כבר טופל ע"י express.static למעלה) - מחזיר את index.html
-// הבנוי, כדי ש-TanStack Router בצד הלקוח יטפל בניתוב (/, /shirts,
-// /footwear, /about, /cart, /checkout, /orders, /orders/:orderId,
-// /disclaimer). ה-middleware-ים למעלה (health/products/auth/orders/images)
-// כבר "תפסו" את מה ששייך להם - זה שריד אחרון, ולכן חייב לבוא אחרון.
+// הבנוי, כדי ש-TanStack Router בצד הלקוח יטפל בניתוב (/shirts, /footwear,
+// /cart, /checkout, /orders, /orders/:orderId, /disclaimer - ל-/, /about
+// ו-/products/:slug יש כבר טיפול ייעודי למעלה, כולל meta-injection). ה-
+// middleware-ים למעלה (health/products/auth/api/orders/images) כבר "תפסו"
+// את מה ששייך להם - זה שריד אחרון, ולכן חייב לבוא אחרון.
 app.get("*", (_req, res) => {
   if (!fs.existsSync(WEB_INDEX_HTML_PATH)) {
     // מצב תקין ב-dev מקומי: ה-frontend לא נבנה/הועתק לכאן (זה קורה רק

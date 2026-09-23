@@ -15,7 +15,7 @@
 
 ## Auth ו-cookies — הכי חשוב לא לפספס
 
-- ה-session הוא **httpOnly cookie חתום**, לא token ב-localStorage/header. כל בקשה שדורשת התחברות (הכל תחת `/orders`) חייבת להישלח עם `credentials: 'include'` (fetch) / `withCredentials: true` (axios) - אחרת ה-cookie לא יישלח והשרת יחזיר 401 דרך `requireAuth`.
+- ה-session הוא **httpOnly cookie חתום**, לא token ב-localStorage/header. כל בקשה שדורשת התחברות (הכל תחת `/api/orders` - **לא** `/orders`, זה ה-URL של עמוד ה-SPA עצמו; ראו סעיף 66 ב-PRD.md על ה-prefix `/api/`) חייבת להישלח עם `credentials: 'include'` (fetch) / `withCredentials: true` (axios) - אחרת ה-cookie לא יישלח והשרת יחזיר 401 דרך `requireAuth`.
 - Google Sign-In מתבצע **כולו בצד ה-frontend** (Google Identity Services, לא redirect מהשרת) - ה-frontend מקבל `credential` (ID token) מ-Google ושולח אותו ל-`POST /auth/google`. השרת מאמת, יוצר/מוצא משתמש, ומחזיר cookie.
 - ה-frontend צריך **את אותו** Google OAuth Client ID שיש ל-backend (`GOOGLE_CLIENT_ID`) כדי לאתחל את כפתור ה-Sign-In - זה מזהה ציבורי (לא סוד), חשוף לצד לקוח לגיטימית. שם מוצע: `VITE_GOOGLE_CLIENT_ID`.
 - **בדיקת מצב התחברות בטעינת/רענון דף:** `GET /auth/me` — ראו למטה. ה-cookie הוא httpOnly בכוונה (הגנה מפני XSS) כך שאין דרך אחרת ל-frontend לדעת אם המשתמש מחובר.
@@ -88,7 +88,9 @@ Body: `{ "credential": "<google id token>" }`. מגדיר session cookie. תגו
 ### `POST /auth/logout`
 בלי body. מנקה את ה-cookie. תגובה: `{ "ok": true }`.
 
-### `POST /orders` — **דורש login (cookie)**
+### `POST /api/orders` — **דורש login (cookie)**
+
+**עדכון 2026-09-23 (PRD.md סעיף 66)**: ה-endpoint עבר מ-`/orders` ל-`/api/orders` - `/orders` (בלי prefix) היה מתנגש עם ה-URL של עמוד היסטוריית ההזמנות ב-SPA עצמו (ניווט דפדפן ישיר החזיר JSON גולמי במקום את האתר). ה-URL של העמוד ב-SPA (`/orders`, `/orders/:orderId`) לא השתנה - רק ה-endpoint הפנימי שה-frontend קורא לו.
 Body:
 ```json
 {
@@ -99,18 +101,18 @@ Body:
 - המחיר **תמיד** מחושב בשרת מה-DB - לא לשלוח מחיר מה-frontend, הוא יתעלם ממנו ממילא.
 - `quantity` לכל פריט מוגבל ל-`MAX_LINE_ITEM_QUANTITY` (5, `constants/index.ts`, נוסף 2026-09) - זהה בכוונה לערך המקביל ב-frontend, ראו הערה שם.
 - שגיאות אפשריות: `400 { error: "VARIANT_NOT_FOUND", productVariantId }`, `400 { error: "OUT_OF_STOCK", productVariantId, availableQty }` (`availableQty` נוסף 2026-09 - המלאי האמיתי הנוכחי של הוריאנט, כדי שה-frontend יוכל להציג הודעה מפורטת ולא רק "אזל"), `400 { error: "VALIDATION_ERROR", issues }` (נוסף 2026-09 - כשל zod גנרי, כולל למשל חריגה מ-`MAX_LINE_ITEM_QUANTITY` בכמות פריט בודד - `issues` הוא מערך ה-issues הגולמי של zod).
-- הצלחה: `201 { order: { id, totalAgorot, items: [...], ... } }` — צורת `items[]` מפורטת למטה (זהה ב-`GET /orders`/`GET /orders/:id`).
+- הצלחה: `201 { order: { id, totalAgorot, items: [...], ... } }` — צורת `items[]` מפורטת למטה (זהה ב-`GET /api/orders`/`GET /api/orders/:id`).
 - **אין תשלום אמיתי** (v1 - "רכישה חינמית", ראו PRD 11.2). אחרי יצירת ההזמנה נשלח מייל תודה + PDF מתנה ל-מייל המשתמש - אין ל-frontend שום תפקיד בזה, זה effect צד-שרת מלא.
 
-### `GET /orders` — **דורש login**
+### `GET /api/orders` — **דורש login**
 היסטוריית ההזמנות של המשתמש המחובר בלבד. `{ orders: [...] }`.
 
-### `GET /orders/:id` — **דורש login**
+### `GET /api/orders/:id` — **דורש login**
 הזמנה בודדת, בעלים בלבד - `404 { error: "ORDER_NOT_FOUND" }` גם אם ההזמנה קיימת אבל שייכת למשתמש אחר (לא 403, בכוונה - לא לחשוף קיום).
 
-### צורת `OrderItem` (בשלוש התגובות למעלה — `POST /orders`, `GET /orders`, `GET /orders/:id`)
+### צורת `OrderItem` (בשלוש התגובות למעלה — `POST /api/orders`, `GET /api/orders`, `GET /api/orders/:id`)
 
-**נוסף 2026-09-09**: לכל שורת הזמנה יש עכשיו, בנוסף ל-`productNameSnapshot` הקיים, גם `selectionLabelSnapshot` ו-`flatImageUrlSnapshot` — לצורך הצגת היסטוריית הזמנות (`GET /orders`) בלי לצטרך live-join מול הוריאנט/המוצר הנוכחיים (שיכולים להשתנות/להימחק). **שני השדות, כמו `productNameSnapshot`, הם snapshot שנלכד בזמן הרכישה** — לא מחושבים מחדש בקריאה:
+**נוסף 2026-09-09**: לכל שורת הזמנה יש עכשיו, בנוסף ל-`productNameSnapshot` הקיים, גם `selectionLabelSnapshot` ו-`flatImageUrlSnapshot` — לצורך הצגת היסטוריית הזמנות (`GET /api/orders`) בלי לצטרך live-join מול הוריאנט/המוצר הנוכחיים (שיכולים להשתנות/להימחק). **שני השדות, כמו `productNameSnapshot`, הם snapshot שנלכד בזמן הרכישה** — לא מחושבים מחדש בקריאה:
 
 ```json
 {
