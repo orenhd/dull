@@ -116,13 +116,19 @@ export function CartPage() {
                   <label className="sr-only" htmlFor={`qty-${item.variantId}`}>
                     {t("cart.quantity")}
                   </label>
-                  <div className="flex items-center rounded-sm border border-border-base">
+                  {/* תוקן 2026-09-23 (PRD.md סעיף 54, בקשת אורן): רוחב
+                      הקונטיינר נעול ל-w-24 (96px) - זהה בכוונה לרוחב תמונת
+                      הפריט (size-24 למעלה, גם 96px) - כל שליש (−/מספר/+)
+                      מקבל flex-1, כלומר 32px בדיוק. לא magic number עצמאי -
+                      נגזר ישירות מאותו טוקן (size-24/w-24), כך שאם התמונה
+                      תשתנה בעתיד אפשר לעדכן את שניהם יחד. */}
+                  <div className="flex h-9 w-24 items-center rounded-sm border border-border-base">
                     <button
                       type="button"
                       onClick={() => setQuantity(item.variantId, Math.max(1, item.quantity - 1))}
                       disabled={item.quantity <= 1}
                       aria-label={t("cart.decreaseQuantity")}
-                      className="flex h-9 w-9 flex-none items-center justify-center text-body-strong text-text-base disabled:cursor-not-allowed disabled:text-text-muted"
+                      className="flex h-full flex-1 items-center justify-center text-body-strong text-text-base disabled:cursor-not-allowed disabled:text-text-muted"
                     >
                       −
                     </button>
@@ -132,7 +138,7 @@ export function CartPage() {
                     <span
                       id={`qty-${item.variantId}`}
                       aria-live="polite"
-                      className="w-8 flex-none text-center text-body text-text-base tabular-nums"
+                      className="flex h-full flex-1 items-center justify-center text-body text-text-base tabular-nums"
                     >
                       {item.quantity}
                     </span>
@@ -143,7 +149,7 @@ export function CartPage() {
                       }
                       disabled={item.quantity >= MAX_LINE_ITEM_QUANTITY}
                       aria-label={t("cart.increaseQuantity")}
-                      className="flex h-9 w-9 flex-none items-center justify-center text-body-strong text-text-base disabled:cursor-not-allowed disabled:text-text-muted"
+                      className="flex h-full flex-1 items-center justify-center text-body-strong text-text-base disabled:cursor-not-allowed disabled:text-text-muted"
                     >
                       +
                     </button>
