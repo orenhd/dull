@@ -123,6 +123,8 @@
     "emptyTitle": "העגלה שלך ריקה",
     "backToCatalog": "חזרה לקטלוג",
     "quantity": "כמות",
+    "decreaseQuantity": "הפחתת כמות",
+    "increaseQuantity": "הוספת כמות",
     "remove": "הסרה",
     "total": "סה\"כ",
     "checkout": "מעבר לתשלום"

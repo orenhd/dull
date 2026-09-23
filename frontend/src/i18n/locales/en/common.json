@@ -123,6 +123,8 @@
     "emptyTitle": "Your cart is empty",
     "backToCatalog": "Back to the catalog",
     "quantity": "Qty",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity",
     "remove": "Remove",
     "total": "Total",
     "checkout": "Checkout"

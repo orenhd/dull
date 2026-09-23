@@ -26,6 +26,7 @@ import { useCartStore, selectCartTotalAgorot } from "@/stores/cartStore";
 import { useAuthStore } from "@/stores/authStore";
 import { useFreshCartItems } from "@/hooks/useFreshCartItems";
 import { useStickyBottomOffset } from "@/hooks/useStickyBottomOffset";
+import { useElementHeight } from "@/hooks/useElementHeight";
 import { createOrder } from "@/lib/api/orders";
 import { ApiError } from "@/lib/api/client";
 import { formatAgorot } from "@/lib/money";
@@ -76,6 +77,13 @@ export function CheckoutPage() {
   const setQuantity = useCartStore((s) => s.setQuantity);
   const freshItems = useFreshCartItems();
   const bottomOffsetPx = useStickyBottomOffset();
+  // תוקן 2026-09-23 (PRD.md סעיף 53, דיווח אורן: "אי אפשר לגלול את התוכן
+  // בכלל" במובייל) - ראו useElementHeight.ts להסבר המלא. חמור יותר כאן
+  // מאשר ב-CartPage.tsx כי הבר הדביק גבוה משמעותית (כותרת+רשימת פריטים+
+  // סה"כ+כפתור) - בלי המדידה הזו, שדות טופס בפועל (כתובת/מיקוד) יכולים
+  // להיחבא לגמרי מתחת לסיכום עם אפס דרך לגלול אליהם.
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const summaryHeightPx = useElementHeight(summaryRef);
 
   const [shipping, setShipping] = useState<ShippingAddress>(EMPTY_SHIPPING);
   const [submitting, setSubmitting] = useState(false);
@@ -227,7 +235,13 @@ export function CheckoutPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-col gap-lg px-md py-lg desktop:flex-row desktop:items-start desktop:gap-xl">
+    <div
+      // תוקן 2026-09-23 (PRD.md סעיף 53) - אותה טכניקה בדיוק כמו
+      // CartPage.tsx: py-lg האחיד הוחלף ל-pt-lg + pb דינמי (מובייל בלבד,
+      // desktop:pb-lg מחזיר להתנהגות המקורית).
+      className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-col gap-lg px-md pt-lg pb-[var(--checkout-bottom-reserve)] desktop:flex-row desktop:items-start desktop:gap-xl desktop:pb-lg"
+      style={{ "--checkout-bottom-reserve": `calc(var(--space-lg) + ${summaryHeightPx + bottomOffsetPx}px)` } as CSSProperties}
+    >
       <form id="checkout-form" onSubmit={handleSubmit} className="flex min-w-0 flex-1 flex-col gap-md">
         <h1 className="m-0 font-headline text-h3 font-black text-text-base">{t("checkout.title")}</h1>
 
@@ -289,9 +303,17 @@ export function CheckoutPage() {
       </form>
 
       {/* תוקן 2026-09-22 (PRD סעיף 52, דיווח אורן): fixed לא sticky, אותו
-          מנגנון/הסבר מלא כמו CartPage.tsx ו-StickyAddToBagBar.tsx. */}
+          מנגנון/הסבר מלא כמו CartPage.tsx ו-StickyAddToBagBar.tsx.
+          תוקן 2026-09-23 (PRD סעיף 53): max-h/overflow-y-auto במובייל
+          בלבד - הגנה נוספת מעבר לתיקון ה-padding: בעגלה עם הרבה פריטים
+          הסיכום הזה (כותרת+רשימה+סה"כ+כפתור) יכול תיאורטית לצמוח לגובה
+          שגדול מהמסך עצמו - הגבלה + גלילה פנימית מבטיחה שתמיד יישאר שטח
+          פנוי למעלה למגע/גלילה של <main>, גם בעגלה גדולה. לא נוגע
+          בדסקטופ (desktop:max-h-none/desktop:overflow-visible) - שם זה
+          כרטיס-צד קבוע, לא צף מעל תוכן. */}
       <div
-        className="fixed inset-x-0 bottom-[var(--sticky-bottom-offset)] z-10 flex flex-col gap-sm border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:inset-x-auto desktop:top-lg desktop:bottom-auto desktop:w-[320px] desktop:flex-none desktop:rounded-sm desktop:border"
+        ref={summaryRef}
+        className="fixed inset-x-0 bottom-[var(--sticky-bottom-offset)] z-10 flex max-h-[70dvh] flex-col gap-sm overflow-y-auto border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:inset-x-auto desktop:top-lg desktop:bottom-auto desktop:max-h-none desktop:w-[320px] desktop:flex-none desktop:overflow-visible desktop:rounded-sm desktop:border"
         style={{ "--sticky-bottom-offset": `${bottomOffsetPx}px` } as CSSProperties}
       >
         <h2 className="m-0 text-body-strong font-bold text-text-base">{t("checkout.summaryTitle")}</h2>

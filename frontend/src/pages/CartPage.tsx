@@ -17,12 +17,13 @@
 // CheckoutPage שצריך בדיוק את אותה לוגיקה לסיכום ההזמנה) - שולף מחדש כל
 // מוצר ייחודי שיש בעגלה בשפה הנוכחית ומציג את זה במקום ה-cache השמור, עם
 // נפילה חזרה ל-cache אם ה-fetch עוד לא חזר/נכשל/הוריאנט כבר לא קיים.
-import type { CSSProperties } from "react";
+import { useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "@tanstack/react-router";
 import { useCartStore, selectCartTotalAgorot } from "@/stores/cartStore";
 import { useFreshCartItems } from "@/hooks/useFreshCartItems";
 import { useStickyBottomOffset } from "@/hooks/useStickyBottomOffset";
+import { useElementHeight } from "@/hooks/useElementHeight";
 import { formatAgorot } from "@/lib/money";
 import { buttonClassName } from "@/components/ui/Button";
 import { MAX_LINE_ITEM_QUANTITY } from "@/constants";
@@ -34,6 +35,11 @@ export function CartPage() {
   const removeItem = useCartStore((s) => s.removeItem);
   const freshItems = useFreshCartItems();
   const bottomOffsetPx = useStickyBottomOffset();
+  // תוקן 2026-09-23 (PRD.md סעיף 53, דיווח אורן): מודד את הגובה בפועל של
+  // הסיכום הדביק (למטה) כדי "לשמור" לו מקום בתחתית התוכן הגולל - ראו
+  // useElementHeight.ts להסבר המלא למה זה נדרש אחרי המעבר ל-fixed (סעיף 52).
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const summaryHeightPx = useElementHeight(summaryRef);
 
   if (freshItems.length === 0) {
     return (
@@ -47,65 +53,110 @@ export function CartPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-col gap-lg px-md py-lg desktop:flex-row desktop:items-start desktop:gap-xl">
+    <div
+      // תוקן 2026-09-23 (PRD.md סעיף 53, דיווח אורן): py-lg האחיד הוחלף
+      // ל-pt-lg + pb דינמי - במובייל בלבד (desktop:pb-lg מחזיר להתנהגות
+      // המקורית) - כדי ש-<main> ידע שיש עוד תוכן "לגלול אליו" מתחת לסיכום
+      // ה-fixed, בדיוק כמו ש-bottom-[var(--sticky-bottom-offset)] עצמו
+      // נעשה (PRD סעיף 52) - אותה טכניקת CSS custom property + קלאס
+      // ערך-שרירותי, מאותה סיבה (style ישיר ישבור את desktop:pb-lg).
+      className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-col gap-lg px-md pt-lg pb-[var(--cart-bottom-reserve)] desktop:flex-row desktop:items-start desktop:gap-xl desktop:pb-lg"
+      style={{ "--cart-bottom-reserve": `calc(var(--space-lg) + ${summaryHeightPx + bottomOffsetPx}px)` } as CSSProperties}
+    >
       <div className="min-w-0 flex-1">
         <h1 className="m-0 mb-md font-headline text-h3 font-black text-text-base">{t("cart.title")}</h1>
 
         <ul className="m-0 flex list-none flex-col gap-md p-0">
           {freshItems.map((item) => (
-            <li key={item.variantId} className="flex gap-md border-b border-border-base pb-md">
-              {item.imageUrl && (
-                <img
-                  src={item.imageUrl}
-                  alt=""
-                  width={96}
-                  height={96}
-                  className="size-24 flex-none rounded-sm bg-surface-sunken object-cover"
-                />
-              )}
-              <div className="flex min-w-0 flex-1 flex-col gap-xs">
-                <Link
-                  to="/products/$slug"
-                  params={{ slug: item.productSlug }}
-                  className="text-body text-text-base [overflow-wrap:anywhere] hover:underline"
-                >
-                  {/* <bdi> (2026-09-15, docs/PRD.md סעיף 28) - אותה מחלקת-באג
-                      bidi כמו ProductPage.tsx h1 (ראו הערה שם) - item.displayName
-                      יכול להיות שם-להקה שמתחיל בספרה. */}
-                  <bdi>{item.displayName}</bdi>
-                </Link>
-                <span className="text-caption text-text-muted">{item.displayLabel}</span>
+            <li key={item.variantId} className="flex flex-col gap-sm border-b border-border-base pb-md">
+              {/* תוקן 2026-09-23 (PRD.md סעיף 53, דיווח אורן [ב]): שורה
+                  עליונה = תמונה+שם+מחיר, שורה תחתונה נפרדת (רוחב מלא) =
+                  stepper הכמות + הסרה. לפני התיקון הכל היה שורה אחת -
+                  עמודת התוכן האמצעית (עם שם+שורת-כמות) התכווצה בלחץ מקום
+                  מהמחיר (אומת חי: שדה ה-number הצטמצם מ-64px ל-40.6px
+                  כשהמחיר הגיע ל-3 ספרות - shrink-0 בלבד על השדה רק מעביר
+                  את הצפיפות לתווית/לכפתור ההסרה, לא פותר את זה מהותית).
+                  שורה תחתונה נפרדת ברוחב מלא לא מתחרה עם המחיר על מקום
+                  בכלל, ולכן פותרת את הבעיה מהשורש, לא רק מזיזה אותה. */}
+              <div className="flex gap-md">
+                {item.imageUrl && (
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    width={96}
+                    height={96}
+                    className="size-24 flex-none rounded-sm bg-surface-sunken object-cover"
+                  />
+                )}
+                <div className="flex min-w-0 flex-1 flex-col gap-xs">
+                  <Link
+                    to="/products/$slug"
+                    params={{ slug: item.productSlug }}
+                    className="text-body text-text-base [overflow-wrap:anywhere] hover:underline"
+                  >
+                    {/* <bdi> (2026-09-15, docs/PRD.md סעיף 28) - אותה מחלקת-באג
+                        bidi כמו ProductPage.tsx h1 (ראו הערה שם) - item.displayName
+                        יכול להיות שם-להקה שמתחיל בספרה. */}
+                    <bdi>{item.displayName}</bdi>
+                  </Link>
+                  <span className="text-caption text-text-muted">{item.displayLabel}</span>
+                </div>
+                <span className="flex-none text-body-strong font-bold text-text-base">
+                  {formatAgorot(item.priceAgorot * item.quantity)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-sm">
+                {/* stepper -/+ (2026-09-23, PRD סעיף 53, בקשת אורן [ב]) -
+                    מחליף <input type="number"> נייטיבי: שני כפתורים אמיתיים
+                    (לא תלויי-hover כמו חיצי ה-spinner המקוריים - עובדים
+                    מצוין במגע), תצוגת מספר לא-ניתנת-לעריכה. התווית "כמות"
+                    עברה ל-sr-only בלבד - ה-stepper מובן מעצמו בלי תווית
+                    ויזואלית, וזה גם מפנה עוד קצת רוחב. */}
                 <div className="flex items-center gap-sm">
-                  <label className="text-caption text-text-muted" htmlFor={`qty-${item.variantId}`}>
+                  <label className="sr-only" htmlFor={`qty-${item.variantId}`}>
                     {t("cart.quantity")}
                   </label>
-                  <input
-                    id={`qty-${item.variantId}`}
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    max={MAX_LINE_ITEM_QUANTITY}
-                    value={item.quantity}
-                    onChange={(event) =>
-                      setQuantity(
-                        item.variantId,
-                        Math.min(MAX_LINE_ITEM_QUANTITY, Math.max(1, Math.trunc(Number(event.target.value)) || 1)),
-                      )
-                    }
-                    className="w-16 rounded-sm border border-border-base px-xs py-xs text-body text-text-base"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeItem(item.variantId)}
-                    className="px-xs py-xs text-caption text-text-muted underline hover:text-text-base"
-                  >
-                    {t("cart.remove")}
-                  </button>
+                  <div className="flex items-center rounded-sm border border-border-base">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(item.variantId, Math.max(1, item.quantity - 1))}
+                      disabled={item.quantity <= 1}
+                      aria-label={t("cart.decreaseQuantity")}
+                      className="flex h-9 w-9 flex-none items-center justify-center text-body-strong text-text-base disabled:cursor-not-allowed disabled:text-text-muted"
+                    >
+                      −
+                    </button>
+                    {/* aria-live: קורא מסך מכריז את הכמות החדשה בכל שינוי -
+                        שיפור נגישות אמיתי לעומת ה-input הקודם, לא רק תיקון
+                        קוסמטי (בקשת אורן - "מה שלדעתך יהיה הכי תקני ונכון"). */}
+                    <span
+                      id={`qty-${item.variantId}`}
+                      aria-live="polite"
+                      className="w-8 flex-none text-center text-body text-text-base tabular-nums"
+                    >
+                      {item.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setQuantity(item.variantId, Math.min(MAX_LINE_ITEM_QUANTITY, item.quantity + 1))
+                      }
+                      disabled={item.quantity >= MAX_LINE_ITEM_QUANTITY}
+                      aria-label={t("cart.increaseQuantity")}
+                      className="flex h-9 w-9 flex-none items-center justify-center text-body-strong text-text-base disabled:cursor-not-allowed disabled:text-text-muted"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => removeItem(item.variantId)}
+                  className="px-xs py-xs text-caption text-text-muted underline hover:text-text-base"
+                >
+                  {t("cart.remove")}
+                </button>
               </div>
-              <span className="flex-none text-body-strong font-bold text-text-base">
-                {formatAgorot(item.priceAgorot * item.quantity)}
-              </span>
             </li>
           ))}
         </ul>
@@ -122,6 +173,7 @@ export function CartPage() {
           סעיף 52, דיווח אורן): קודם היה sticky+z-10 קבוע, מוסתר לגמרי
           מתחת לבאנר. */}
       <div
+        ref={summaryRef}
         className="fixed inset-x-0 bottom-[var(--sticky-bottom-offset)] z-10 flex flex-col gap-sm border-t border-border-base bg-surface-base px-md py-md desktop:sticky desktop:inset-x-auto desktop:top-lg desktop:bottom-auto desktop:w-[320px] desktop:flex-none desktop:rounded-sm desktop:border"
         style={{ "--sticky-bottom-offset": `${bottomOffsetPx}px` } as CSSProperties}
       >
