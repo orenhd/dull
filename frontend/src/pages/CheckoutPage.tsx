@@ -64,14 +64,22 @@ const EMPTY_SHIPPING: ShippingAddress = {
 // למטה על שאלת כיוון-המבט שנשארה פתוחה ולמה זה בסדר.
 const CHECKOUT_TALIA_IMAGE_URL = "/images/talia-checkout_page.webp";
 
-// [מפתח, type/inputMode] - לא רק שם השדה, כדי שמקלדת המובייל תתאים
-// (מספרים לטלפון/מיקוד).
+// [מפתח, type/inputMode, autoComplete] - לא רק שם השדה, כדי שמקלדת המובייל
+// תתאים (מספרים לטלפון/מיקוד). autoComplete נוסף (docs/PRD.md סעיף 64,
+// פידבק מרקטינג 2026-09-23) - טוקנים סטנדרטיים לפי מפרט ה-WHATWG Autofill
+// (https://html.spec.whatwg.org/#autofill), לא ניחוש - "street-address"
+// (לא "address-line1") כי יש כאן שדה כתובת *יחיד*, לא מפוצל ל-line1/line2.
+// לפני זה לא היה שום autoComplete/name על השדות - השלמה מהדפדפן עדיין
+// עבדה חלקית אצל אורן בזכות היוריסטיקות של Chrome (id/label matching),
+// אבל זה לא אמין באותה מידה בכל הדפדפנים (בעיקר Safari/Firefox, שנשענים
+// הרבה יותר על autocomplete מפורש) - וזו גם דרישת WCAG 1.3.5 "Identify
+// Input Purpose" (רמה AA) בפני עצמה, לא רק נוחות.
 const SHIPPING_FIELDS = [
-  { key: "fullName", type: "text" },
-  { key: "phone", type: "tel" },
-  { key: "addressLine", type: "text" },
-  { key: "city", type: "text" },
-  { key: "postalCode", type: "text" },
+  { key: "fullName", type: "text", autoComplete: "name" },
+  { key: "phone", type: "tel", autoComplete: "tel" },
+  { key: "addressLine", type: "text", autoComplete: "street-address" },
+  { key: "city", type: "text", autoComplete: "address-level2" },
+  { key: "postalCode", type: "text", autoComplete: "postal-code" },
 ] as const;
 
 export function CheckoutPage() {
@@ -285,14 +293,16 @@ export function CheckoutPage() {
               השדות כבר מסומנים required ב-<input> בפועל (ולידציה דפדפנית
               אמיתית) - זו רק הבהרה ויזואלית קדימה, לא באג בהיעדרה. */}
           <p className="m-0 text-caption text-text-muted">{t("checkout.allFieldsRequired")}</p>
-          {SHIPPING_FIELDS.map(({ key, type }) => (
+          {SHIPPING_FIELDS.map(({ key, type, autoComplete }) => (
             <div key={key} className="flex flex-col gap-xs">
               <label htmlFor={key} className="text-caption text-text-muted">
                 {t(`checkout.fields.${key}`)}
               </label>
               <input
                 id={key}
+                name={key}
                 type={type}
+                autoComplete={autoComplete}
                 required
                 value={shipping[key]}
                 onChange={(event) => handleFieldChange(key, event.target.value)}
